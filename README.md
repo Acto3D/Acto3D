@@ -19,7 +19,11 @@ According to the original paper, Acto3D is designed to expand entire images into
 - The dimensions in X, Y, Z must be less than or equal to 2048 pixels.
 - The maximum number of fluorescent channels is limited to 4.
 
-## instruction
+### Download
+Please download the binary file from [here](https://github.com/Acto3D/Acto3D/releases).<br>
+For the sample data, please refer [here](#sample-data).
+
+## Instruction
 Acto3D recommends the use of multi-page TIFF files created by Fiji. While it's possible to create 3D from sequential image files with common image formats, following the procedure below ensures that the XYZ resolution is set correctly. Therefore, create multi-page TIFF files from original format in accordance with the following steps.
 ### Compatible formats
 |                                     | 16 bits / channel        | 8 bits / channel                                                           |
