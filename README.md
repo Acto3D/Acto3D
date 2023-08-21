@@ -1,8 +1,7 @@
 # *Acto3D* - 3D viewer for multichannel fluorocence images
 This repository contains the complete source code and compiled binaries of the paper:
 - Naoki Takeshita, Kenta Yashiro et al.  
-[***Acto3D: a novel user- and budget-friendly software for multichannel three-dimensional imaging with high-resolution***](http://www....)  
-Paper info will be available soon.
+[***Acto3D: a novel user- and budget-friendly software for multichannel three-dimensional imaging with high-resolution***](https://biorxiv.org/cgi/content/short/2023.08.18.553473v1)  
 
 Please [cite the paper](#how-to-cite) if you are using this software or code in your research.  
 
@@ -103,36 +102,21 @@ Please note that the instructions might vary based on your Xcode version.
 
 
 ## How to cite
-This section will be available soon.
+[BibTeX](https://www.biorxiv.org/highwire/citation/3319461/bibtext),
+[RIS](https://www.biorxiv.org/highwire/citation/3319461/ris),
+[EndNote](https://www.biorxiv.org/highwire/citation/3319461/endnote-tagged)
 
-RIS
-```ris
-@article{RN,
-   author = {},
-   title = {},
-   journal = {},
-   pages = {},
-   abstract = {},
-   DOI = {},
-   url = {},
-   year = {2023},
-   type = {Journal Article}
-}
-```
-
-EndNote
-
-BibTeX
-```bibtex
-@article{RN,
-   author = {},
-   title = {},
-   journal = {},
-   pages = {},
-   abstract = {},
-   DOI = {},
-   url = {},
-   year = {2023},
-   type = {Journal Article}
+```BibTeX
+@article {Takeshita2023.08.18.553473,
+    author = {Naoki Takeshita and Shinichiro Sakaki and Rie Saba and Satoshi Inoue and Kosuke Nishikawa and Atsuko Ueyama and Kazuhiko Matsuo and Masaki Shigeta and Yoshiro Nakajima and Daisuke Kobayashi and Hideya Yamazaki and Kei Yamada and Tomoko Iehara and Kenta Yashiro},
+    title = {Acto3D: user- and budget-friendly software for multichannel high-resolution three-dimensional imaging},
+    elocation-id = {2023.08.18.553473},
+    year = {2023},
+    doi = {10.1101/2023.08.18.553473},
+    publisher = {Cold Spring Harbor Laboratory},
+    abstract = {Advances in fluorescence microscopy and tissue-clearing technology have revolutionized three-dimensional (3D) imaging of fluorescently labeled tissues, organs, and embryos. However, the complexity and high cost of existing software and computer solutions for such imaging limit its widespread adoption by researchers with limited resources. We here introduce Acto3D as a user- and budget-friendly, open-source computer software application designed to streamline the generation and observation of high-resolution 3D images of targets labeled with multiple fluorescent probes. Acto3D features an intuitive interface that simplifies the importation, visualization, and analysis of data sets, has an associated tool for annotation of vascular lumens, and incorporates multiple fluorescence channels for comprehensive imaging. Underpinned by an integrated graphics processing unit, Acto3D allows accurate image reconstruction and efficient data processing without the need for expensive high-performance computers. We validated the software by imaging mouse embryonic structures. Acto3D thus constitutes a cost-effective and efficient platform to support biological research.Competing Interest StatementThe authors have declared no competing interest.},
+    URL = {https://www.biorxiv.org/content/early/2023/08/20/2023.08.18.553473},
+    eprint = {https://www.biorxiv.org/content/early/2023/08/20/2023.08.18.553473.full.pdf},
+    journal = {bioRxiv}
 }
 ```
