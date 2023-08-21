@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1410"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <PostActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Script"
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;&#10;# Type a script or drag a script file from your workspace to insert its path.&#10;cd &quot;${PROJECT_DIR}&quot; ; agvtool bump&#10;&#10;&#10;# Info.plist path&#10;info_plist=&quot;${PROJECT_DIR}/Acto3D/info.plist&quot;&#10;echo &quot;${info_plist}&quot;&#10;echo &quot;${PROJECT_DIR}&quot;&#10;# CFBundleVersion&#x306e;&#x5024;&#x3092;&#x53d6;&#x5f97;&#10;#bundle_version=$(/usr/libexec/PlistBuddy -c &quot;Print CFBundleVersion&quot; &quot;${info_plist}&quot;)&#10;&#10;# &#x6700;&#x5f8c;&#x306e;&#x6570;&#x5b57;&#x3092;&#x53d6;&#x5f97;&#x3057;&#x3001;1&#x30a4;&#x30f3;&#x30af;&#x30ea;&#x30e1;&#x30f3;&#x30c8;&#x3059;&#x308b;&#10;#new_bundle_version=$(echo $bundle_version | awk -F. &apos;{$NF = $NF + 1;} 1&apos; OFS=.)&#10;&#10;# &#x65b0;&#x3057;&#x3044;&#x30d0;&#x30fc;&#x30b8;&#x30e7;&#x30f3;&#x756a;&#x53f7;&#x3092;Info.plist&#x306b;&#x30bb;&#x30c3;&#x30c8;&#10;#/usr/libexec/PlistBuddy -c &quot;Set :CFBundleVersion $new_bundle_version&quot; &quot;${info_plist}&quot;&#10;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "B0B75E57276D733400CCAF6B"
+                     BuildableName = "Acto3D.app"
+                     BlueprintName = "Acto3D"
+                     ReferencedContainer = "container:Acto3D.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PostActions>
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B0B75E57276D733400CCAF6B"
+               BuildableName = "Acto3D.app"
+               BlueprintName = "Acto3D"
+               ReferencedContainer = "container:Acto3D.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B0B75E68276D733400CCAF6B"
+               BuildableName = "Acto3DTests.xctest"
+               BlueprintName = "Acto3DTests"
+               ReferencedContainer = "container:Acto3D.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B0B75E72276D733400CCAF6B"
+               BuildableName = "Acto3DUITests.xctest"
+               BlueprintName = "Acto3DUITests"
+               ReferencedContainer = "container:Acto3D.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      enableGPUFrameCaptureMode = "1"
+      showGraphicsOverview = "Yes"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "B0B75E57276D733400CCAF6B"
+            BuildableName = "Acto3D.app"
+            BlueprintName = "Acto3D"
+            ReferencedContainer = "container:Acto3D.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Release"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "B0B75E57276D733400CCAF6B"
+            BuildableName = "Acto3D.app"
+            BlueprintName = "Acto3D"
+            ReferencedContainer = "container:Acto3D.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>

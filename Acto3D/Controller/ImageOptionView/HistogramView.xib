@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="HistogramView" customModule="Acto3D" customModuleProvider="target">
+            <connections>
+                <outlet property="bitButton_10" destination="Qtu-Nl-TzR" id="wD9-ZY-nfp"/>
+                <outlet property="bitButton_12" destination="0Y5-MF-7Ax" id="jHs-QS-4oc"/>
+                <outlet property="bitButton_14" destination="uWc-t1-aKQ" id="wew-g0-oL1"/>
+                <outlet property="bitButton_16" destination="iZJ-fn-bhM" id="Wey-GY-Yrq"/>
+                <outlet property="bitButton_8" destination="JmR-LL-ogy" id="UXs-gQ-Sae"/>
+                <outlet property="bitClipTo10" destination="Qtu-Nl-TzR" id="nXL-Rb-quS"/>
+                <outlet property="bitClipTo12" destination="0Y5-MF-7Ax" id="df9-mr-tdE"/>
+                <outlet property="bitClipTo14" destination="uWc-t1-aKQ" id="dyJ-x9-muI"/>
+                <outlet property="bitClipTo16" destination="iZJ-fn-bhM" id="iM7-ax-ahN"/>
+                <outlet property="bitClipTo8" destination="JmR-LL-ogy" id="Ktf-Bx-IK1"/>
+                <outlet property="view" destination="c22-O7-iKe" id="y0y-xP-ltc"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="c22-O7-iKe">
+            <rect key="frame" x="0.0" y="0.0" width="309" height="163"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <button hidden="YES" verticalHuggingPriority="750" tag="14" translatesAutoresizingMaskIntoConstraints="NO" id="uWc-t1-aKQ">
+                    <rect key="frame" x="188" y="144" width="46" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="46" id="X36-gA-tZQ"/>
+                    </constraints>
+                    <buttonCell key="cell" type="roundRect" title="14 bit" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="gYw-M7-QP0">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                        <font key="font" metaFont="cellTitle"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="bitClip:" target="-2" id="9Sq-CY-VgK"/>
+                    </connections>
+                </button>
+                <button hidden="YES" verticalHuggingPriority="750" tag="12" translatesAutoresizingMaskIntoConstraints="NO" id="0Y5-MF-7Ax">
+                    <rect key="frame" x="132" y="144" width="46" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="46" id="03T-VH-of5"/>
+                    </constraints>
+                    <buttonCell key="cell" type="roundRect" title="12 bit" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="aK7-Wg-mhM">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                        <font key="font" metaFont="cellTitle"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="bitClip:" target="-2" id="JQe-jn-HLe"/>
+                    </connections>
+                </button>
+                <button hidden="YES" verticalHuggingPriority="750" tag="10" translatesAutoresizingMaskIntoConstraints="NO" id="Qtu-Nl-TzR">
+                    <rect key="frame" x="76" y="144" width="46" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="46" id="osg-hC-m7y"/>
+                    </constraints>
+                    <buttonCell key="cell" type="roundRect" title="10 bit" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="geo-M4-8Zr">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                        <font key="font" metaFont="cellTitle"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="bitClip:" target="-2" id="Afz-iy-trg"/>
+                    </connections>
+                </button>
+                <button hidden="YES" verticalHuggingPriority="750" tag="8" translatesAutoresizingMaskIntoConstraints="NO" id="JmR-LL-ogy">
+                    <rect key="frame" x="20" y="144" width="46" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="46" id="h47-So-pFL"/>
+                    </constraints>
+                    <buttonCell key="cell" type="roundRect" title="8 bit" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="iMd-dC-z1M">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                        <font key="font" metaFont="cellTitle"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="bitClip:" target="-2" id="ZKk-P4-teC"/>
+                    </connections>
+                </button>
+                <button hidden="YES" verticalHuggingPriority="750" tag="16" translatesAutoresizingMaskIntoConstraints="NO" id="iZJ-fn-bhM">
+                    <rect key="frame" x="244" y="144" width="46" height="19"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="46" id="q0c-5R-38A"/>
+                    </constraints>
+                    <buttonCell key="cell" type="roundRect" title="16 bit" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cLX-27-x3r">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                        <font key="font" metaFont="cellTitle"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="bitClip:" target="-2" id="qUa-tI-7s8"/>
+                    </connections>
+                </button>
+            </subviews>
+            <constraints>
+                <constraint firstItem="Qtu-Nl-TzR" firstAttribute="leading" secondItem="JmR-LL-ogy" secondAttribute="trailing" constant="10" id="3Ug-XZ-hUV"/>
+                <constraint firstItem="0Y5-MF-7Ax" firstAttribute="centerX" secondItem="c22-O7-iKe" secondAttribute="centerX" id="Ee0-t1-RV9"/>
+                <constraint firstItem="iZJ-fn-bhM" firstAttribute="leading" secondItem="uWc-t1-aKQ" secondAttribute="trailing" constant="10" id="Nrz-l3-tmq"/>
+                <constraint firstItem="0Y5-MF-7Ax" firstAttribute="leading" secondItem="Qtu-Nl-TzR" secondAttribute="trailing" constant="10" id="P3E-2L-enB"/>
+                <constraint firstItem="0Y5-MF-7Ax" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="T3Q-TB-rbk"/>
+                <constraint firstItem="iZJ-fn-bhM" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="U3H-6u-quc"/>
+                <constraint firstItem="Qtu-Nl-TzR" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="aHC-Vl-mRn"/>
+                <constraint firstItem="uWc-t1-aKQ" firstAttribute="leading" secondItem="0Y5-MF-7Ax" secondAttribute="trailing" constant="10" id="bIo-BS-Pl7"/>
+                <constraint firstItem="uWc-t1-aKQ" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="lgi-kp-eQy"/>
+                <constraint firstItem="JmR-LL-ogy" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="nnI-Ea-gVw"/>
+            </constraints>
+            <point key="canvasLocation" x="53.5" y="91.5"/>
+        </customView>
+    </objects>
+</document>
