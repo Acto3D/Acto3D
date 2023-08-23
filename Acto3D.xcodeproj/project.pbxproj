@@ -36,6 +36,8 @@
 		B06A2B14299E255A002B1CC5 /* SegmentNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B13299E255A002B1CC5 /* SegmentNode.swift */; };
 		B06A2B16299F8996002B1CC5 /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B15299F8996002B1CC5 /* Permission.swift */; };
 		B07507AE2A6CF12000B43C61 /* ViewController-renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07507AD2A6CF12000B43C61 /* ViewController-renderer.swift */; };
+		B0768FDF2A962DDC00291474 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = B0768FDE2A962DDC00291474 /* LICENSE */; };
+		B0768FE12A962DE300291474 /* docs in Resources */ = {isa = PBXBuildFile; fileRef = B0768FE02A962DE300291474 /* docs */; };
 		B07B6D1B276E4F1900D31400 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = B07B6D1A276E4F1900D31400 /* shader.metal */; };
 		B092F60A2780487800247CD5 /* BinarySwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092F6092780487800247CD5 /* BinarySwitch.swift */; };
 		B092F60C2780732400247CD5 /* ModelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B092F60B2780732400247CD5 /* ModelView.swift */; };
@@ -121,7 +123,6 @@
 		B0321D5829666F3F00FA2507 /* Segment3DController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment3DController.swift; sourceTree = "<group>"; };
 		B0321D5A296670A400FA2507 /* SegmentRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentRenderer.swift; sourceTree = "<group>"; };
 		B0321D5C296673FD00FA2507 /* GlobalAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalAlert.swift; sourceTree = "<group>"; };
-		B03649792A809D7000311769 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		B038B403289E246300D507EA /* arrangement.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = arrangement.metal; sourceTree = "<group>"; };
 		B038B406289F2F3300D507EA /* Benchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Benchmark.swift; sourceTree = "<group>"; };
 		B03D1CB727CBFC5600268AB8 /* SaveAndLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveAndLoad.swift; sourceTree = "<group>"; };
@@ -141,6 +142,8 @@
 		B06A2B15299F8996002B1CC5 /* Permission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permission.swift; sourceTree = "<group>"; };
 		B07395872A6B69F90080A4A0 /* calculateTextureHistogram.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = calculateTextureHistogram.metal; sourceTree = "<group>"; };
 		B07507AD2A6CF12000B43C61 /* ViewController-renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController-renderer.swift"; sourceTree = "<group>"; };
+		B0768FDE2A962DDC00291474 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		B0768FE02A962DE300291474 /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = docs; sourceTree = "<group>"; };
 		B07B6D1A276E4F1900D31400 /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		B092F6092780487800247CD5 /* BinarySwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BinarySwitch.swift; path = Acto3D/Model/BinarySwitch.swift; sourceTree = SOURCE_ROOT; };
 		B092F60B2780732400247CD5 /* ModelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelView.swift; sourceTree = "<group>"; };
@@ -403,7 +406,8 @@
 		B0B75E4F276D733400CCAF6B = {
 			isa = PBXGroup;
 			children = (
-				B03649792A809D7000311769 /* LICENSE.txt */,
+				B0768FDE2A962DDC00291474 /* LICENSE */,
+				B0768FE02A962DE300291474 /* docs */,
 				B0A8CE002A3AB98B0071EB1E /* Shader */,
 				B0B75E5F276D733400CCAF6B /* Assets.xcassets */,
 				B066B210276EED690072F4A6 /* README.md */,
@@ -625,7 +629,9 @@
 				B0A13D8A28B3995000B7F471 /* HistogramView.xib in Resources */,
 				B0EE0D9B27D6319F00237048 /* SequenceCell.xib in Resources */,
 				B0B75E60276D733400CCAF6B /* Assets.xcassets in Resources */,
+				B0768FDF2A962DDC00291474 /* LICENSE in Resources */,
 				B0EE0DA727D6403000237048 /* SequenceCellRotation.xib in Resources */,
+				B0768FE12A962DE300291474 /* docs in Resources */,
 				B0B75E63276D733400CCAF6B /* Main.storyboard in Resources */,
 				B0A8CE012A3AB98B0071EB1E /* Shader in Resources */,
 			);
@@ -895,7 +901,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -931,7 +937,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -963,7 +969,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -983,7 +989,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1002,7 +1008,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1020,7 +1026,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 35;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				GENERATE_INFOPLIST_FILE = YES;
