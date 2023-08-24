@@ -308,7 +308,7 @@ extension ViewController{
         
         Logger.log(message: "Load parameters from: \(fileUrl.path)", level: .info, writeToLogfile: true)
         
-        var params:StoredParameters?
+        var params:StoredParameters!
         
         do{
             let data = try Data(contentsOf: fileUrl)
@@ -319,10 +319,7 @@ extension ViewController{
             return
         }
         
-        guard var params = params else {return}
-        
-        
-        // apply params
+        // Apply params
         renderer.renderParams = params.renderParams
         renderer.resetRotation()
         renderer.rotateModelTo(quaternion: params.quaternion)
@@ -334,7 +331,7 @@ extension ViewController{
         }else{
             renderer.currentShader = ShaderManage.getPresetList()[1]
         }
-        print(renderer.currentShader!)
+        
         switch renderer.currentShader!.kernalName {
         case "preset_FTB":
             segmentRenderMode.selectedSegment = 0
@@ -350,17 +347,12 @@ extension ViewController{
                 segmentRenderMode.selectedSegment = 3
             }else{
                 Dialog.showDialog(message: "Shader: \(renderer.currentShader!.functionLabel) (\(renderer.currentShader!.kernalName)) was not found. \n Instead, the preset shader will be used.")
-                Logger.log(message: "Shader: \(renderer.currentShader!.functionLabel) (\(renderer.currentShader!.kernalName)) was not found. Instead, the preset shader will be used.", level: .error, writeToLogfile: true)
                                   
-                renderer.currentShader = ShaderManage.getPresetList()[1]
-                segmentRenderMode.selectedSegment = 1
+                renderer.currentShader = ShaderManage.getPresetList()[AppConfig.DEFAULT_SHADER_NO]
+                segmentRenderMode.selectedSegment = AppConfig.DEFAULT_SHADER_NO
                 
             }
         }
-        
-     
-        
-        
         
         // update views
         toneCh1.setControlPoint(array: params.controlPoints[0])
@@ -373,6 +365,11 @@ extension ViewController{
         wellCh3.color =  NSColor.color(from: params.toneColors[2])
         wellCh4.color =  NSColor.color(from: params.toneColors[3])
         
+        // Change the control color for Tone Curve View
+        toneCh1.setDefaultBackgroundColor(color: wellCh1.color)
+        toneCh2.setDefaultBackgroundColor(color: wellCh2.color)
+        toneCh3.setDefaultBackgroundColor(color: wellCh3.color)
+        toneCh4.setDefaultBackgroundColor(color: wellCh4.color)
         
         transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
         transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)

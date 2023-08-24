@@ -50,6 +50,9 @@ class AppConfig {
     
     /// This constant represents the image size when capture or copy.
     @CachedUserDefault(key: "HQ_SIZE", defaultValue: 2048) static var HQ_SIZE: UInt16
+    
+    /// This constant represents the default shader index.
+    @CachedUserDefault(key: "DEFAULT_SHADER_NO", defaultValue: 1) static var DEFAULT_SHADER_NO: Int
 
     private init() {
     }

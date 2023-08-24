@@ -20,23 +20,62 @@ extension ViewController{
         }
         
         if (filePackage.fileType == .singleFileMultiPage){
-            make3Dtexture_from_ImageJ_tiff(filePackage: filePackage)
-            return
+            make3Dtexture_from_ImageJ_tiff(filePackage: filePackage){success in
+                if(success == true){
+                    self.updateViewAfterTextureLoad()
+                }
+                DispatchQueue.main.async {
+                    self.progressBar.isHidden = true
+                    self.progressBar.doubleValue = 0
+                }
+            }
             
         }else if (filePackage.fileType == .multiFileStacks){
-            make3Dtexture_from_ImageStacks(filePackage: filePackage)
-            return
+            make3Dtexture_from_ImageStacks(filePackage: filePackage){success in
+                if(success == true){
+                    self.updateViewAfterTextureLoad()
+                }
+                DispatchQueue.main.async {
+                    self.progressBar.isHidden = true
+                    self.progressBar.doubleValue = 0
+                }
+            }
             
         }else{
-            return
-            
         }
     }
+    
+    func updateViewAfterTextureLoad() {
+        self.renderer.createMtlFunctionForRendering()
+        self.renderer.createMtlPipelineForRendering()
+        
+        DispatchQueue.main.sync {[self] in
+            self.zScale_Slider.floatValue = self.renderer.renderParams.zScale
+            self.updateSliceAndScale(currentSliceToMax: true)
+                
+
+            self.xResolutionField.floatValue = self.renderer.imageParams.scaleX
+            self.yResolutionField.floatValue = self.renderer.imageParams.scaleY
+            self.zResolutionField.floatValue = self.renderer.imageParams.scaleZ
+            self.scaleUnitField.stringValue = self.renderer.imageParams.unit
+
+            if(self.renderer.imageParams.textureLoadChannel != 4){
+                self.intensityRatio_slider_4.floatValue = 0
+                self.renderer.renderParams.intensityRatio[3] = 0
+                self.toneCh4.setControlPoint(array: [[0,0], [255,0]], redraw: true)
+            }
+                
+            self.outputView.image = self.renderer.rendering()
+                
+            self.renderer.calculateTextureHistogram()
+        }
+    }
+
     
     // MARK: -
     // MARK: Image Stacks
     /// Create 3D textures from a sequence of image files
-    private func make3Dtexture_from_ImageStacks(filePackage: FilePackage){
+    internal func make3Dtexture_from_ImageStacks(filePackage: FilePackage, completion: @escaping (Bool) -> Void){
         // Load the first image and determine some parameters
         
         Logger.logPrintAndWrite(message: "Start to load directory: \(filePackage.fileDir.path)")
@@ -47,6 +86,7 @@ extension ViewController{
               let imgRep:NSBitmapImageRep = NSBitmapImageRep(data: tiffData)
         else{
             Dialog.showDialog(message: "Invalid image format")
+            completion(false)
             return
         }
         
@@ -81,6 +121,8 @@ extension ViewController{
         }
         
         let zScaleRatio = renderer.imageParams.scaleZ / renderer.imageParams.scaleX
+        renderer.renderParams.zScale = zScaleRatio
+        
         Logger.logPrintAndWrite(message: "Create 3D texture from image stacks.")
         Logger.logPrintAndWrite(message: " Multiple images, \(imgRep.bitsPerPixel) bits/px, \(imgRep.bitsPerSample) bits/channel, \(numberOfComponents) channels")
         
@@ -111,6 +153,7 @@ extension ViewController{
         guard let _ = renderer.mainTexture else{
             Dialog.showDialog(message: "Failed to create texture")
             Logger.logPrintAndWrite(message: "Failed to create texture")
+            completion(false)
             return
         }
         Logger.logOnlyToFile(message: "  Created a 3D Texture: \(renderer.mainTexture!)")
@@ -130,6 +173,7 @@ extension ViewController{
                     guard let cpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: options),
                           let gpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: .storageModePrivate) else {
                         Logger.logOnlyToFile(message: "  Error in creating CPU or GPU buffers")
+                        completion(false)
                         return
                     }
                     
@@ -141,6 +185,7 @@ extension ViewController{
                           let pixelData = img.dataProvider?.data,
                           let data = CFDataGetBytePtr(pixelData) else {
                         Logger.logOnlyToFile(message: "  Error in reading image data")
+                        completion(false)
                         return
                     }
                     
@@ -159,6 +204,7 @@ extension ViewController{
                     guard let commandBuffer = renderer.cmdQueue.makeCommandBuffer(),
                           let blitEncoder = commandBuffer.makeBlitCommandEncoder() else {
                         Logger.logOnlyToFile(message: "  Error in creating command buffer or blit encoder")
+                        completion(false)
                         return
                     }
                     
@@ -180,6 +226,7 @@ extension ViewController{
                           let computeFunction = renderer.mtlLibrary.makeFunction(name: bit == 8 ? "createTextureFromStacks8bit" : "createTextureFromStacks16bit") else {
                         print("Error in creating compute command buffer or function")
                         Logger.logOnlyToFile(message: "  Error in creating pixel arrangement function")
+                        completion(false)
                         return
                     }
                     arrangeCommandBuffer.label = "Arrange Pixel Buffer"
@@ -238,50 +285,18 @@ extension ViewController{
                 }
             }
             
-            self.renderer.createMtlFunctionForRendering()
-            self.renderer.createMtlPipelineForRendering()
-                
-            
-            DispatchQueue.main.sync {[self] in
-                print("Initial Draw in main thread")
-                
-                self.zScale_Slider.floatValue = zScaleRatio
-                self.renderer.renderParams.zScale = zScaleRatio
-                self.updateSliceAndScale(currentSliceToMax: true)
-                
-                
-                self.progressBar.isHidden = true
-                self.progressBar.doubleValue = 0
-                
-                
-                self.xResolutionField.floatValue = self.renderer.imageParams.scaleX
-                self.yResolutionField.floatValue = self.renderer.imageParams.scaleY
-                self.zResolutionField.floatValue = self.renderer.imageParams.scaleZ
-                self.scaleUnitField.stringValue = self.renderer.imageParams.unit
-                
-                
-                if(self.renderer.imageParams.textureLoadChannel != 4){
-                    self.intensityRatio_slider_4.floatValue = 0
-                    self.renderer.renderParams.intensityRatio[3] = 0
-                    self.toneCh4.setControlPoint(array: [[0,0], [255,0]], redraw: true)
-                }
-                
-                
-                self.outputView.image = self.renderer.rendering()
-                
-                self.renderer.calculateTextureHistogram()
-                
-            }
+            completion(true)
         }
         
     }
     
     // MARK: - From ImageJ TIFF
-    private func make3Dtexture_from_ImageJ_tiff(filePackage:FilePackage){
+    internal func make3Dtexture_from_ImageJ_tiff(filePackage:FilePackage, completion: @escaping (Bool) -> Void){
         let tiffUrl = filePackage.fileDir.appendingPathComponent(filePackage.fileList[0])
         
         guard let mTiff = MTIFF(fileURL: tiffUrl) else{
             Logger.logPrintAndWrite(message: "Error in loading file: \(tiffUrl.path)", level: .error)
+            completion(false)
             return
         }
         
@@ -318,6 +333,7 @@ extension ViewController{
         }
         
         var zScaleRatio = renderer.imageParams.scaleZ / renderer.imageParams.scaleX
+        renderer.renderParams.zScale = zScaleRatio
         
         renderer.volumeData.numberOfComponent = 4
         
@@ -414,7 +430,8 @@ extension ViewController{
                     renderer.imageParams.scaleX = newScaleX
                     renderer.imageParams.scaleY = newScaleY
                     
-                     zScaleRatio = renderer.imageParams.scaleZ / renderer.imageParams.scaleX
+                    zScaleRatio = renderer.imageParams.scaleZ / renderer.imageParams.scaleX
+                    renderer.renderParams.zScale = zScaleRatio
                     
                     imgWidth = newWidth
                     imgHeight = newHeight
@@ -430,6 +447,7 @@ extension ViewController{
                     
                     if(renderer.mainTexture == nil){
                         Dialog.showDialog(message: "Acto3D counld not create texture.")
+                        completion(false)
                         return
                     }
                     
@@ -437,9 +455,11 @@ extension ViewController{
                     break
                     
                 case .alertSecondButtonReturn:
+                    completion(false)
                     return
                     
                 default:
+                    completion(false)
                     return
                 }
 
@@ -449,6 +469,7 @@ extension ViewController{
         guard let _ = renderer.mainTexture else{
             Dialog.showDialog(message: "Failed to create texture")
             Logger.logPrintAndWrite(message: "Failed to create texture")
+            completion(false)
             return
         }
         Logger.logOnlyToFile(message: "  Created a 3D Texture: \(renderer.mainTexture!)")
@@ -470,6 +491,7 @@ extension ViewController{
                     guard let cpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: options),
                           let gpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: .storageModePrivate) else {
                         Logger.logOnlyToFile(message: "  Error in creating CPU or GPU buffers")
+                        completion(false)
                         return
                     }
                     
@@ -481,6 +503,7 @@ extension ViewController{
                             guard let pixelData = mTiff.image(pageNo: j * numberOfComponents + c)?.toCGImage.dataProvider?.data,
                                   let data = CFDataGetBytePtr(pixelData) else{
                                 Logger.logOnlyToFile(message: "  Error in reading tiff data")
+                                completion(false)
                                 return
                             }
                             
@@ -490,12 +513,17 @@ extension ViewController{
                         }else{
                             guard let tiffImage = mTiff.image(pageNo: j * numberOfComponents + c) ,
                                   let resizedImage = tiffImage.resize(to: NSSize(width: imgWidth.toCGFloat(), height: imgHeight.toCGFloat()))
-                            else {return}
+                            else {
+                                completion(false)
+                                return
+                                
+                            }
                             
                             
                             guard let pixelData = resizedImage.toCGImage.dataProvider?.data,
                                   let data = CFDataGetBytePtr(pixelData) else{
                                 Logger.logOnlyToFile(message: "  Error in reading tiff data")
+                                completion(false)
                                 return
                             }
                             
@@ -507,6 +535,7 @@ extension ViewController{
                     guard let commandBuffer = renderer.cmdQueue.makeCommandBuffer(),
                           let blitEncoder = commandBuffer.makeBlitCommandEncoder() else {
                         Logger.logOnlyToFile(message: "  Error in creating command buffer or blit encoder")
+                        completion(false)
                         return
                     }
                     
@@ -526,6 +555,7 @@ extension ViewController{
                           let computeFunction = renderer.mtlLibrary.makeFunction(name: bit == 8 ? "createTexture8bit" : "createTexture16bit") else {
                         print("Error in creating compute command buffer or function")
                         Logger.logOnlyToFile(message: "  Error in creating pixel arrangement function")
+                        completion(false)
                         return
                     }
                     arrangeCommandBuffer.label = "Arrange Pixel Buffer"
@@ -580,50 +610,10 @@ extension ViewController{
                         self.progressBar.increment(by: Double(numberOfComponents))
                     }
                 }
-                
             }
             
-            
-            self.renderer.createMtlFunctionForRendering()
-            self.renderer.createMtlPipelineForRendering()
-            
-            
-            DispatchQueue.main.sync {[self] in
-                Logger.logPrintAndWrite(message: "  Loaded images")
-                print("Initial Draw in main thread")
-                
-                self.zScale_Slider.floatValue = zScaleRatio
-                self.renderer.renderParams.zScale = zScaleRatio
-                self.updateSliceAndScale(currentSliceToMax: true)
-                
-                
-                self.progressBar.isHidden = true
-                self.progressBar.doubleValue = 0
-                
-                self.xResolutionField.floatValue = self.renderer.imageParams.scaleX
-                self.yResolutionField.floatValue = self.renderer.imageParams.scaleY
-                self.zResolutionField.floatValue = self.renderer.imageParams.scaleZ
-                self.scaleUnitField.stringValue = self.renderer.imageParams.unit
-                
-                
-                if(self.renderer.imageParams.textureLoadChannel != 4){
-                    self.intensityRatio_slider_4.floatValue = 0
-                    self.renderer.renderParams.intensityRatio[3] = 0
-                    self.toneCh4.setControlPoint(array: [[0,0], [255,0]], redraw: true)
-                }
-                
-                
-                self.outputView.image = self.renderer.rendering()
-                
-                self.renderer.calculateTextureHistogram()
-                
-            }
-            bench.finish()
-            print("Render:VolumeData", renderer.volumeData)
+            completion(true)
         }
-        
-        
-        
     }
     
     
