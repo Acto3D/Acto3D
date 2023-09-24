@@ -311,10 +311,6 @@ extension ViewController{
                     let outputImage = renderer.rendering(targetViewSize: drawingSize)
                     outputView.image = outputImage
                     
-//                    renderer.renderOption.changeValue(option: .PREVIEW, value: 0)
-//                    scaleRatio = pre_viewsize.toFloat() / drawingSize.toFloat()
-//                    renderer.renderParams.viewSize = pre_viewsize
-//                    renderer.renderParams.scale *= scaleRatio
                     
                     if(previewMode == true){
                         // low quality image and draw in real time as possible

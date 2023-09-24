@@ -1174,7 +1174,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Z0-Q5-mG0">
-                                <rect key="frame" x="732" y="204" width="19" height="30"/>
+                                <rect key="frame" x="732" y="205" width="19" height="28"/>
                                 <stepperCell key="cell" continuous="YES" alignment="left" minValue="2" maxValue="20" doubleValue="3" id="jjl-39-roy"/>
                                 <connections>
                                     <action selector="clusterCountStepperChanged:" target="2Jc-51-6dz" id="B9o-UH-JyE"/>
@@ -4133,7 +4133,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="17" height="17"/>
+        <image name="link" catalog="system" width="14" height="14"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>
