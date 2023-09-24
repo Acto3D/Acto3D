@@ -292,8 +292,6 @@ extension ViewController{
                     renderer.renderOption = RenderOption(rawValue: params.renderOption)
                     renderer.pointClouds = params.pointClouds
                     
-                    renderer.rotateModel(deltaX: 0, deltaY: -360.0 / range * i.toFloat(), deltaZ: 0)
-                    
                     if(needTransferTone == true){
                         renderer.transferToneArrayToBuffer(toneArray: params.alphaValues![0], targetGpuBuffer: &renderer.toneBuffer_ch1, index: 0)
                         renderer.transferToneArrayToBuffer(toneArray: params.alphaValues![1], targetGpuBuffer: &renderer.toneBuffer_ch2, index: 1)
