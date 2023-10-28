@@ -306,7 +306,7 @@ extension ViewController{
         
         var imgWidth = mTiff.width
         var imgHeight = mTiff.height
-        let imgCount = mTiff.imgCount // original tiff pages: channel * Depth
+        let imgCount = mTiff.imgCount // Total image counts in tiff file (channel * Depth)
         var numberOfComponents = mTiff.channel
         let imgDepth = imgCount / numberOfComponents  // slice count
         let bit = mTiff.bitsPerSample.toUInt8()
@@ -352,12 +352,24 @@ extension ViewController{
         
         var pxCountPerSlice = imgWidth * imgHeight * numberOfComponents
         
+        
+        
+        let channel = renderer.imageParams.textureLoadChannel!
+        let width = renderer.volumeData.inputImageWidth.toInt()
+        let height = renderer.volumeData.inputImageHeight.toInt()
+        let depth = renderer.volumeData.inputImageDepth.toInt()
+        
         // texture setting
-        renderer.mainTexture = renderer.device.makeTexture(withChannelCount: self.renderer.imageParams.textureLoadChannel!,
-                                                           width: self.renderer.volumeData.inputImageWidth.toInt(),
-                                                           height: self.renderer.volumeData.inputImageHeight.toInt(),
-                                                           depth: self.renderer.volumeData.inputImageDepth.toInt())
+        renderer.mainTexture = renderer.device.makeTexture(withChannelCount: channel,
+                                                           width: width,
+                                                           height: height,
+                                                           depth: depth)
         renderer.mainTexture?.label = "Acto3D Texture"
+        
+        // if creation of mainTexture failed,
+        //  - XYZ dimension check
+        //  - buffer check
+        
         
 //        This is a debug code for downsizing for memory capacity
 //        if(AppConfig.IS_DEBUG_MODE){
@@ -369,19 +381,99 @@ extension ViewController{
         // Consider downsizing the image for verification.
         var downsizeRatio:Float = 1.0
         
+        
+        // Try to downsize in XY dimension so as to fit within 2048 px.
         if renderer.mainTexture == nil{
+            if(depth <= 2048 &&
+               (width > 2048 ||
+                height > 2048) ){
+                
+                // Input image size error
+                
+                Logger.logPrintAndWrite(message: "Input image: Width=\(width), Height=\(height), Depth=\(depth)")
+                Logger.logPrintAndWrite(message: "The input image has a depth of 2048 or less, but both width and height must also be 2048 or less.")
+                
+                // Calculate shrink ratio
+                let ratio = min(2048.0 / width.toFloat(), 2048.0 / height.toFloat())
+                
+                downsizeRatio *= ratio
+                
+                let newWidth = round(width.toFloat() * downsizeRatio).toInt()
+                let newHeight = round(height.toFloat() * downsizeRatio).toInt()
+                
+                let newScaleX = renderer.imageParams.scaleX / downsizeRatio
+                let newScaleY = renderer.imageParams.scaleY / downsizeRatio
+                
+                let alert = NSAlert()
+                alert.messageText = "Resolution Adjustment Needed"
+                alert.informativeText = "The image size exceeds the limit size (XY <= 2048).\n" +
+                "Do you want to downsize the XY resolution to fit within the limits?\n\n" +
+                "Width: \(width) -> \(newWidth)\n" +
+                "Height: \(height) -> \(newHeight)\n" +
+                "Depth: \(imgDepth), " +
+                "Load channels: \(channel)\n" +
+                "X resolution: \(renderer.imageParams.scaleX) -> \(newScaleX)\n" +
+                "Y resolution: \(renderer.imageParams.scaleY) -> \(newScaleY)\n" +
+                "Z resolution: \(renderer.imageParams.scaleZ)\n\n" +
+                "Note: The Z-direction resolution and stack count will remain unchanged."
+                alert.alertStyle = .warning
+                alert.addButton(withTitle: "Yes")
+                alert.addButton(withTitle: "No")
+                
+                let response = alert.runModal()
+                
+                switch response {
+                case .alertFirstButtonReturn:
+                    // procceed
+                    Logger.logPrintAndWrite(message: "Downsize, Width: \(width) -> \(newWidth), Height: \(height) -> \(newHeight), X resolution: \(renderer.imageParams.scaleX) -> \(newScaleX), Y resolution: \(renderer.imageParams.scaleY) -> \(newScaleY)")
+                    
+                    // Change some parameters
+                    renderer.volumeData.inputImageWidth = newWidth.toUInt16()
+                    renderer.volumeData.inputImageHeight = newHeight.toUInt16()
+                    
+                    renderer.imageParams.scaleX = newScaleX
+                    renderer.imageParams.scaleY = newScaleY
+                    
+                    zScaleRatio = renderer.imageParams.scaleZ / renderer.imageParams.scaleX
+                    renderer.renderParams.zScale = zScaleRatio
+                    
+                    imgWidth = newWidth
+                    imgHeight = newHeight
+                    
+                    pxCountPerSlice = imgWidth * imgHeight * numberOfComponents
+                    
+                    // Retry creation of texture
+                    renderer.mainTexture = renderer.device.makeTexture(withChannelCount: self.renderer.imageParams.textureLoadChannel!,
+                                                                       width: self.renderer.volumeData.inputImageWidth.toInt(),
+                                                                       height: self.renderer.volumeData.inputImageHeight.toInt(),
+                                                                       depth: self.renderer.volumeData.inputImageDepth.toInt())
+                    renderer.mainTexture?.label = "Acto3D Texture"
+                    
+                    break
+                    
+                case .alertSecondButtonReturn:
+                    completion(false)
+                    return
+                    
+                default:
+                    completion(false)
+                    return
+                }
+                
+                
+            }
+        }
+        
+        // If buffer error happens,
+        if renderer.mainTexture == nil{
+            // maybe, filed in creation of mainTexure due to buffer error
+            
             let maxBuffer = renderer.device.maxBufferLength
             
-//            This is a debug code for downsizing for memory capacity
-//            if(AppConfig.IS_DEBUG_MODE){
-//                maxBuffer = 8 * 1024 * 1024 * 1024
-//            }
-            
-            let channel = renderer.imageParams.textureLoadChannel!
-            let width = renderer.volumeData.inputImageWidth.toInt()
-            let height = renderer.volumeData.inputImageHeight.toInt()
-            let depth = renderer.volumeData.inputImageDepth.toInt()
-            
+            //            This is a debug code for downsizing for memory capacity
+            //            if(AppConfig.IS_DEBUG_MODE){
+            //                maxBuffer = 8 * 1024 * 1024 * 1024
+            //            }
             
             let requestBufferSize = channel * width * height * depth
             
@@ -415,13 +507,13 @@ extension ViewController{
                 alert.alertStyle = .warning
                 alert.addButton(withTitle: "Yes")
                 alert.addButton(withTitle: "No")
-
+                
                 let response = alert.runModal()
-
+                
                 switch response {
                 case .alertFirstButtonReturn:
                     // procceed
-                    Logger.logPrintAndWrite(message: "Downsize(x0.95), Width: \(width) -> \(newWidth), Height: \(height) -> \(newHeight), X resolution: \(renderer.imageParams.scaleX) -> \(newScaleX), Y resolution: \(renderer.imageParams.scaleY) -> \(newScaleY)")
+                    Logger.logPrintAndWrite(message: "Downsize Width: \(width) -> \(newWidth), Height: \(height) -> \(newHeight), X resolution: \(renderer.imageParams.scaleX) -> \(newScaleX), Y resolution: \(renderer.imageParams.scaleY) -> \(newScaleY)")
                     
                     // Change some parameters
                     renderer.volumeData.inputImageWidth = newWidth.toUInt16()
@@ -445,12 +537,6 @@ extension ViewController{
                                                                        depth: self.renderer.volumeData.inputImageDepth.toInt())
                     renderer.mainTexture?.label = "Acto3D Texture"
                     
-                    if(renderer.mainTexture == nil){
-                        Dialog.showDialog(message: "Acto3D counld not create texture.")
-                        completion(false)
-                        return
-                    }
-                    
                     
                     break
                     
@@ -462,8 +548,15 @@ extension ViewController{
                     completion(false)
                     return
                 }
-
+                
             }
+        }
+        
+        // After adjusting the XY dimension or buffer correction, if the texture creation still fails, return
+        if(renderer.mainTexture == nil){
+            Dialog.showDialog(message: "Acto3D counld not create texture.")
+            completion(false)
+            return
         }
         
         guard let _ = renderer.mainTexture else{
