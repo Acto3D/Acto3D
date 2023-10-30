@@ -19,6 +19,8 @@ extension ViewController{
             return
         }
         
+        removeAllPointSet(self) // re-initialize point set
+        
         if (filePackage.fileType == .singleFileMultiPage){
             make3Dtexture_from_ImageJ_tiff(filePackage: filePackage){success in
                 if(success == true){

@@ -22,7 +22,7 @@ extension ViewController{
             let n = 200
             
             
-            for i in 0...(n-1) {
+            for _ in 0...(n-1) {
                 _ = renderer.rendering()
             }
             
