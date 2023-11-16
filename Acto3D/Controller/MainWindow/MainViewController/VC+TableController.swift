@@ -217,7 +217,7 @@ extension ViewController:NSTableViewDataSource, NSTableViewDelegate{
     }
     
     
-    @IBAction func removeAllPointSet(_ sender:NSButton){
+    @IBAction func removeAllPointSet(_ sender:Any){
         renderer.pointClouds = PointClouds()
         pointSetTable.reloadData()
         
@@ -225,8 +225,9 @@ extension ViewController:NSTableViewDataSource, NSTableViewDelegate{
         removeAllButton.isEnabled = false
         planeSectionButton1.isEnabled = false
         
-            outputView.image = renderer.rendering()
+        outputView.image = renderer.rendering()
     }
+    
     func tableView_pointSet(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
         renderer.pointClouds.selectedIndex = row.toUInt16()
         

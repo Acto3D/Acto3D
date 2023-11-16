@@ -1,8 +1,8 @@
-// Label: Color As Gradient
+// Label: Template for Front To Back
 // Author: Naoki Takeshita
-// Description: Replace Color as Gradient norms
-kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(0)]],
-                              uint2                        position    [[thread_position_in_grid]]){
+// Description: Template for standard front to back rendering
+kernel void TMP_FTB(device RenderingArguments    &args       [[buffer(0)]],
+                       uint2                        position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;
     
@@ -127,15 +127,15 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
     float3 channel_4 = modelParameter.color.ch4.rgb;
     
     
-    // The sampling coordinates along the ray direction are at the behind, inside, or in front of the volume.
-    uint8_t state = BEHIND_VOLUME;
-    
     // Accumulated color (C) and opacity (A) for volume rendering.
-    float4 Cin = float4(modelParameter.backgroundColor, 0);
-    float4 Cout = float4(modelParameter.backgroundColor, 0);
+    float4 Cin = 0;
+    float4 Cout = 0 ;
+    float4 Ain = 0;
+    float4 Aout = 0;
     
     
-    for (float ts = t_far ; ts >=  max(t_near, radius - modelParameter.sliceNo) ; ts-= modelParameter.renderingStep * renderingStepAdditionalRatio ){
+    for (float ts = max(t_near, radius - modelParameter.sliceNo) ; ts <=  t_far  ; ts+= modelParameter.renderingStep * renderingStepAdditionalRatio){
+        
         float4 currentPos = float4((mappedPosition.xyz + ts * directionVector_rotate.xyz), 1);
         float4 coordinatePos = centeringToViewMatrix * currentPos;
         
@@ -146,23 +146,15 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
         float3(coordinatePos.x / float(width),
                coordinatePos.y / float(height),
                coordinatePos.z / (depth * scale_Z)) ;
-        
+
         float4 Cvoxel;
         
         if (texCoordinate.x < modelParameter.trimX_min || texCoordinate.x > modelParameter.trimX_max ||
             texCoordinate.y < modelParameter.trimY_min || texCoordinate.y > modelParameter.trimY_max ||
             texCoordinate.z < modelParameter.trimZ_min || texCoordinate.z > modelParameter.trimZ_max){
             
-            if (state == INSIDE_VOLUME){
-                // If the sampling has exited the bounding box of the 3D texture from inside to outside,
-                // then terminate the sampling and exit the loop.
-                state = FRONT_VOLUME;
-                break;
-                
-            }else{
-                // Skip processing until the sampling point moves from behind to inside the volume.
-                continue;
-            }
+            // If trimming is applied in the XYZ directions using the GUI slider, areas outside the specified range are not processed.
+            continue;
             
         }else{
             // Render the bounding box when it is turned ON.
@@ -188,12 +180,14 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                     ){
                     
                     Cin = Cout;
+                    Ain = Aout;
                     
                     // Color and alpha definition for boundary box
                     Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
                     float Alpha = 0.55;
                     
-                    Cout = (1.0 - Alpha) * Cin + Alpha *  Cvoxel;
+                    Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                    Aout = Ain + (1.0 - Ain) * Alpha;
                     
                     continue;
                 }
@@ -202,7 +196,7 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
             // When 'Crop' is ON, render only one side of the cutting plane.
             // If set to display the cutting surface, render both fragments and the cutting plane.
             if(flags & (1 << CROP_LOCK)){
-                // geometorical transformation in cropped setting
+                // Geometorical transformation in cropped setting
                 float3 directionVector_crop = quatMul(modelParameter.cropLockQuaternions, directionVector.xyz);
                 float4 directionVector_crop_rotate = float4(directionVector_crop, 0);
                 float4 mappedPosition_crop = quatMul(modelParameter.cropLockQuaternions, uniformedThreadPosition);
@@ -216,7 +210,6 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                 float3 _vec = coordinatePos.xyz - coordinatePos_crop.xyz;
                 float t_crop = dot(_vec, directionVector_crop);
                 
-                
                 if(flags & (1 << PLANE)){
                     float threath = 4.5;
                     
@@ -224,13 +217,14 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                         // same side
                         
                     }else if (t_crop <= threath && t_crop >= -threath){
-                        Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
-                        
                         Cin = Cout;
+                        Ain = Aout;
                         
+                        Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
                         float Alpha = 0.07;
                         
-                        Cout = (1.0 - Alpha) * Cin + Alpha * Cvoxel;
+                        Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                        Aout = Ain + (1.0 - Ain) * Alpha;
                         
                         continue;
                         
@@ -242,13 +236,14 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                 }else{
                     if (flags & (1 << CROP_TOGGLE)){
                         if(t_crop > 0){
-                            Cvoxel = float4(0, 0, 0, 0);
-                            
                             Cin = Cout;
+                            Ain = Aout;
                             
+                            Cvoxel = float4(0, 0, 0, 0);
                             float Alpha = 0;
                             
-                            Cout = (1.0 - Alpha) * Cin + Alpha * Cvoxel;
+                            Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                            Aout = Ain + (1.0 - Ain) * Alpha;
                             
                             continue;
                             
@@ -258,13 +253,14 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                         
                     }else{
                         if(t_crop < 0){
-                            Cvoxel = float4(0, 0, 0, 0);
-                            
                             Cin = Cout;
+                            Ain = Aout;
                             
-                            float Alpha = 0;
+                            Cvoxel = float4(0, 0, 0, 0);
+                            half Alpha = 0;
                             
-                            Cout = (1.0 - Alpha) * Cin + Alpha * Cvoxel;
+                            Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                            Aout = Ain + (1.0 - Ain) * Alpha;
                             
                             continue;
                             
@@ -281,9 +277,8 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
         // Begin main sampling and compositing process.
         //
         
-        state = INSIDE_VOLUME;
-        
         Cin = Cout;
+        Ain = Aout;
         
         Cvoxel = args.tex.sample(args.smp, texCoordinate);
         
@@ -291,6 +286,7 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                                        modelParameter.intensityRatio[1],
                                        modelParameter.intensityRatio[2],
                                        modelParameter.intensityRatio[3]);
+        
         
         /* Get opacity for the voxel */
         /*
@@ -323,13 +319,13 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
         // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
         // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
         float4 alphaMax = max(max(alpha.r, alpha.g) , max(alpha.b, alpha.a));
-        
+      
         float4 light_intensity = modelParameter.light;
         
         if(flags & (1 << SHADE)){
             // Very simple light and shade
             
-            float eps = 1.0;
+            float eps = 2;
             float3 gradient_diff[3] = {
                 float3(1.0 / width, 0, 0) * eps,
                 float3(0, 1.0 / height, 0)* eps,
@@ -337,25 +333,34 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
             };
             
             // Calculate the gradient
-            float4 gradient_x = args.tex.sample(args.smp, texCoordinate + gradient_diff[0]) -  args.tex.sample(args.smp, texCoordinate - gradient_diff[0]);
-            float4 gradient_y = args.tex.sample(args.smp, texCoordinate + gradient_diff[1]) -  args.tex.sample(args.smp, texCoordinate - gradient_diff[1]);
-            float4 gradient_z = args.tex.sample(args.smp, texCoordinate + gradient_diff[2]) -  args.tex.sample(args.smp, texCoordinate - gradient_diff[2]);
+            float4 gradient_x = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[0]);
+            float4 gradient_y = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[1]);
+            float4 gradient_z = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[2]);
             
             float3 grad_0 = float3(gradient_x[0], gradient_y[0], gradient_z[0]);
             float3 grad_1 = float3(gradient_x[1], gradient_y[1], gradient_z[1]);
             float3 grad_2 = float3(gradient_x[2], gradient_y[2], gradient_z[2]);
             float3 grad_3 = float3(gradient_x[3], gradient_y[3], gradient_z[3]);
+    
+            float diffuse_ratio = modelParameter.shade;
             
-            float v0 = length(grad_0);
-            float v1 = length(grad_1);
-            float v2 = length(grad_2);
-            float v3 = length(grad_3);
+            // The vector used for shading calculations is currently fixed at (1,1,0).
+            float diffuse0 = diffuse_ratio * max(0.0f, dot(normalize(grad_0), normalize(float3(1,1,0))));
+            float diffuse1 = diffuse_ratio * max(0.0f, dot(normalize(grad_1), normalize(float3(1,1,0))));
+            float diffuse2 = diffuse_ratio * max(0.0f, dot(normalize(grad_2), normalize(float3(1,1,0))));
+            float diffuse3 = diffuse_ratio * max(0.0f, dot(normalize(grad_3), normalize(float3(1,1,0))));
             
-            // This shader file replaces the color information at the sampling point with the computed gradient.
-            Cvoxel = float4(v0,v1,v2,v3);
+            light_intensity = float4(
+                                     max(0.0f, light_intensity.x - diffuse0),
+                                     max(0.0f, light_intensity.y - diffuse1),
+                                     max(0.0f, light_intensity.z - diffuse2),
+                                     max(0.0f, light_intensity.w - diffuse3)
+                                     );
+            
         }
         
-        Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity;
+        Cout = Cin + Cvoxel * light_intensity * (1.0f - Ain) * alphaMax;
+        Aout = Ain + (1.0f - Ain) * alphaMax;
         
         
         // Render a small sphere at the specified coordinate if it's marked within the space.
@@ -380,11 +385,25 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
                     al = _r * _r ;
                 }
                 
-                alphaMax = float4(0.1);
-                Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity  ;
+                Cout = Cin + Cvoxel * (1.0 - Ain) * Cvoxel * Cvoxel * Cvoxel * Cvoxel;
+                Aout = Ain + (1.0 - Ain) * Cvoxel * Cvoxel * Cvoxel * Cvoxel;
                 
             }
         }
+        
+        
+        // Early termination for front-to-back rendering
+        // If the accumulated opacity surpasses a certain threshold, further processing can be skipped.
+        
+        // Setting a higher opacityThreshold results in an image closer to back-to-front rendering,
+        // but at the cost of increased computation.
+        // A realistic range for the threshold is between 0.9 and 0.99.
+        float opacityThreshold = 0.99;
+        if(max(max(Aout.x, Aout.y), max(Aout.z, Aout.a)) > opacityThreshold){
+            break;
+        }
+
+        
     }
     
     float3 lut_c1 = Cout.r * channel_1;

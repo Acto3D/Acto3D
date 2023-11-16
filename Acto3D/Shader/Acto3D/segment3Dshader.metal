@@ -392,7 +392,7 @@ kernel void transferMaskToTexture(texture3d<half, access::sample>       texIn [[
 kernel void transferChannelToMask(texture3d<half, access::read> texIn [[texture(0)]],
                                   texture3d<half, access::write> texOut [[texture(1)]],
                                   constant  uint8_t &channel [[buffer(0)]],
-                                  sampler   smp [[ sampler(0) ]],
+//                                  sampler   smp [[ sampler(0) ]],
                                   ushort3   position [[thread_position_in_grid]]){
     float imageWidth = texIn.get_width();
     float imageHeight = texIn.get_height();

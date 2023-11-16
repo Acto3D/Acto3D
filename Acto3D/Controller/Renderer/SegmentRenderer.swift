@@ -293,17 +293,22 @@ class SegmentRenderer{
         
         
         if (smooth == true){
+            print("Mask(Binary) to mainTexture")
             copyMaskToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+            
+            print("mainTexture to Mask")
             copyTextureToMask(texIn: mainTexture, channel: destChannel, texOut: maskTexture)
             
             let semaphore = DispatchSemaphore(value: 0)
-
+            
+            print("3")
             let processor = ImageProcessor(device: self.device, cmdQueue: self.cmdQueue, lib: self.mtlLib)
             processor.applyFilter_Gaussian3D(inTexture: maskTexture, k_size: 5, channel: 0){ result in
                 self.maskTexture = result
                 semaphore.signal()
             }
             
+                print("4")
             semaphore.wait()
             
             if(self.maskTexture == nil){
@@ -381,22 +386,25 @@ class SegmentRenderer{
     }
     
     public func copyTextureToMask(texIn: MTLTexture, channel: UInt8, texOut:MTLTexture){
-        guard let lib = self.device.makeDefaultLibrary() else {
-            return
-        }
-        
-        guard let computeFunction = lib.makeFunction(name: "transferChannelToMask") else {
+        print("prepare compute function")
+        guard let computeFunction = mtlLib.makeFunction(name: "transferChannelToMask") else {
             print("error make function")
             return
         }
         var renderPipeline: MTLComputePipelineState!
         
+        
+        print("prepare render pipeline")
         renderPipeline = try? self.device.makeComputePipelineState(function: computeFunction)
         
+        print("render is created")
         
         let cmdBuf = cmdQueue.makeCommandBuffer()!
+        print("command buffer created")
         let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
+        print("command encoder created")
         computeSliceEncoder.setComputePipelineState(renderPipeline)
+        print("pipeline set to encoder")
         
         // Sampler Set
         var sampler: MTLSamplerState!
@@ -407,12 +415,20 @@ class SegmentRenderer{
         samplerDescriptor.magFilter = .linear
         sampler = device.makeSamplerState(descriptor: samplerDescriptor)
         
+        
+        print("set textures to encoder")
         computeSliceEncoder.setTexture(texIn, index: 0)
         computeSliceEncoder.setTexture(texOut, index: 1)
+        
+        print("set sampler to encoder")
         computeSliceEncoder.setSamplerState(sampler, index: 0)
         
+        print("set variable to encoder")
         var channel:UInt8 = channel
         computeSliceEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 0)
+        
+        
+        print("metal params have set")
         
         // Compute optimization
         let xCount = texIn.width
@@ -430,6 +446,7 @@ class SegmentRenderer{
                                           depth: (zCount + depth - 1) / depth)
         
         
+        print("Dispatch")
         // Metal Dispatch
         computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
         computeSliceEncoder.endEncoding()
