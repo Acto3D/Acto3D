@@ -40,7 +40,7 @@ extension MTLDevice{
         
         guard width <= 2048, height <= 2048, depth <= 2048 else {
             Dialog.showDialog(message: "The input image must have a height and width of 2048 pixels or less, and the number of Z stacks must be 2048 or fewer.")
-            Logger.logPrintAndWrite(message: "The input image must have a height and width of 2048 pixels or less, and the number of Z stacks must be 2048 or fewer.")
+//            Logger.logPrintAndWrite(message: "The input image must have a height and width of 2048 pixels or less, and the number of Z stacks must be 2048 or fewer.")
             
             return nil
         }

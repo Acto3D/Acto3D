@@ -190,7 +190,6 @@ class ImageProcessor{
                                           height: (yCount + height - 1) / height,
                                           depth: (zCount + depth - 1) / depth)
         
-        print("Gaussian 3D", "Thread for gaussian", threadsPerThreadgroup, "threadgroupsPerGrid", threadgroupsPerGrid)
         
         // counter setting
         totalCounter = threadgroupsPerGrid.width * threadgroupsPerGrid.height * threadgroupsPerGrid.depth
@@ -560,7 +559,6 @@ class ImageProcessor{
         let progress = Int(counterPtr.pointee)
         let progressPercentage = Double(progress) / Double(totalCounter) * 100.0
         
-        print("Counter", counterPtr.pointee)
         
         return (progress, totalCounter, progressPercentage)
     }

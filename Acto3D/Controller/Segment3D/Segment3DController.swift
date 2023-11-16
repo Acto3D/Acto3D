@@ -1318,12 +1318,10 @@ class Segment3DController: NSViewController {
     }
     
     @objc func applyMaskToMainTexture(_ sender:NSMenuItem){
-        print(sender.tag)
         renderer.transferMaskToMainTexture(destChannel: sender.tag.toUInt8(), smooth: false)
         Dialog.showDialog(message: "Completed", title: "", style: .informational)
     }
     @objc func applySmoothedMaskToMainTexture(_ sender:NSMenuItem){
-        print(sender.tag)
         renderer.transferMaskToMainTexture(destChannel: sender.tag.toUInt8(), smooth: true)
         Dialog.showDialog(message: "Completed", title: "", style: .informational)
     }

@@ -25,14 +25,14 @@ public enum TiffType {
 
 // metadata types
 let MAGIC_NUMBER = 0x494a494a;  // "IJIJ"
-let INFO = 0x696e666f;  // "info" (Info image property)
-let LABELS = 0x6c61626c;  // "labl" (slice labels)
-let RANGES = 0x72616e67;  // "rang" (display ranges)
-let LUTS = 0x6c757473;    // "luts" (channel LUTs)
-let PLOT = 0x706c6f74;    // "plot" (serialized plot)
-let ROI = 0x726f6920;     // "roi " (ROI)
-let OVERLAY = 0x6f766572; // "over" (overlay)
-let PROPERTIES = 0x70726f70; // "prop" (properties)
+let INFO = 0x696e666f;          // "info" (Info image property)
+let LABELS = 0x6c61626c;        // "labl" (slice labels)
+let RANGES = 0x72616e67;        // "rang" (display ranges)
+let LUTS = 0x6c757473;          // "luts" (channel LUTs)
+let PLOT = 0x706c6f74;          // "plot" (serialized plot)
+let ROI = 0x726f6920;           // "roi " (ROI)
+let OVERLAY = 0x6f766572;       // "over" (overlay)
+let PROPERTIES = 0x70726f70;    // "prop" (properties)
 
 
 fileprivate func print(_ items: Any..., separator: String = " ", terminator: String = "\n"){
