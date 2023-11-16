@@ -329,7 +329,7 @@ kernel void color_as_gradient(device RenderingArguments    &args       [[buffer(
         if(flags & (1 << SHADE)){
             // Very simple light and shade
             
-            float eps = 2;
+            float eps = 1.0;
             float3 gradient_diff[3] = {
                 float3(1.0 / width, 0, 0) * eps,
                 float3(0, 1.0 / height, 0)* eps,
