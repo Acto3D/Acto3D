@@ -47,7 +47,7 @@ class ToneCurveView: NSView {
         [255,1]
     ]
     
-    var interpolateMode: CubicSplineInterpolator.InterpolateMode = .cubicSpline{
+    var interpolateMode: CubicSplineInterpolator.InterpolateMode = .linear{
         didSet{
             spline?.interpolateMode = interpolateMode
             updateView()
@@ -494,7 +494,7 @@ class ToneCurveView: NSView {
     // Menu item actions
     @objc func selectInterpolateModeMenuItem(_ sender: NSMenuItem) {
         if(sender.identifier?.rawValue == "spline"){
-            spline!.interpolateMode = .cubicSpline
+            spline?.interpolateMode = .cubicSpline
         }else{
             spline?.interpolateMode = .linear
         }
