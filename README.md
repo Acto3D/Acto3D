@@ -49,7 +49,7 @@ Split channel: Off
 2. Optional: to adjust display ranges, XYZ resolution and limit channels, click **Image options**.
 3. To create 3D image, click **View in 3D**.  
 
-Please refer [this instruction manual](./instruction.pdf) for further instructions.   
+Please refer **[this instruction manual](./instruction.pdf)** for further instructions.   
 
 ### Sample data
 ##### [Download the Sample Data 1 (for 3D observation) (1.65 GB)](https://drive.google.com/file/d/1VHiLkK2O1ZrWoWX4ahPwnZfNgDQ242Kz/view?usp=sharing).
