@@ -2268,7 +2268,7 @@ DQ
                                                                                 <button identifier="adaptive" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DcL-Tv-tm8" customClass="EXButton" customModule="Acto3D" customModuleProvider="target">
                                                                                     <rect key="frame" x="300" y="70" width="84" height="22"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                                    <buttonCell key="cell" type="check" title="adaptive" bezelStyle="regularSquare" imagePosition="left" inset="2" id="9EE-rA-Xtg">
+                                                                                    <buttonCell key="cell" type="check" title="Adaptive" bezelStyle="regularSquare" imagePosition="left" inset="2" id="9EE-rA-Xtg">
                                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                                         <font key="font" metaFont="system"/>
                                                                                     </buttonCell>
@@ -2745,7 +2745,7 @@ DQ
                                                     <rect key="frame" x="6" y="296" width="392" height="280"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="oH5-lF-bWT">
                                                         <rect key="frame" x="1" y="1" width="390" height="278"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <tableView verticalHuggingPriority="750" tag="2" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" tableStyle="fullWidth" alternatingRowBackgroundColors="YES" autosaveColumns="NO" rowHeight="24" usesAutomaticRowHeights="YES" headerView="2DU-VZ-wEL" viewBased="YES" id="4MQ-ct-cPa">
                                                                 <rect key="frame" x="0.0" y="0.0" width="390" height="250"/>
@@ -3431,7 +3431,6 @@ DQ
                         <outlet property="toneCh2" destination="fOo-o8-K3W" id="h81-dS-okO"/>
                         <outlet property="toneCh3" destination="SNW-14-n8p" id="Qlh-FD-Ywe"/>
                         <outlet property="toneCh4" destination="D5U-aZ-TLz" id="Dqf-VE-gwz"/>
-                        <outlet property="toneControlMenu" destination="y24-Ox-5RS" id="UON-8a-x9Q"/>
                         <outlet property="wellCh1" destination="qqZ-hS-0Zi" id="eVG-pg-Jeg"/>
                         <outlet property="wellCh2" destination="exg-BA-oIN" id="cOJ-A3-9CK"/>
                         <outlet property="wellCh3" destination="3lB-6r-9Ic" id="GdR-Ci-OIt"/>
@@ -3492,58 +3491,6 @@ DQ
                     </items>
                 </menu>
                 <userDefaultsController representsSharedInstance="YES" id="znc-KO-fVq"/>
-                <menu id="y24-Ox-5RS">
-                    <items>
-                        <menuItem title="Default" identifier="default" id="Wcy-xO-PBn">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="vWT-R0-1O1"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="MPR / MIP" identifier="mpr" id="vA1-nA-VZc">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="8h3-Dm-Cwu"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="MPR (cut low intensity)" identifier="mpr2" id="g0c-0A-ZMF">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="awZ-n2-HV6"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="Transparent (Back to Front)" identifier="transparent" id="qhq-Do-O58">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="nxc-AH-UWT"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="Intermediate" identifier="intermediate" id="oLX-0t-uyN">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="En1-sX-QXG"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="Intermediate2" identifier="intermediate2" id="knd-qg-1Ms">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="cEC-3m-di6"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="Cut low intensity" identifier="cut" id="oXM-QK-Cw4">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="oyO-dV-vdE"/>
-                            </connections>
-                        </menuItem>
-                        <menuItem title="Cut low intensity2" identifier="cut2" id="Ba8-zq-ETx">
-                            <modifierMask key="keyEquivalentModifierMask"/>
-                            <connections>
-                                <action selector="toneControlMenuActionWithSender:" target="XfG-lQ-9wD" id="06i-H3-LNb"/>
-                            </connections>
-                        </menuItem>
-                    </items>
-                </menu>
             </objects>
             <point key="canvasLocation" x="-1635.5" y="3236"/>
         </scene>
@@ -4133,7 +4080,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="14" height="14"/>
+        <image name="link" catalog="system" width="17" height="17"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

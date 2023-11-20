@@ -11,12 +11,12 @@
 		B004633A27D1925A00EEEB72 /* KeyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004633927D1925A00EEEB72 /* KeyEvent.swift */; };
 		B004C7942916DB5600F79AA5 /* NSRect+.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004C7932916DB5600F79AA5 /* NSRect+.swift */; };
 		B00518822A8D41BD00AE58CA /* ToneCurveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00518812A8D41BD00AE58CA /* ToneCurveView.swift */; };
-		B009959D2785DB3400E859B9 /* VC+toneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B009959C2785DB3400E859B9 /* VC+toneController.swift */; };
+		B009959D2785DB3400E859B9 /* VC_toneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B009959C2785DB3400E859B9 /* VC_toneController.swift */; };
 		B00F7F9F27D5202A00ED00ED /* AnimateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F7F9E27D5202A00ED00ED /* AnimateView.swift */; };
 		B01E3586276D821300EAF0CA /* windowProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E3585276D821300EAF0CA /* windowProtocol.swift */; };
 		B01E3588276D85AE00EAF0CA /* FileLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E3587276D85AE00EAF0CA /* FileLoad.swift */; };
 		B01E358A276D8E5900EAF0CA /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E3589276D8E5900EAF0CA /* Logger.swift */; };
-		B01E358C276D90F500EAF0CA /* VC+TableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E358B276D90F500EAF0CA /* VC+TableController.swift */; };
+		B01E358C276D90F500EAF0CA /* VC_TableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E358B276D90F500EAF0CA /* VC_TableController.swift */; };
 		B01E358E276DBE3400EAF0CA /* ImageExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E358D276DBE3400EAF0CA /* ImageExt.swift */; };
 		B01F2F7629A89F27005D5775 /* Metal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01F2F7529A89F27005D5775 /* Metal.swift */; };
 		B01F2F7829A9F86A005D5775 /* enum.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01F2F7729A9F86A005D5775 /* enum.swift */; };
@@ -32,6 +32,7 @@
 		B04606A729CD3AF800DE1D50 /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04606A629CD3AF800DE1D50 /* ImageProcessor.swift */; };
 		B04AD2392A4741CA0061E350 /* ShaderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04AD2382A4741CA0061E350 /* ShaderManager.swift */; };
 		B04AD2412A4756340061E350 /* URL+relative.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04AD2402A4756340061E350 /* URL+relative.swift */; };
+		B05B03592B0B572000E4C39E /* VC_ControlPoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05B03582B0B572000E4C39E /* VC_ControlPoints.swift */; };
 		B0693FC627B02ADC00A778CE /* FocusCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0693FC527B02ADC00A778CE /* FocusCircle.swift */; };
 		B06A2B14299E255A002B1CC5 /* SegmentNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B13299E255A002B1CC5 /* SegmentNode.swift */; };
 		B06A2B16299F8996002B1CC5 /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B15299F8996002B1CC5 /* Permission.swift */; };
@@ -69,7 +70,7 @@
 		B0D36C84296A6C72008E9ECA /* KMeansController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D36C83296A6C72008E9ECA /* KMeansController.swift */; };
 		B0DA86D927CEE81E0000C788 /* NSColor+RGBAf.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DA86D827CEE81E0000C788 /* NSColor+RGBAf.swift */; };
 		B0E819242A4DBB85009E9B82 /* CubicSplineInterpolator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E819232A4DBB85009E9B82 /* CubicSplineInterpolator.swift */; };
-		B0E9634028A5DF5600797449 /* VC+MouseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E9633F28A5DF5600797449 /* VC+MouseEvent.swift */; };
+		B0E9634028A5DF5600797449 /* VC_MouseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E9633F28A5DF5600797449 /* VC_MouseEvent.swift */; };
 		B0EE0D9727D6316A00237048 /* MovieCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EE0D9627D6316A00237048 /* MovieCollectionView.swift */; };
 		B0EE0D9A27D6319F00237048 /* SequenceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EE0D9827D6319F00237048 /* SequenceCell.swift */; };
 		B0EE0D9B27D6319F00237048 /* SequenceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0EE0D9927D6319F00237048 /* SequenceCell.xib */; };
@@ -100,17 +101,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B00103C22A91090300F2DFA0 /* paper_consider_gradients.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = paper_consider_gradients.metal; sourceTree = "<group>"; };
 		B004633727CFD57800EEEB72 /* PlaneSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaneSection.swift; sourceTree = "<group>"; };
 		B004633927D1925A00EEEB72 /* KeyEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEvent.swift; sourceTree = "<group>"; };
 		B004C7932916DB5600F79AA5 /* NSRect+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+.swift"; sourceTree = "<group>"; };
 		B00518812A8D41BD00AE58CA /* ToneCurveView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToneCurveView.swift; sourceTree = "<group>"; };
-		B009959C2785DB3400E859B9 /* VC+toneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+toneController.swift"; sourceTree = "<group>"; };
+		B009959C2785DB3400E859B9 /* VC_toneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_toneController.swift; sourceTree = "<group>"; };
 		B00F7F9E27D5202A00ED00ED /* AnimateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateView.swift; sourceTree = "<group>"; };
 		B01E3585276D821300EAF0CA /* windowProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = windowProtocol.swift; sourceTree = "<group>"; };
 		B01E3587276D85AE00EAF0CA /* FileLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLoad.swift; sourceTree = "<group>"; };
 		B01E3589276D8E5900EAF0CA /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		B01E358B276D90F500EAF0CA /* VC+TableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+TableController.swift"; sourceTree = "<group>"; };
+		B01E358B276D90F500EAF0CA /* VC_TableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_TableController.swift; sourceTree = "<group>"; };
 		B01E358D276DBE3400EAF0CA /* ImageExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExt.swift; sourceTree = "<group>"; };
 		B01F2F7529A89F27005D5775 /* Metal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metal.swift; sourceTree = "<group>"; };
 		B01F2F7729A9F86A005D5775 /* enum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = enum.swift; path = Acto3D/Controller/enum.swift; sourceTree = SOURCE_ROOT; };
@@ -134,8 +134,8 @@
 		B04AD2422A477AEB0061E350 /* preset_BTF.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_BTF.metal; sourceTree = "<group>"; };
 		B04E1AD72A8AFAD500DE7EDA /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
 		B05243D62A4A720800EBAA5C /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
-		B056CDC32A8D4D61001809C3 /* simple_shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = simple_shader.metal; sourceTree = "<group>"; };
 		B056CDC52A8D5089001809C3 /* macros.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = macros.metal; sourceTree = "<group>"; };
+		B05B03582B0B572000E4C39E /* VC_ControlPoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_ControlPoints.swift; sourceTree = "<group>"; };
 		B066B210276EED690072F4A6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B0693FC527B02ADC00A778CE /* FocusCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusCircle.swift; sourceTree = "<group>"; };
 		B06A2B13299E255A002B1CC5 /* SegmentNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentNode.swift; sourceTree = "<group>"; };
@@ -182,7 +182,7 @@
 		B0E5D3F328A0AF1E009856BD /* struct.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = struct.metal; sourceTree = "<group>"; };
 		B0E5D3F528A0B08F009856BD /* quat.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = quat.metal; sourceTree = "<group>"; };
 		B0E819232A4DBB85009E9B82 /* CubicSplineInterpolator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CubicSplineInterpolator.swift; sourceTree = "<group>"; };
-		B0E9633F28A5DF5600797449 /* VC+MouseEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VC+MouseEvent.swift"; sourceTree = "<group>"; };
+		B0E9633F28A5DF5600797449 /* VC_MouseEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_MouseEvent.swift; sourceTree = "<group>"; };
 		B0EE0D9627D6316A00237048 /* MovieCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieCollectionView.swift; sourceTree = "<group>"; };
 		B0EE0D9827D6319F00237048 /* SequenceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceCell.swift; sourceTree = "<group>"; };
 		B0EE0D9927D6319F00237048 /* SequenceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SequenceCell.xib; sourceTree = "<group>"; };
@@ -356,15 +356,6 @@
 			path = Acto3D;
 			sourceTree = "<group>";
 		};
-		B04AD2372A473EED0061E350 /* Custom */ = {
-			isa = PBXGroup;
-			children = (
-				B056CDC32A8D4D61001809C3 /* simple_shader.metal */,
-				B00103C22A91090300F2DFA0 /* paper_consider_gradients.metal */,
-			);
-			path = Custom;
-			sourceTree = "<group>";
-		};
 		B04E1AD62A8AFA6900DE7EDA /* ShaderTemplates */ = {
 			isa = PBXGroup;
 			children = (
@@ -387,7 +378,6 @@
 		B07B6D19276E4EF500D31400 /* Shader */ = {
 			isa = PBXGroup;
 			children = (
-				B04AD2372A473EED0061E350 /* Custom */,
 				B04AD2362A473ECC0061E350 /* Acto3D */,
 			);
 			path = Shader;
@@ -477,9 +467,10 @@
 				B09E5CA42A5170AC00B90CD4 /* ShaderCompiler.swift */,
 				B01F2F7729A9F86A005D5775 /* enum.swift */,
 				B09BB661279801A400326EA4 /* VC_make3D_texture.swift */,
-				B0E9633F28A5DF5600797449 /* VC+MouseEvent.swift */,
-				B01E358B276D90F500EAF0CA /* VC+TableController.swift */,
-				B009959C2785DB3400E859B9 /* VC+toneController.swift */,
+				B0E9633F28A5DF5600797449 /* VC_MouseEvent.swift */,
+				B01E358B276D90F500EAF0CA /* VC_TableController.swift */,
+				B009959C2785DB3400E859B9 /* VC_toneController.swift */,
+				B05B03582B0B572000E4C39E /* VC_ControlPoints.swift */,
 				B004633727CFD57800EEEB72 /* PlaneSection.swift */,
 				B03D1CB727CBFC5600268AB8 /* SaveAndLoad.swift */,
 				B004633927D1925A00EEEB72 /* KeyEvent.swift */,
@@ -676,10 +667,11 @@
 				B0EE0D9727D6316A00237048 /* MovieCollectionView.swift in Sources */,
 				B03D1CB827CBFC5600268AB8 /* SaveAndLoad.swift in Sources */,
 				B0AB4030298EC27000FDE0D6 /* GlobalImageHandler.swift in Sources */,
-				B01E358C276D90F500EAF0CA /* VC+TableController.swift in Sources */,
+				B01E358C276D90F500EAF0CA /* VC_TableController.swift in Sources */,
 				B0A83F0027CC8ADD00806DBC /* NSDate+TimeStamp.swift in Sources */,
 				B01F2F7829A9F86A005D5775 /* enum.swift in Sources */,
 				B026A7EE2A39635E00F07CCF /* FilePackage.swift in Sources */,
+				B05B03592B0B572000E4C39E /* VC_ControlPoints.swift in Sources */,
 				B0321D5929666F3F00FA2507 /* Segment3DController.swift in Sources */,
 				B0AAD0662A1282B900A24138 /* DiceCoeff.swift in Sources */,
 				B004C7942916DB5600F79AA5 /* NSRect+.swift in Sources */,
@@ -701,10 +693,10 @@
 				B09D4E0D2A8FAF88001C77E6 /* FlippedViewForScroll.swift in Sources */,
 				B04606A729CD3AF800DE1D50 /* ImageProcessor.swift in Sources */,
 				B004633827CFD57800EEEB72 /* PlaneSection.swift in Sources */,
-				B009959D2785DB3400E859B9 /* VC+toneController.swift in Sources */,
+				B009959D2785DB3400E859B9 /* VC_toneController.swift in Sources */,
 				B09BB662279801A400326EA4 /* VC_make3D_texture.swift in Sources */,
 				B07B6D1B276E4F1900D31400 /* shader.metal in Sources */,
-				B0E9634028A5DF5600797449 /* VC+MouseEvent.swift in Sources */,
+				B0E9634028A5DF5600797449 /* VC_MouseEvent.swift in Sources */,
 				B06A2B16299F8996002B1CC5 /* Permission.swift in Sources */,
 				B0F59D2027D6ECDF00E0644F /* MovieSequence.swift in Sources */,
 				B01E3588276D85AE00EAF0CA /* FileLoad.swift in Sources */,
@@ -901,7 +893,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 15;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -917,7 +909,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ntakeshita.Acto3D;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -937,7 +929,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 15;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -953,7 +945,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ntakeshita.Acto3D;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

@@ -23,7 +23,6 @@ class ViewController: NSViewController {
     
     // MENUs
     @IBOutlet var openMenu: NSMenu!
-    @IBOutlet var toneControlMenu: NSMenu!
     
     @IBOutlet weak var pathField: NSTextField!
     
@@ -59,6 +58,10 @@ class ViewController: NSViewController {
     @IBOutlet weak var toneCh2: ToneCurveView!
     @IBOutlet weak var toneCh3: ToneCurveView!
     @IBOutlet weak var toneCh4: ToneCurveView!
+    
+    // name, control points, linear or spline
+    var controlPoints:[(String, [[Float]], Int)] = []
+    let controlPointsMenu: NSMenu = NSMenu()
     
     
     @IBOutlet weak var intensityRatio_slider_1: NSSlider!
@@ -194,21 +197,26 @@ class ViewController: NSViewController {
             renderer.createDefaultLibrary()
         }
         
-        renderer.currentShader = shaderList[1] // select default shader
-        segmentRenderMode.selectSegment(withTag: 1)
+        renderer.currentShader = shaderList[AppConfig.DEFAULT_SHADER_NO] // select default shader
+        segmentRenderMode.selectSegment(withTag: AppConfig.DEFAULT_SHADER_NO)
         
         // check system resource
         checkSystemResource()
         
-        initWellCh()
-        initToneCurves()
+        setDefaultColorToWell()
+        
+        
+        // Create preset control points
+        createPresetControlPoints()
+        
+        
+        initToneCurveViews()
         
         
         transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
         transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
         transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
         transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
-        
         
         
         
@@ -275,7 +283,7 @@ class ViewController: NSViewController {
         print(renderer.device.maxBufferLength)
     }
     
-    func initWellCh(){
+    func setDefaultColorToWell(){
         wellCh1.color = NSColor(calibratedRed: 1, green: 0, blue: 0, alpha: 1)
         wellCh2.color = NSColor(calibratedRed: 0, green: 1, blue: 0, alpha: 1)
         wellCh3.color = NSColor(calibratedRed: 0, green: 0, blue: 1, alpha: 1)
@@ -572,136 +580,7 @@ class ViewController: NSViewController {
         self.renderer.imageParams.displayRanges = [[Double]](repeating: [0, max.toDouble()], count: channelCount)
     }
     
-    //MARK: Tone Control
-    func initToneCurves(){
-        // toneCurve setting
-        toneCh1.delegate = self
-        toneCh2.delegate = self
-        toneCh3.delegate = self
-        toneCh4.delegate = self
-        toneCh1.knobSize = 5
-        toneCh2.knobSize = 5
-        toneCh3.knobSize = 5
-        toneCh4.knobSize = 5
-        
-        toneCh1.relativeView = self.view
-        toneCh2.relativeView = self.view
-        toneCh3.relativeView = self.view
-        toneCh4.relativeView = self.view
-        
-        //MARK: Initial control points
-        let controlPoints:[[Float]] = [
-            [0,0],
-            [30,0],
-            [130,0.4],
-            [255,1]
-//            [0,0],
-//            [20,0],
-//            [110,0.3],
-//            [255,1]
-            ]
-        
-        toneCh1.setControlPoint(array: controlPoints)
-        toneCh2.setControlPoint(array: controlPoints)
-        toneCh3.setControlPoint(array: controlPoints)
-        toneCh4.setControlPoint(array: controlPoints)
-        
-        toneCh1.setDefaultBackgroundColor(color: wellCh1.color)
-        toneCh2.setDefaultBackgroundColor(color: wellCh2.color)
-        toneCh3.setDefaultBackgroundColor(color: wellCh3.color)
-        toneCh4.setDefaultBackgroundColor(color: wellCh4.color)
-        
-    }
-    
-    /// toneControl preset button
-    @IBAction func toneControlOptionButton(_ sender: NSButton) {
-        let menuPosition = sender.superview!.convert(NSPoint(x: sender.frame.minX, y: sender.frame.minY), to: self.view)
-        print(menuPosition)
-        toneControlMenu.popUp(positioning: nil, at: NSPoint(x: menuPosition.x, y: menuPosition.y), in: self.view)
-    }
-    
-    @IBAction func toneControlMenuAction(sender: NSMenuItem){
-        
-        var controlPoints:[[Float]] = [[]]
-        
-        switch sender.identifier?.rawValue {
-        case "default":
-            controlPoints = [
-                [0,0],
-                [255,1]
-            ]
-            
-        case "mpr":
-            controlPoints = [
-                [0,1],
-                [255,1]
-            ]
-            
-            
-        case "mpr2":
-            controlPoints = [
-                [0,0],
-                [20, 0],
-                [20.1, 1],
-                [255,1]
-            ]
-            
-        case "transparent":
-            controlPoints = [
-                [0,0],
-                [255,0.45]
-            ]
-            
-        case "intermediate":
-            controlPoints = [
-                [0,0],
-                [30,0],
-                [65, 1],
-                [255,1]
-            ]
-        case "intermediate2":
-            controlPoints = [
-                [0,0],
-                [25,0],
-                [70,0.15],
-                [145.0,0.40],
-                [255.0,0.60]
-            ]
-            
-        case "cut":
-            controlPoints = [
-                [0,0],
-                [30,0],
-                [140, 0.5],
-                [255,1]
-            ]
-            
-        case "cut2":
-            controlPoints = [
-                [0,0],
-                [20,0],
-                [33, 0.15],
-                [50,0.215],
-                [255,0.35]
-            ]
-            
-        default:
-            break
-        }
-        
-        toneCh1.setControlPoint(array: controlPoints)
-        toneCh2.setControlPoint(array: controlPoints)
-        toneCh3.setControlPoint(array: controlPoints)
-        toneCh4.setControlPoint(array: controlPoints)
-        
-        transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
-        transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
-        transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
-        transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
-        
-        outputView.image = renderer.rendering()
-    }
-    
+ 
     
     @IBAction func selectViewSize(_ sender: Any) {
         let drawingviewSize = Int(popUpViewSize.selectedItem!.title)!.toUInt16()
@@ -1325,43 +1204,6 @@ class ViewController: NSViewController {
             pasteboard.clearContents()
             pasteboard.setData(imageData, forType: NSPasteboard.PasteboardType(rawValue: "NSTIFFPboardType"))
         }
-    }
-    
-    @IBAction func linkToneCurve(_ sender: NSButton) {
-        switch sender.identifier?.rawValue {
-        case "ch1":
-            toneCh2.setControlPoint(array: toneCh1.getControlPoint())
-            toneCh3.setControlPoint(array: toneCh1.getControlPoint())
-            toneCh4.setControlPoint(array: toneCh1.getControlPoint())
-            
-        case "ch2":
-            toneCh1.setControlPoint(array: toneCh2.getControlPoint())
-            toneCh3.setControlPoint(array: toneCh2.getControlPoint())
-            toneCh4.setControlPoint(array: toneCh2.getControlPoint())
-            
-        case "ch3":
-            toneCh1.setControlPoint(array: toneCh3.getControlPoint())
-            toneCh2.setControlPoint(array: toneCh3.getControlPoint())
-            toneCh4.setControlPoint(array: toneCh3.getControlPoint())
-            
-        case "ch4":
-            toneCh1.setControlPoint(array: toneCh4.getControlPoint())
-            toneCh2.setControlPoint(array: toneCh4.getControlPoint())
-            toneCh3.setControlPoint(array: toneCh4.getControlPoint())
-            
-        default:
-            break
-            
-        }
-        
-        transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
-        transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
-        transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
-        transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
-        
-        print("link tone curve")
-        outputView.image = renderer.rendering()
-        
     }
     
     
