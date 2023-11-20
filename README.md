@@ -52,9 +52,22 @@ Split channel: Off
 Please refer [this instruction manual](./instruction.pdf) for further instructions.   
 
 ### Sample data
-[Download the Sample Data (1.65 GB)](https://drive.google.com/file/d/1VHiLkK2O1ZrWoWX4ahPwnZfNgDQ242Kz/view?usp=sharing).
+##### [Download the Sample Data 1 (for 3D observation) (1.65 GB)](https://drive.google.com/file/d/1VHiLkK2O1ZrWoWX4ahPwnZfNgDQ242Kz/view?usp=sharing).
 
 This dataset consists of a heart from an E13.5 mouse embryo, imaged using the Zeiss Lightsheet 7.
+
+Imaging Specifications:
+- Dimensions: 1920 x 1920 px with 997 z stacks
+- Resolution: XY = 1.0874 µm/px, Z = 1.9251 µm/px
+- Staining: SYTOX Green, Tomato lection-DyLight 594
+- Data Post-processing: For the sake of reducing file size:
+    - The data was scaled in the XY direction by 0.5 using Fiji.
+    - The display range was adjusted.
+    - It was then converted to 8 bits.
+
+##### [Download the Sample Data 2 (for vascular 3D reconstruction) (1.5 GB)](https://drive.google.com/file/d/1n1Pr_gaB-zFYdcAeKQs6HlwdtKiSKxu1/view?usp=sharing).
+
+This dataset consists of a embryo pharyngeal arch region from an E10.5 mouse embryo, imaged using the Zeiss Lightsheet 7.
 
 Imaging Specifications:
 - Dimensions: 1920 x 1920 px with 597 z stacks
@@ -64,7 +77,6 @@ Imaging Specifications:
     - The data was scaled in the XY direction by 0.5 using Fiji.
     - The display range was adjusted.
     - It was then converted to 8 bits.
-
 
 
 ### Create a custom shader
