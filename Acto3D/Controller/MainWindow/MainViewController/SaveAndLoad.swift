@@ -185,9 +185,10 @@ extension ViewController{
         var controlPoints:[[[Float]]]!
         var toneColors:[float4]!
         
+        var controlPointsInterpolateMode:[Int]?
+        
         var pointClouds:PointClouds! = PointClouds()
         var renderOption:UInt16!
-//        var displayRanges:[[Double]]!
         var shaderInfo:ShaderManage? 
         
         var alphaValues:[[Float]]?
@@ -212,6 +213,11 @@ extension ViewController{
                                                          wellCh2.color.RGBAtoFloat4(),
                                                          wellCh3.color.RGBAtoFloat4(),
                                                          wellCh4.color.RGBAtoFloat4()],
+                                            
+                                            controlPointsInterpolateMode: [toneCh1.spline!.interpolateMode.rawValue,
+                                                                           toneCh2.spline!.interpolateMode.rawValue,
+                                                                           toneCh3.spline!.interpolateMode.rawValue,
+                                                                           toneCh4.spline!.interpolateMode.rawValue],
                                             
                                             pointClouds: renderer.pointClouds,
                                             renderOption: renderer.renderOption.rawValue,
@@ -359,6 +365,16 @@ extension ViewController{
         toneCh2.setControlPoint(array: params.controlPoints[1])
         toneCh3.setControlPoint(array: params.controlPoints[2])
         toneCh4.setControlPoint(array: params.controlPoints[3])
+        
+        // Set Interpolate Mode for Control points (0 = Linear, 1 = Spline)
+        if let interpolateMode = params.controlPointsInterpolateMode{
+            toneCh1.interpolateMode = CubicSplineInterpolator.InterpolateMode(rawValue: interpolateMode[0])!
+            toneCh2.interpolateMode = CubicSplineInterpolator.InterpolateMode(rawValue: interpolateMode[1])!
+            toneCh3.interpolateMode = CubicSplineInterpolator.InterpolateMode(rawValue: interpolateMode[2])!
+            toneCh4.interpolateMode = CubicSplineInterpolator.InterpolateMode(rawValue: interpolateMode[3])!
+        }else{
+            Logger.logPrintAndWrite(message: "Interpolate Mode is not defined", level:.info)
+        }
         
         wellCh1.color =  NSColor.color(from: params.toneColors[0])
         wellCh2.color =  NSColor.color(from: params.toneColors[1])
