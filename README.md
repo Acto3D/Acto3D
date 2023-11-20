@@ -56,10 +56,6 @@ Please refer **[this instruction manual](./instruction.pdf)** for further instru
 
 This dataset consists of a heart from an E13.5 mouse embryo, imaged using the Zeiss Lightsheet 7.
 
-##### [Download the Sample Data 2 (for vascular 3D reconstruction) (1.5 GB)](https://drive.google.com/file/d/1n1Pr_gaB-zFYdcAeKQs6HlwdtKiSKxu1/view?usp=sharing).
-
-This dataset consists of a embryo pharyngeal arch region from an E10.5 mouse embryo, imaged using the Zeiss Lightsheet 7.
-
 Imaging Specifications:
 - Dimensions: 1920 x 1920 px with 597 z stacks
 - Resolution: XY = 1.0635 µm/px, Z = 2.4009 µm/px
