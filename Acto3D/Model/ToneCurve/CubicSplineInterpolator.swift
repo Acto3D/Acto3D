@@ -15,9 +15,9 @@ class CubicSplineInterpolator{
     var yPoints: [Float]
     var coefficients: [[Float]]?
     
-    enum InterpolateMode{
-        case cubicSpline
-        case linear
+    enum InterpolateMode: Int{
+        case linear = 0
+        case cubicSpline = 1
     }
     
     var interpolateMode:InterpolateMode = .cubicSpline
