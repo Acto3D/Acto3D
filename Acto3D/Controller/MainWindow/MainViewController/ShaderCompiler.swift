@@ -244,5 +244,97 @@ extension ViewController{
 
         return result
     }
+    
+    func copyPresetShadersToShaderDirectory(){
+        
+        let appURL = Bundle.main.bundleURL
+        let mainShadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("Preset")
+        
+        // get custom shader dir
+        guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader").appendingPathComponent("Preset") else {
+            Logger.logPrintAndWrite(message: "Could not obtein shader directory")
+            return
+        }
+        do {
+            try FileManager.default.createDirectory(at: customShadersURL, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            Logger.logPrintAndWrite(message: "Error in creating custom shader directory", level: .error)
+            return
+        }
+        
+        guard let mainShadersFiles = try? FileManager.default.contentsOfDirectory(at: mainShadersURL,
+                                                                                  includingPropertiesForKeys: nil,
+                                                                                  options: .skipsHiddenFiles)
+        else{
+            Logger.logPrintAndWrite(message: "could not obtein files in: \(mainShadersURL.path)")
+            return
+        }
+        
+        let metalFiles = mainShadersFiles.filter{$0.pathExtension == "metal"}
+        if(metalFiles.count == 0){
+            Logger.logPrintAndWrite(message: "no metal files in :\(mainShadersURL.path)")
+            return
+        }
+        
+        var overwriteAll = false
+        
+        for fileURL in metalFiles {
+            let destinationURL = customShadersURL.appendingPathComponent(fileURL.lastPathComponent)
+            if FileManager.default.fileExists(atPath: destinationURL.path){
+                if (overwriteAll){
+                    // first, delete the existing file
+                    do{
+                        try FileManager.default.removeItem(at: destinationURL)
+                        Logger.logPrintAndWrite(message: "delete existing shader file: \(destinationURL.path)")
+                    }catch{
+                        Logger.log(message: "error in overwrite \(destinationURL)")
+                    }
+                    
+                }else{
+                    let alert = NSAlert()
+                    alert.messageText = "Would you like to overwrite the existing file?"
+                    alert.informativeText = "\(destinationURL.path) already exists."
+                    alert.addButton(withTitle: "Overwrite")
+                    alert.addButton(withTitle: "Skip")
+                    alert.addButton(withTitle: "Overwrite All")
+                    let response = alert.runModal()
+                    
+                    switch response {
+                    case .alertFirstButtonReturn:  // User chose to overwrite
+                        do{
+                            try FileManager.default.removeItem(at: destinationURL)
+                            Logger.logPrintAndWrite(message: "delete existing shader file: \(destinationURL.path)")
+                        }catch{
+                            Logger.logPrintAndWrite(message: "error in handling file:\(destinationURL.path)")
+                        }
+                        
+                    case .alertSecondButtonReturn:  // User chose to skip
+                        Logger.logPrintAndWrite(message: "skip shader file: \(destinationURL.path)")
+                        continue
+                        
+                    case .alertThirdButtonReturn:  // User chose to overwrite all
+                        overwriteAll = true
+                        do{
+                            try FileManager.default.removeItem(at: destinationURL)
+                            Logger.logPrintAndWrite(message: "delete existing shader file: \(destinationURL.path)")
+                        }catch{
+                            Logger.logPrintAndWrite(message: "error in handling file:\(destinationURL.path)")
+                        }
+                        
+                    default:
+                        break
+                    }
+                }
+            }
+            do{
+                try FileManager.default.copyItem(at: fileURL, to: destinationURL)
+                Logger.logPrintAndWrite(message: "copy shader file: \(destinationURL.path)")
+            }catch{
+                Logger.logPrintAndWrite(message: "error in handling file:\(destinationURL.path)")
+            }
+        }
+        NSWorkspace.shared.activateFileViewerSelecting([customShadersURL])
+        
+    }
         
 }

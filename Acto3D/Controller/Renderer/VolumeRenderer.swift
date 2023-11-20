@@ -58,7 +58,7 @@ class VoluemeRenderer{
     
     
     
-    // FPS
+    // FPS calculation
     private var lastFrameTime: TimeInterval = 0
     private var frameCount: Int = 0
     
@@ -88,7 +88,7 @@ class VoluemeRenderer{
             
             Dialog.showDialog(message: "No corresponding shader found. Try in preset shader.\n Shader Name: \(currentShader?.kernalName)")
             
-            self.currentShader = ShaderManage.getPresetList()[1]
+            self.currentShader = ShaderManage.getPresetList()[AppConfig.DEFAULT_SHADER_NO]
             
                 guard let shader = currentShader,
                       let mtlFunction = mtlLibrary.makeFunction(name: shader.kernalName) else {

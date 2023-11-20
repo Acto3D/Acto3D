@@ -194,8 +194,8 @@ class ViewController: NSViewController {
             renderer.createDefaultLibrary()
         }
         
-        renderer.currentShader = shaderList[1] // select default shader
-        segmentRenderMode.selectSegment(withTag: 1)
+        renderer.currentShader = shaderList[AppConfig.DEFAULT_SHADER_NO] // select default shader
+        segmentRenderMode.selectSegment(withTag: AppConfig.DEFAULT_SHADER_NO)
         
         // check system resource
         checkSystemResource()

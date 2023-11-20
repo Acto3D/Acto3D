@@ -100,7 +100,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B00103C22A91090300F2DFA0 /* paper_consider_gradients.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = paper_consider_gradients.metal; sourceTree = "<group>"; };
 		B004633727CFD57800EEEB72 /* PlaneSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaneSection.swift; sourceTree = "<group>"; };
 		B004633927D1925A00EEEB72 /* KeyEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEvent.swift; sourceTree = "<group>"; };
 		B004C7932916DB5600F79AA5 /* NSRect+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+.swift"; sourceTree = "<group>"; };
@@ -134,7 +133,6 @@
 		B04AD2422A477AEB0061E350 /* preset_BTF.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_BTF.metal; sourceTree = "<group>"; };
 		B04E1AD72A8AFAD500DE7EDA /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
 		B05243D62A4A720800EBAA5C /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
-		B056CDC32A8D4D61001809C3 /* simple_shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = simple_shader.metal; sourceTree = "<group>"; };
 		B056CDC52A8D5089001809C3 /* macros.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = macros.metal; sourceTree = "<group>"; };
 		B066B210276EED690072F4A6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B0693FC527B02ADC00A778CE /* FocusCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusCircle.swift; sourceTree = "<group>"; };
@@ -356,15 +354,6 @@
 			path = Acto3D;
 			sourceTree = "<group>";
 		};
-		B04AD2372A473EED0061E350 /* Custom */ = {
-			isa = PBXGroup;
-			children = (
-				B056CDC32A8D4D61001809C3 /* simple_shader.metal */,
-				B00103C22A91090300F2DFA0 /* paper_consider_gradients.metal */,
-			);
-			path = Custom;
-			sourceTree = "<group>";
-		};
 		B04E1AD62A8AFA6900DE7EDA /* ShaderTemplates */ = {
 			isa = PBXGroup;
 			children = (
@@ -387,7 +376,6 @@
 		B07B6D19276E4EF500D31400 /* Shader */ = {
 			isa = PBXGroup;
 			children = (
-				B04AD2372A473EED0061E350 /* Custom */,
 				B04AD2362A473ECC0061E350 /* Acto3D */,
 			);
 			path = Shader;
@@ -901,7 +889,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -917,7 +905,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ntakeshita.Acto3D;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -937,7 +925,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = MXZTRA8VF6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -953,7 +941,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ntakeshita.Acto3D;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

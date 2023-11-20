@@ -54,7 +54,6 @@ class ModelView: NSImageView {
     
     
     override func updateTrackingAreas() {
-        print("update tracking area: output view")
         if !trackingAreas.isEmpty {
             for area in trackingAreas {
                 removeTrackingArea(area)
