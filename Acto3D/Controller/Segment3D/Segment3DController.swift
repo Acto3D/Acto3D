@@ -119,7 +119,8 @@ class Segment3DController: NSViewController {
         outputView.image = renderer?.renderSlice()
         
         if(currentSegmentNode.cropArea != nil){
-            guard let targetArea = outputView.confirmedArea?.standardized else {return}
+            guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
+//            guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
             guard let currentImg = renderer.baseImage else {return}
             
             let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
@@ -268,7 +269,8 @@ class Segment3DController: NSViewController {
     
     
     @IBAction func setSlice1(_ sender: Any) {
-        guard let targetArea = outputView.confirmedArea?.standardized else {return}
+//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
+        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return} // squared image
         
@@ -277,7 +279,8 @@ class Segment3DController: NSViewController {
         // scaleX = scaleY
         
         let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-        let croppedImg = currentImg.cropping(to: scaledArea)
+        let croppedImg = currentImg.cropping(to: scaledArea.standardized)
+//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
         cropView1.image = croppedImg?.toNSImage
         
         currentSegmentNode.startSliceNo = sliderSlice.integerValue
@@ -290,7 +293,8 @@ class Segment3DController: NSViewController {
     }
     
     @IBAction func setSlice2(_ sender: Any) {
-        guard let targetArea = outputView.confirmedArea?.standardized else {return}
+        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
+//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return} // squared image
         
@@ -299,7 +303,8 @@ class Segment3DController: NSViewController {
         // scaleX = scaleY
         
         let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-        let croppedImg = currentImg.cropping(to: scaledArea)
+//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+        let croppedImg = currentImg.cropping(to: scaledArea.standardized)
         cropView2.image = croppedImg?.toNSImage
         
         currentSegmentNode.endSliceNo = sliderSlice.integerValue
@@ -353,14 +358,16 @@ class Segment3DController: NSViewController {
         
         currentSegmentNode.currentSliceNo = startSliceNo
         
-        guard let targetArea = outputView.confirmedArea?.standardized else {return}
+//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
+        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return}
         let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         
         let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-        let croppedImg = currentImg.cropping(to: scaledArea)
+//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+        let croppedImg = currentImg.cropping(to: scaledArea.standardized)
         cropViewForCluster.image = croppedImg?.toNSImage
     }
     
@@ -377,14 +384,16 @@ class Segment3DController: NSViewController {
         outputView.image = renderer?.renderSlice()
         currentSegmentNode.currentSliceNo = endSliceNo
         
-        guard let targetArea = outputView.confirmedArea?.standardized else {return}
+//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
+        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return}
         let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         
         let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-        let croppedImg = currentImg.cropping(to: scaledArea)
+        let croppedImg = currentImg.cropping(to: scaledArea.standardized)
+//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
         cropViewForCluster.image = croppedImg?.toNSImage
     }
     
@@ -415,7 +424,8 @@ class Segment3DController: NSViewController {
         
         let scaledArea = cropArea.scaling(scaleX: scaleX, scaleY: scaleY)
         
-        guard let croppedImg = currentImg.cropping(to: scaledArea) else {return nil}
+//        guard let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral) else {return nil}
+        guard let croppedImg = currentImg.cropping(to: scaledArea.standardized) else {return nil}
         
 //        let croppedImageForCurrentSlice = croppedImg.toNSImage
         
@@ -973,8 +983,10 @@ class Segment3DController: NSViewController {
  
         let passPoint = node.cropArea.origin //.scaling(scaleX: scale, scaleY: scale)
         
-        var passRectLeft = UInt16(passPoint.x.rounded())
-        var passRectTop = UInt16(passPoint.y.rounded())
+//        var passRectLeft = UInt16(passPoint.x.rounded())
+//        var passRectTop = UInt16(passPoint.y.rounded())
+        var passRectLeft:Float = passPoint.x.toFloat()
+        var passRectTop:Float = passPoint.y.toFloat()
     
         print("rect org pos", passRectLeft, passRectTop)
 
@@ -985,8 +997,10 @@ class Segment3DController: NSViewController {
         computeMakeMaskEncoder.setBytes(&passSliceNo, length: MemoryLayout<UInt16>.stride, index: 2)
         var quaternion = node.quaternion!
         computeMakeMaskEncoder.setBytes(&quaternion, length: MemoryLayout<simd_quatf>.stride, index: 3)
-        computeMakeMaskEncoder.setBytes(&passRectLeft, length: MemoryLayout<UInt16>.stride, index: 4)
-        computeMakeMaskEncoder.setBytes(&passRectTop, length: MemoryLayout<UInt16>.stride, index: 5)
+        computeMakeMaskEncoder.setBytes(&passRectLeft, length: MemoryLayout<Float>.stride, index: 4)
+        computeMakeMaskEncoder.setBytes(&passRectTop, length: MemoryLayout<Float>.stride, index: 5)
+//        computeMakeMaskEncoder.setBytes(&passRectLeft, length: MemoryLayout<UInt16>.stride, index: 4)
+//        computeMakeMaskEncoder.setBytes(&passRectTop, length: MemoryLayout<UInt16>.stride, index: 5)
         
         
         let viewScaleW = outputView.frame.width / renderer.imageParams.outputImageWidth.toCGFloat()
@@ -1348,14 +1362,16 @@ extension Segment3DController:SegmentRenderViewProtocol{
             currentSegmentNode.cropAreaCoord = area / outputView.bounds.width
             currentSegmentNode.viewSize = outputView.frame.size
             
-            guard let targetArea = outputView.confirmedArea?.standardized else {return}
+//            guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
+            guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
             guard let currentImg = renderer.baseImage else {return}
             
             let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
             let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
             
             let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-            let croppedImg = currentImg.cropping(to: scaledArea)
+//            let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+            let croppedImg = currentImg.cropping(to: scaledArea.standardized)
             
             currentSegmentNode.size = croppedImg?.size
             
@@ -1384,6 +1400,7 @@ extension Segment3DController:SegmentRenderViewProtocol{
         }
     }
     
+    // calculate coordinates when mouse moved over the render view
     func segmentRenderViewMouseMoved(view: SegmentRenderView, with event: NSEvent, point: NSPoint) {
         switch view.identifier?.rawValue {
         case "main":
@@ -1532,7 +1549,7 @@ extension Segment3DController:SegmentRenderViewProtocol{
             }
             
             maskViewForCluster.image = fillResult.toNSImage
-            clusteredView.marker = moment.moment.scaling(scaleX: 1/scale, scaleY: 1/scale)
+            clusteredView.marker = moment.moment.scaling(scaleX: 1.0/scale, scaleY: 1.0/scale)
             clusteredView.redraw()
             
             break

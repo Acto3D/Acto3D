@@ -245,13 +245,13 @@ extension ViewController{
         return result
     }
     
-    func copyPresetShadersToShaderDirectory(){
+    func copySampleShadersToShaderDirectory(){
         
         let appURL = Bundle.main.bundleURL
-        let mainShadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("Preset")
+        let mainShadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("SampleShaders")
         
         // get custom shader dir
-        guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader").appendingPathComponent("Preset") else {
+        guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader").appendingPathComponent("SampleShaders") else {
             Logger.logPrintAndWrite(message: "Could not obtein shader directory")
             return
         }

@@ -35,6 +35,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
     }
+    
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        Logger.logPrintAndWrite(message: filename)
+        return true
+    }
+    func application(_ sender: NSApplication, openFiles filenames: [String]) {
+        Logger.logPrintAndWrite(message: filenames[0])
+    }
 
     @IBAction func quit(_ sender: Any) {
 //        let windowCount = NSApplication.shared.windows.count

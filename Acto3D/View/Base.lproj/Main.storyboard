@@ -465,7 +465,7 @@ isotropic voxel size</string>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="cUk-J0-UME"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Copy Preset Shaders" identifier="copy_preset_shaders" id="q0P-XI-nr5">
+                                        <menuItem title="Copy Sample Shaders" identifier="copy_sample_shaders" id="q0P-XI-nr5">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="cRY-Kc-pqi"/>
@@ -4080,7 +4080,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="17" height="17"/>
+        <image name="link" catalog="system" width="14" height="14"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

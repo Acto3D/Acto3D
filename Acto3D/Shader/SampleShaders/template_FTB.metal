@@ -1,8 +1,8 @@
-// Label: Template for Front To Back
+// Label: Template for Front To Back Rendering
 // Author: Naoki Takeshita
 // Description: Template for standard front to back rendering
 kernel void TMP_FTB(device RenderingArguments    &args       [[buffer(0)]],
-                       uint2                        position    [[thread_position_in_grid]]){
+                       uint2                     position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;
     
@@ -309,16 +309,16 @@ kernel void TMP_FTB(device RenderingArguments    &args       [[buffer(0)]],
         // there are cases where the luminance value may exceed 2550, so it is clamped to 2550.
         // (No need to consider this if fetching opacity before multiplying pixel value with intensity.)
         
-        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel.r * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(clamp(Cvoxel.g * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(clamp(Cvoxel.b * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(clamp(Cvoxel.a * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
         
         
         // While different opacities are defined for the four channels,
         // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
         // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
-        float4 alphaMax = max(max(alpha.r, alpha.g) , max(alpha.b, alpha.a));
+        float4 alphaMax = max(max(alpha[0], alpha[1]) , max(alpha[2], alpha[3]));
       
         float4 light_intensity = modelParameter.light;
         
@@ -351,10 +351,10 @@ kernel void TMP_FTB(device RenderingArguments    &args       [[buffer(0)]],
             float diffuse3 = diffuse_ratio * max(0.0f, dot(normalize(grad_3), normalize(float3(1,1,0))));
             
             light_intensity = float4(
-                                     max(0.0f, light_intensity.x - diffuse0),
-                                     max(0.0f, light_intensity.y - diffuse1),
-                                     max(0.0f, light_intensity.z - diffuse2),
-                                     max(0.0f, light_intensity.w - diffuse3)
+                                     max(0.0f, light_intensity[0] - diffuse0),
+                                     max(0.0f, light_intensity[1] - diffuse1),
+                                     max(0.0f, light_intensity[2] - diffuse2),
+                                     max(0.0f, light_intensity[3] - diffuse3)
                                      );
             
         }
@@ -399,21 +399,21 @@ kernel void TMP_FTB(device RenderingArguments    &args       [[buffer(0)]],
         // but at the cost of increased computation.
         // A realistic range for the threshold is between 0.9 and 0.99.
         float opacityThreshold = 0.99;
-        if(max(max(Aout.x, Aout.y), max(Aout.z, Aout.a)) > opacityThreshold){
+        if(max(max(Aout[0], Aout[1]), max(Aout[2], Aout[3])) > opacityThreshold){
             break;
         }
 
         
     }
     
-    float3 lut_c1 = Cout.r * channel_1;
-    float3 lut_c2 = Cout.g * channel_2;
-    float3 lut_c3 = Cout.b * channel_3;
-    float3 lut_c4 = Cout.a * channel_4;
+    float3 lut_c1 = Cout[0] * channel_1;
+    float3 lut_c2 = Cout[1] * channel_2;
+    float3 lut_c3 = Cout[2] * channel_3;
+    float3 lut_c4 = Cout[3] * channel_4;
     
-    float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r));
-    float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g));
-    float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b));
+    float cR = max(max(lut_c1[0], lut_c2[0]), max(lut_c3[0], lut_c4[0]));
+    float cG = max(max(lut_c1[1], lut_c2[1]), max(lut_c3[1], lut_c4[1]));
+    float cB = max(max(lut_c1[2], lut_c2[2]), max(lut_c3[2], lut_c4[2]));
     
     args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0);
     args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0);

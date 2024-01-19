@@ -604,8 +604,8 @@ extension ViewController{
             guard let workingDirUrl = filePackage?.workingDir else {return}
             NSWorkspace.shared.activateFileViewerSelecting([workingDirUrl])
             
-        case "copy_preset_shaders":
-            copyPresetShadersToShaderDirectory()
+        case "copy_sample_shaders":
+            copySampleShadersToShaderDirectory()
             
         default:
             break

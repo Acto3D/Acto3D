@@ -10,7 +10,7 @@ using namespace metal;
 
 //MARK: - Arguments for Argument Buffer
 struct RenderingArguments {
-    texture3d<float, access::sample> tex           [[id(0)]];
+    texture3d<float, access::sample> tex          [[id(0)]];
     constant RenderingParameters &params          [[id(1)]];
     device  uint8_t *outputData                   [[id(2)]];
     device float* tone1                           [[id(3)]];

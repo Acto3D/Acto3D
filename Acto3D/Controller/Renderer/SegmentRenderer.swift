@@ -308,7 +308,7 @@ class SegmentRenderer{
                 semaphore.signal()
             }
             
-                print("4")
+            print("4")
             semaphore.wait()
             
             if(self.maskTexture == nil){

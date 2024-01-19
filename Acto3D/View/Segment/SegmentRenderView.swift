@@ -216,9 +216,12 @@ class SegmentRenderView: NSImageView {
                 let areaRect = NSMakeRect(startMousePoint.x, startMousePoint.y,
                                           currentMousePoint.x - startMousePoint.x,
                                           currentMousePoint.y - startMousePoint.y)
-                confirmedArea = areaRect.standardized
+//                confirmedArea = areaRect.standardized
+                confirmedArea = areaRect.standardized.integral
+                
                 
                 view?.segmentRenderViewAreaConfirm(view: self, area: confirmedArea!)
+                print(areaRect.standardized, areaRect.standardized.integral)
                 
                 toolMode = .hover
                 
@@ -335,7 +338,7 @@ class SegmentRenderView: NSImageView {
             NSColor(calibratedRed: 1, green: 0, blue: 0, alpha: 0.2).setFill()
             
             let rects = NSBezierPath() // container for line(s)
-            rects.appendRect(confirmedArea!.standardized)
+            rects.appendRect(confirmedArea!.standardized.integral)
             rects.fill()
             rects.stroke()
         }
