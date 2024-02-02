@@ -107,7 +107,7 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
     //TODO: consider FLIP
     float3 samplerPostion = float3(coordinatePos.x / float(meta.inputImageWidth),
                                    coordinatePos.y / float(meta.inputImageHeight),
-                                   coordinatePos.z / float(meta.inputImageDepth) * scale_Z) ;
+                                   coordinatePos.z / (meta.inputImageDepth * scale_Z)) ;
     
     if (samplerPostion.x < modelParameter.trimX_min || samplerPostion.x > modelParameter.trimX_max ||
         samplerPostion.y < modelParameter.trimY_min || samplerPostion.y > modelParameter.trimY_max ||
@@ -246,7 +246,7 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
     
     float3 samplerPostion = float3(coordPos.x / float(meta.inputImageWidth),
                                    (coordPos.y / float(meta.inputImageHeight)),
-                                   (coordPos.z / (float(meta.inputImageDepth) * scale_Z))
+                                   (coordPos.z / (meta.inputImageDepth * scale_Z))
                                    ) ;
     
     
@@ -256,15 +256,15 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
         float inputDepth = maskTexture_in.get_depth();
         
         
-        half4 maskIntensity = maskTexture_in.sample(smp, float3(position.x / (inputWidth-1),
-                                                                position.y / (inputHeight-1),
-                                                                position.z / (inputDepth-1)));
+        half4 maskIntensity = maskTexture_in.sample(smp, float3(position.x / (inputWidth),
+                                                                position.y / (inputHeight),
+                                                                position.z / (inputDepth)));
 //        maskIntensity = maskTexture_in.read(position);
 
         
-        ushort3 out_coord = ushort3(round(samplerPostion.x * (maskTexture_out.get_width()-1)),
-                                    round(samplerPostion.y * (maskTexture_out.get_height()-1)),
-                                    round(samplerPostion.z * (maskTexture_out.get_depth()-1)));
+        ushort3 out_coord = ushort3(round(samplerPostion.x * (maskTexture_out.get_width())),
+                                    round(samplerPostion.y * (maskTexture_out.get_height())),
+                                    round(samplerPostion.z * (maskTexture_out.get_depth())));
         
         if(maskIntensity.r != 0){
             maskTexture_out.write(half4(1.0,0,0,0), out_coord);
@@ -358,6 +358,49 @@ kernel void calcKmeansCluster(constant uint8_t             *inputPixel [[buffer(
 //
 
 
+/// transfer mask image to the texture
+/// if `binary` is `true`, only Zero value will set to zero
+kernel void transferMaskToTexture2(texture3d<half, access::sample>       texIn [[texture(0)]],
+                                   texture3d<half, access::read_write>   texOut [[texture(1)]],
+                                   constant uint8_t  &channel [[buffer(0)]],
+                                   constant bool     &binary [[buffer(1)]],
+                                   sampler           smp [[ sampler(0) ]],
+                                   ushort3           position [[thread_position_in_grid]]){
+    
+    float imageWidth = texIn.get_width();
+    float imageHeight = texIn.get_height();
+    float imageDepth = texIn.get_depth();
+    
+    if (position.x >= imageWidth || position.y >= imageHeight || position.z >= imageDepth){
+        return;
+    }
+    
+    // get color from mask texture
+    
+    // Due to rounding in floating-point calculations, there may be a slight deviation in the value of z.
+    // If necessary, adjust z in the range from -2 to 0 (-2, -1, +0) to correct for this deviation.
+    float eps = -1;
+    half4 inputColor = texIn.sample(smp, float3(position.x / (imageWidth + eps),
+                                                position.y / (imageHeight + eps),
+                                                position.z / (imageDepth + eps)));
+    
+    half4 outputColor = texOut.read(position);
+    
+    if(binary == true){
+        outputColor[channel] = inputColor.r != 0 ? 1.0 : 0.0;
+//        outputColor[channel] = inputColor.r > 0.2 ? 1.0 : 0.0;
+        
+    }else{
+        outputColor[channel] = inputColor.r ;
+    }
+    
+    texOut.write(outputColor, position);
+    
+}
+
+
+
+
 
 /// transfer mask image to the texture
 /// if `binary` is `true`, only Zero value will set to zero
@@ -381,7 +424,7 @@ kernel void transferMaskToTexture(texture3d<half, access::sample>       texIn [[
                                                 position.z / (imageDepth-1)));
     // Due to rounding in floating-point calculations, there may be a slight deviation in the value of z.
     // If necessary, adjust z in the range from -2 to 0 (-2, -1, +0) to correct for this deviation.
-    
+    inputColor = texIn.read(position);
     half4 outputColor = texOut.read(position);
     
     if(binary == true){

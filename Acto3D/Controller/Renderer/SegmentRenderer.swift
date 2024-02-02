@@ -86,6 +86,7 @@ class SegmentRenderer{
         cmdEncoder.setComputePipelineState(renderPipeline)
         cmdEncoder.label = "Command Encoder (Segment 3D)"
         
+        
         let pxByteSize = imageParams!.outputImageWidth.toInt() * imageParams!.outputImageHeight.toInt() * 3
         let pxByteSizeBaseCh = imageParams!.outputImageWidth.toInt() * imageParams!.outputImageHeight.toInt()
         

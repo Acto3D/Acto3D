@@ -136,6 +136,10 @@ struct SegmentNode: Codable{
         
         cropArea = try container.decodeIfPresent(NSRect.self, forKey: .cropArea)
         
+        if(cropArea == nil){
+            cropArea = NSRect(x: 429, y: 429, width: 429, height: 429)
+        }
+        
         // Adjusting values for compatibility with previous versions
         if viewSize == nil{
             cropArea = NSRect(

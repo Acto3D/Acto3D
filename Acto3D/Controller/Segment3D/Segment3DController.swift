@@ -1361,6 +1361,7 @@ extension Segment3DController:SegmentRenderViewProtocol{
             currentSegmentNode.cropArea = area
             currentSegmentNode.cropAreaCoord = area / outputView.bounds.width
             currentSegmentNode.viewSize = outputView.frame.size
+            print(outputView.bounds.width, outputView.frame.size)
             
 //            guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
             guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}

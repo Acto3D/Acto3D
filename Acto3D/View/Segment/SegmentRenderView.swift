@@ -315,11 +315,13 @@ class SegmentRenderView: NSImageView {
     
     
     override func draw(_ dirtyRect: NSRect) {
+        // draw background (black) of this view
         NSColor.black.set()
         let rects = NSBezierPath()
         rects.appendRect(self.bounds)
         rects.fill()
         
+        // draw border (gray) of this view
         super.draw(dirtyRect)
         NSColor.secondaryLabelColor.setStroke()
         rects.stroke()
