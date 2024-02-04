@@ -1174,7 +1174,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Z0-Q5-mG0">
-                                <rect key="frame" x="732" y="204" width="19" height="30"/>
+                                <rect key="frame" x="732" y="205" width="19" height="28"/>
                                 <stepperCell key="cell" continuous="YES" alignment="left" minValue="2" maxValue="20" doubleValue="3" id="jjl-39-roy"/>
                                 <connections>
                                     <action selector="clusterCountStepperChanged:" target="2Jc-51-6dz" id="B9o-UH-JyE"/>
@@ -1283,6 +1283,15 @@ isotropic voxel size</string>
                                 <color key="bezelColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                 <color key="contentTintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </button>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="e2b-UH-Zjd">
+                                <rect key="frame" x="794" y="211" width="37" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="kx2-Iq-Z6P">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
                             <constraint firstItem="0Tm-C3-jkU" firstAttribute="top" secondItem="onn-2w-RMs" secondAttribute="top" id="0fb-tm-F0p"/>
@@ -1386,6 +1395,7 @@ isotropic voxel size</string>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="alertLabel" destination="e2b-UH-Zjd" id="CxZ-3c-37L"/>
                         <outlet property="channelSelectionPopup" destination="zTa-Wd-TQh" id="QtZ-IS-Mf9"/>
                         <outlet property="clusterCountField" destination="dpL-es-XZA" id="FSy-yV-Fz2"/>
                         <outlet property="clusteredView" destination="5Nh-M8-5h4" id="rbs-He-Idk"/>
@@ -4080,7 +4090,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="14" height="14"/>
+        <image name="link" catalog="system" width="17" height="17"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

@@ -32,6 +32,7 @@ class Segment3DController: NSViewController {
     var kmeansController:KMeansController!
     
     
+    @IBOutlet weak var alertLabel: NSTextField!
     
     @IBOutlet weak var sliderSlice: NSSlider!
     @IBOutlet weak var labelSlice: NSTextField!
@@ -269,7 +270,6 @@ class Segment3DController: NSViewController {
     
     
     @IBAction func setSlice1(_ sender: Any) {
-//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return} // squared image
@@ -278,9 +278,9 @@ class Segment3DController: NSViewController {
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         // scaleX = scaleY
         
-        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
+        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
         let croppedImg = currentImg.cropping(to: scaledArea.standardized)
-//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+        
         cropView1.image = croppedImg?.toNSImage
         
         currentSegmentNode.startSliceNo = sliderSlice.integerValue
@@ -294,7 +294,6 @@ class Segment3DController: NSViewController {
     
     @IBAction func setSlice2(_ sender: Any) {
         guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
-//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return} // squared image
         
@@ -302,8 +301,8 @@ class Segment3DController: NSViewController {
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         // scaleX = scaleY
         
-        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
+        
         let croppedImg = currentImg.cropping(to: scaledArea.standardized)
         cropView2.image = croppedImg?.toNSImage
         
@@ -335,6 +334,7 @@ class Segment3DController: NSViewController {
             return
         }
         
+        print("Cluster Refreshed: \n image size = \(currentImage.size), \(currentImage.size.width.rounded()), \(currentImage.size.height.rounded())")
         let _w = Int(currentImage.size.width.rounded())
         let _h = Int(currentImage.size.height.rounded())
         
@@ -358,15 +358,13 @@ class Segment3DController: NSViewController {
         
         currentSegmentNode.currentSliceNo = startSliceNo
         
-//        guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
         
         guard let currentImg = renderer.baseImage else {return}
         let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         
-        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
         let croppedImg = currentImg.cropping(to: scaledArea.standardized)
         cropViewForCluster.image = croppedImg?.toNSImage
     }
@@ -391,9 +389,9 @@ class Segment3DController: NSViewController {
         let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         
-        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
+        let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
         let croppedImg = currentImg.cropping(to: scaledArea.standardized)
-//        let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+        
         cropViewForCluster.image = croppedImg?.toNSImage
     }
     
@@ -422,14 +420,9 @@ class Segment3DController: NSViewController {
         }
          
         
-        let scaledArea = cropArea.scaling(scaleX: scaleX, scaleY: scaleY)
+        let scaledArea = cropArea.scaling(scaleX: scaleX, scaleY: scaleY).standardized.integral
         
-//        guard let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral) else {return nil}
-        guard let croppedImg = currentImg.cropping(to: scaledArea.standardized) else {return nil}
-        
-//        let croppedImageForCurrentSlice = croppedImg.toNSImage
-        
-//        cropViewForCurrentSlice.image = croppedImg.toNSImage
+        guard let croppedImg = currentImg.cropping(to: scaledArea) else {return nil}
         
         
         //MARK: Rules for creating mask images:
@@ -469,27 +462,22 @@ class Segment3DController: NSViewController {
         let _h = Int(croppedImg.size.height.rounded())
         let totalBytes = _w * _h
         
-//        var intensities = kmeansResult.clusters.map{(val) -> UInt8 in
-//            return 255 / stepperCluster.integerValue.toUInt8() * val
-//        }
-        
         guard let providerRef = CGDataProvider(data: Data(bytes: kmeansResult.clusterImage, count: totalBytes) as CFData) else{return nil}
         
         guard let clusteredCgImage = CGImage(
             width: _w,
             height: _h,
-            bitsPerComponent: 8, // 8
-            bitsPerPixel: 8 * 1, // 24 or 32
-            bytesPerRow: MemoryLayout<UInt8>.stride * _w * 1,  // * 4 for 32bit
+            bitsPerComponent: 8,
+            bitsPerPixel: 8 * 1,
+            bytesPerRow: MemoryLayout<UInt8>.stride * _w * 1,
             space:  CGColorSpaceCreateDeviceGray(),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),  //CGImageAlphaInfo.noneSkipLast.rawValue
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
             provider: providerRef,
             decode: nil,
             shouldInterpolate: true,
             intent: .defaultIntent)
         else {return nil}
         
-//        clusterView.image = clusteredCgImage.toNSImage
         
         if Thread.isMainThread {
             scaleX = clusteredCgImage.width.toCGFloat() / maskViewForCluster.bounds.width
@@ -710,6 +698,19 @@ class Segment3DController: NSViewController {
         currentSegmentNode.currentSliceNo = startSliceNo
         sliderSegmentSlice.integerValue = startIndex
         
+        var scaleX:CGFloat = 0
+        var scaleY:CGFloat = 0
+        if Thread.isMainThread {
+            scaleX = currentSegmentNode.width!.toCGFloat() / maskViewForCluster.bounds.width
+            scaleY = currentSegmentNode.height!.toCGFloat() / maskViewForCluster.bounds.height
+        }else{
+            DispatchQueue.main.sync {
+                scaleX = currentSegmentNode.width!.toCGFloat() / maskViewForCluster.bounds.width
+                scaleY = currentSegmentNode.height!.toCGFloat() / maskViewForCluster.bounds.height
+            }
+        }
+        let scale = max(scaleX, scaleY)
+        
         
         var shouldExitLoop = false // flag for stopping loop
         
@@ -731,6 +732,9 @@ class Segment3DController: NSViewController {
         
         
         DispatchQueue.global(qos: .userInteractive).async{ [self] in
+            DispatchQueue.main.sync {
+                alertLabel.stringValue = ""
+            }
             
             autoreleasepool{
                 for _ in (startIndex + 1)...endIndex{
@@ -742,7 +746,7 @@ class Segment3DController: NSViewController {
                     let currentSliceIndex = currentSegmentNode.indexForSlice(slice: currentSlice)
                     
                     if(currentSlice == currentSegmentNode.endSliceNo!){
-                        print("out of range")
+                        print("Out of range")
                         shouldExitLoop = true
                         return
                     }
@@ -780,9 +784,67 @@ class Segment3DController: NSViewController {
                             let dice = calcDiceCoeff(pixel1: prevPixelData, pixel2: currentPixelData)
                             print("Dice: ", calcDiceCoeff(pixel1: prevPixelData, pixel2: currentPixelData))
                             if(dice <= 0.80){
-                                Dialog.showDialog(message: "The automatic processing was interrupted due to significant changes in the mask image. Please ensure it's the correct clustering mask image and process it manually.", title: "", style: .informational)
-                                shouldExitLoop = true
-                                return
+                                var successIfRetry = false
+                                alertLabel.stringValue = "⚠️"
+                                // If dice value are lower than threshold, retry using random filling point
+                                for i in 0..<100{
+                                    if(currentSegmentNode.point[index] == nil){
+                                        print("Dice value smaller larger than threshold. Trial:\(i)")
+                                        //
+                                        var binaryPixelTrial = 0
+                                        var randomPointX:Int = 0
+                                        var randomPointY:Int = 0
+                                        
+                                        while (binaryPixelTrial < 100){
+                                            randomPointX = Int.random(in: 0..<Int(currentSegmentNode.size!.width.rounded()))
+                                            randomPointY = Int.random(in: 0..<Int(currentSegmentNode.size!.height.rounded()))
+                                            let pixelValue = prevPixelData[randomPointY * currentSegmentNode.width! + randomPointX]
+                                            
+                                            
+                                            if(pixelValue == 255){
+                                                print(" Found mask pixel in previous mask image. Trial:\(binaryPixelTrial), x:\(randomPointX), y\(randomPointY)")
+                                                      
+                                                break
+                                            }
+                                            
+                                            binaryPixelTrial += 1
+                                        }
+                                        
+                                        if let fillResult = maskParams.clusteredImage.fill(in: CGPoint(x: randomPointX, y: randomPointY)).image{
+                                            
+                                            let dice2 = calcDiceCoeff(pixel1: prevPixelData, pixel2: fillResult.getPixelData())
+                                            print(" New Dice:\(dice2), Trial:\(i) ")
+                                            if(dice2 > 0.8){
+                                                currentSegmentNode.point[index] = CGPoint(x: randomPointX, y: randomPointY)
+                                                successIfRetry = true
+                                                alertLabel.stringValue = ""
+                                                
+                                                
+                                                guard let momentResult = fillResult.calcMoment(device: device, cmdQueue: cmdQueue, lib: lib) else{
+                                                    Dialog.showDialog(message: "Error in calculating moments")
+                                                    return
+                                                }
+                                                
+                                                currentSegmentNode.moment[index] = momentResult.moment
+                                                currentSegmentNode.maskImage[index] = fillResult
+                                                maskViewForCluster.image = maskParams.maskImage.toNSImage
+                                                
+                                                clusteredView.marker = currentSegmentNode.point[index]!.scaling(scaleX: 1/scale, scaleY: 1/scale)
+                                                
+                                                break
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                                
+                                if(successIfRetry == false){
+                                    alertLabel.stringValue = "⚠️"
+                                    Dialog.showDialog(message: "The automatic processing was interrupted due to significant changes in the mask image. Ensure it's the correct clustering mask image and process it manually.", title: "", style: .informational)
+                                    shouldExitLoop = true
+                                    return
+                                }
+                                
                             }
                         }
                     }
@@ -794,7 +856,6 @@ class Segment3DController: NSViewController {
         }
     }
     //MARK: -
-    
     
     
     @IBAction func sliderSegmentElement(_ sender: Any) {
@@ -827,9 +888,11 @@ class Segment3DController: NSViewController {
             // Mask image is not yet set.
             clusteredView.image = nil
             maskViewForCluster.image = nil
+            alertLabel.stringValue = "⚠️"
             
         }else{
             maskViewForCluster.image = node.maskImage[index]!.toNSImage
+            alertLabel.stringValue = ""
         }
         
         // crop領域部分の画像を表示
@@ -850,7 +913,7 @@ class Segment3DController: NSViewController {
         let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
         let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
         
-        let scaledArea = cropArea.scaling(scaleX: scaleX, scaleY: scaleY)
+        let scaledArea = cropArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
         let croppedImg = currentImg.cropping(to: scaledArea)
         
         cropViewForCluster.image = croppedImg?.toNSImage
@@ -890,6 +953,17 @@ class Segment3DController: NSViewController {
                 clusteredView.image = clusterCGImage?.toNSImage
                 
             }
+        }
+        
+        
+        let scale = max(node.width!.toCGFloat() / maskViewForCluster.bounds.width,
+                        node.height!.toCGFloat() / maskViewForCluster.bounds.height)
+        if (node.point[index] == nil){
+            if let mm = node.moment[index]{
+                clusteredView.marker = mm.scaling(scaleX: 1/scale, scaleY: 1/scale)
+            }
+        }else{
+            clusteredView.marker = node.point[index]!.scaling(scaleX: 1/scale, scaleY: 1/scale)
         }
         
         
@@ -1358,24 +1432,24 @@ extension Segment3DController:SegmentRenderViewProtocol{
     func segmentRenderViewAreaConfirm(view: SegmentRenderView, area: NSRect) {
         switch view.identifier?.rawValue {
         case "main":
+            print("Set area in main view. \n -> \(area)")
             currentSegmentNode.cropArea = area
             currentSegmentNode.cropAreaCoord = area / outputView.bounds.width
             currentSegmentNode.viewSize = outputView.frame.size
-            print(outputView.bounds.width, outputView.frame.size)
             
-//            guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
             guard let targetArea = outputView.confirmedArea?.standardized.integral else {return}
             guard let currentImg = renderer.baseImage else {return}
             
             let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
             let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
             
-            let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY)
-//            let croppedImg = currentImg.cropping(to: scaledArea.standardized.integral)
+            // scale to image size
+            let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
+            print("scaleX:\(scaleX), scaleY:\(scaleY), scaledArea:\(scaledArea)")
             let croppedImg = currentImg.cropping(to: scaledArea.standardized)
             
             currentSegmentNode.size = croppedImg?.size
-            
+            print("segment node size = \(currentSegmentNode.size!)")
             
             break
             
@@ -1503,6 +1577,7 @@ extension Segment3DController:SegmentRenderViewProtocol{
             break
             
         case "clusterView":
+            alertLabel.stringValue = ""
             // mouse click on clustered grayscale image
             // fill the clustered image and create mask image
             

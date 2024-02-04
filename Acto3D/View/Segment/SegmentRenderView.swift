@@ -221,7 +221,7 @@ class SegmentRenderView: NSImageView {
                 
                 
                 view?.segmentRenderViewAreaConfirm(view: self, area: confirmedArea!)
-                print(areaRect.standardized, areaRect.standardized.integral)
+                print("The specified Rect has been rounded to an integer. \n\(areaRect.standardized) -> \(areaRect.standardized.integral)")
                 
                 toolMode = .hover
                 
