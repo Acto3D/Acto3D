@@ -38,8 +38,8 @@
                                 <action selector="indexButtonEvent:" target="-2" id="bg6-L6-ZCA"/>
                             </connections>
                         </button>
-                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PHw-Kl-rlS">
-                            <rect key="frame" x="68" y="10" width="56" height="16"/>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PHw-Kl-rlS">
+                            <rect key="frame" x="179" y="10" width="56" height="16"/>
                             <textFieldCell key="cell" lineBreakMode="clipping" title="Duration" id="Qbh-ve-UGa">
                                 <font key="font" metaFont="system"/>
                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -47,9 +47,9 @@
                             </textFieldCell>
                         </textField>
                         <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Nxp-pe-2nv">
-                            <rect key="frame" x="132" y="7" width="60" height="21"/>
+                            <rect key="frame" x="241" y="7" width="45" height="21"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="60" id="OZu-8O-xpV"/>
+                                <constraint firstAttribute="width" constant="45" id="OZu-8O-xpV"/>
                             </constraints>
                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" title="1000" drawsBackground="YES" id="Yfc-AG-5a2">
                                 <numberFormatter key="formatter" formatterBehavior="custom10_4" positiveFormat="0" allowsFloats="NO" usesGroupingSeparator="NO" formatWidth="-1" groupingSize="0" minimumIntegerDigits="1" maximumIntegerDigits="42" id="u4g-bU-rcQ">
@@ -62,7 +62,7 @@
                             </textFieldCell>
                         </textField>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="M8r-QK-oZe">
-                            <rect key="frame" x="198" y="9" width="22" height="16"/>
+                            <rect key="frame" x="292" y="9" width="22" height="16"/>
                             <textFieldCell key="cell" lineBreakMode="clipping" title="ms" id="Uqj-a8-MVf">
                                 <font key="font" metaFont="system"/>
                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -83,7 +83,7 @@
                                 <action selector="preview:" target="-2" id="o3Q-6e-idf"/>
                             </connections>
                         </button>
-                        <popUpButton verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZQX-iu-rR1">
+                        <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZQX-iu-rR1">
                             <rect key="frame" x="37" y="29" width="162" height="25"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="155" id="Kxp-a9-os6"/>
@@ -126,19 +126,21 @@
                         </popUpButton>
                     </subviews>
                     <constraints>
-                        <constraint firstItem="M8r-QK-oZe" firstAttribute="leading" secondItem="Nxp-pe-2nv" secondAttribute="trailing" constant="8" id="5Fk-od-G9s"/>
-                        <constraint firstItem="Nxp-pe-2nv" firstAttribute="leading" secondItem="PHw-Kl-rlS" secondAttribute="trailing" constant="10" id="7So-uy-J10"/>
+                        <constraint firstItem="Nxp-pe-2nv" firstAttribute="centerY" secondItem="PHw-Kl-rlS" secondAttribute="centerY" id="3C7-2i-xPJ"/>
                         <constraint firstItem="pLl-Tl-jK0" firstAttribute="top" secondItem="U7u-Cv-3hj" secondAttribute="top" constant="7" id="Dgt-b8-X51"/>
+                        <constraint firstItem="M8r-QK-oZe" firstAttribute="leading" secondItem="Nxp-pe-2nv" secondAttribute="trailing" constant="8" symbolic="YES" id="Egz-RH-hYn"/>
                         <constraint firstAttribute="trailing" secondItem="pLl-Tl-jK0" secondAttribute="trailing" constant="10" id="FxQ-XV-e8g"/>
                         <constraint firstItem="wtu-Rc-mrS" firstAttribute="centerY" secondItem="U7u-Cv-3hj" secondAttribute="centerY" id="SSA-Jh-xWD"/>
                         <constraint firstAttribute="trailing" secondItem="lTC-IQ-Phd" secondAttribute="trailing" constant="10" id="W6n-X8-XFL"/>
                         <constraint firstItem="ZQX-iu-rR1" firstAttribute="leading" secondItem="wtu-Rc-mrS" secondAttribute="trailing" constant="10" id="WEs-p5-bMi"/>
+                        <constraint firstItem="ZQX-iu-rR1" firstAttribute="top" secondItem="U7u-Cv-3hj" secondAttribute="top" constant="7" id="XKY-vY-YDG"/>
+                        <constraint firstItem="lTC-IQ-Phd" firstAttribute="leading" secondItem="M8r-QK-oZe" secondAttribute="trailing" constant="8" symbolic="YES" id="dTu-22-Zep"/>
                         <constraint firstAttribute="width" constant="370" id="elb-Lo-Jz8"/>
                         <constraint firstItem="wtu-Rc-mrS" firstAttribute="leading" secondItem="U7u-Cv-3hj" secondAttribute="leading" constant="5" id="goC-WB-7Po"/>
-                        <constraint firstItem="PHw-Kl-rlS" firstAttribute="leading" secondItem="wtu-Rc-mrS" secondAttribute="trailing" constant="40" id="itM-wb-ibb"/>
                         <constraint firstAttribute="bottom" secondItem="Nxp-pe-2nv" secondAttribute="bottom" constant="7" id="jDg-IO-H13"/>
                         <constraint firstItem="M8r-QK-oZe" firstAttribute="centerY" secondItem="lTC-IQ-Phd" secondAttribute="centerY" id="l7p-QG-4D9"/>
                         <constraint firstAttribute="height" constant="60" id="pW7-eQ-gja"/>
+                        <constraint firstItem="Nxp-pe-2nv" firstAttribute="leading" secondItem="PHw-Kl-rlS" secondAttribute="trailing" constant="8" symbolic="YES" id="r5e-bS-LdZ"/>
                         <constraint firstAttribute="bottom" secondItem="lTC-IQ-Phd" secondAttribute="bottom" constant="7" id="y0V-pZ-4sm"/>
                     </constraints>
                 </customView>

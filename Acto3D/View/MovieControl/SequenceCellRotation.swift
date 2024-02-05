@@ -90,9 +90,7 @@ class SequenceCellRotation: NSCollectionViewItem {
 
 extension SequenceCellRotation:NSTextFieldDelegate{
     func controlTextDidChange(_ obj: Notification) {
-    }
-    
-    func controlTextDidEndEditing(_ obj: Notification) {
         self.animateController?.motionArray[index].duration = durationField.floatValue
     }
+    
 }

@@ -25,8 +25,8 @@ class SequenceCell: NSCollectionViewItem {
     @IBOutlet weak var cellindexButton: NSButton!
     
     @IBOutlet weak var originPopup: NSPopUpButton!
-    
     @IBOutlet weak var destPopup: NSPopUpButton!
+    @IBOutlet weak var rotationPopup: NSPopUpButton!
     
     @IBOutlet weak var durationField: NSTextField!
     
@@ -80,13 +80,30 @@ class SequenceCell: NSCollectionViewItem {
     @IBAction func preview(_ sender: Any) {
         self.seqProtocol?.sequenceCellPreview(control: animateController!.motionArray[index])
     }
+    
+    @IBAction func rotationState(_ sender: Any) {
+        switch rotationPopup.indexOfSelectedItem {
+        case 0:
+            self.animateController?.motionArray[index].type = .fileToFile
+        case 1:
+            self.animateController?.motionArray[index].type = .fileToFile
+        case 2:
+            self.animateController?.motionArray[index].type = .fileToFile_rotate_L
+        case 3:
+            self.animateController?.motionArray[index].type = .fileToFile_rotate_R
+        case 4:
+            self.animateController?.motionArray[index].type = .fileToFile_rotate_T
+        case 5:
+            self.animateController?.motionArray[index].type = .fileToFile_rotate_B
+        default:
+            break
+        }
+    }
 }
 
 extension SequenceCell:NSTextFieldDelegate{
     func controlTextDidChange(_ obj: Notification) {
-    }
-    
-    func controlTextDidEndEditing(_ obj: Notification) {
         self.animateController?.motionArray[index].duration = durationField.floatValue
     }
+    
 }

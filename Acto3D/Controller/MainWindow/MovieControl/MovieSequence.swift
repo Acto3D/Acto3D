@@ -69,7 +69,11 @@ extension MovieSequence{
         animateController.workingDir = URL(fileURLWithPath: vc!.pathField.stringValue)
         
         print(indexPath.item)
-        if (self.animateController.motionArray[indexPath.item].type == .fileToFile){
+        if (self.animateController.motionArray[indexPath.item].type == .fileToFile ||
+            self.animateController.motionArray[indexPath.item].type == .fileToFile_rotate_L ||
+            self.animateController.motionArray[indexPath.item].type == .fileToFile_rotate_R ||
+            self.animateController.motionArray[indexPath.item].type == .fileToFile_rotate_T ||
+            self.animateController.motionArray[indexPath.item].type == .fileToFile_rotate_B){
             let item = view.makeItem(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "sequence"), for: indexPath) as! SequenceCell
             
             item.cellindexButton.title = indexPath.item.description
@@ -102,6 +106,25 @@ extension MovieSequence{
             item.originPopup.selectItem(withTitle: animateController.motionArray[indexPath.item].startParamFileName)
             item.destPopup.selectItem(withTitle: animateController.motionArray[indexPath.item].endParamFileName)
             item.durationField.floatValue = animateController.motionArray[indexPath.item].duration
+            
+            switch animateController.motionArray[indexPath.item].type {
+            case .fileToFile:
+                item.rotationPopup.selectItem(at: 0)
+            case .fileToFile_rotate_L:
+                item.rotationPopup.selectItem(at: 2)
+            case .fileToFile_rotate_R:
+                item.rotationPopup.selectItem(at: 3)
+                
+            case .fileToFile_rotate_T:
+                item.rotationPopup.selectItem(at: 4)
+                
+            case .fileToFile_rotate_B:
+                item.rotationPopup.selectItem(at: 5)
+                
+            default:
+                break
+            }
+            
             
             item.seqProtocol = self.vc
             item.seqManageProtocol = self

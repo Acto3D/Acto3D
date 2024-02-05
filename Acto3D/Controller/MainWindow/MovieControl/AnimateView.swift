@@ -21,7 +21,11 @@ class AnimateController{
         case rotate_T = 3
         case rotate_B = 4
         case fileToFile = 5
-        case pause = 6
+        case fileToFile_rotate_L = 6
+        case fileToFile_rotate_R = 7
+        case fileToFile_rotate_T = 8
+        case fileToFile_rotate_B = 9
+        case pause = 10
     }
     
     var workingDir:URL!
@@ -107,12 +111,16 @@ extension ViewController{
         var index = 0
         var savedFileList:[URL] = []
         
+        print("*** Movie Creation ***")
+        print(" Total motion counts: \(movSeq.animateController.motionArray.count)")
+        
         func runNext() {
             guard index < movSeq.animateController.motionArray.count else {
-                print("Done!")
+                print("*** All image are created ***")
                 print(savedFileList)
                 
                 if(previewMode == false){
+                    print("*** Convert to MP4 ***")
                     let movC = MovieCreator(withFps: 30, size: NSSize(width: UInt16(animate_movSize.selectedItem!.title)!.toCGFloat(),
                                                                    height: UInt16(animate_movSize.selectedItem!.title)!.toCGFloat()))
                     //                    movC.create(imagePATH: saveDirUrl.path)
@@ -122,6 +130,8 @@ extension ViewController{
                 completion()
                 return
             }
+            
+            print(" Current No: \(index)")
             let motion = movSeq.animateController.motionArray[index]
             createMotionImage(motion: motion, previewMode: previewMode,
                               forceLinearSampler: forceLinearSampler,
@@ -143,7 +153,8 @@ extension ViewController{
         
         var endParams:StoredParameters?
         
-        if(motion.type == .fileToFile){
+        if(motion.type == .fileToFile || motion.type == .fileToFile_rotate_B || motion.type == .fileToFile_rotate_L ||
+           motion.type == .fileToFile_rotate_R || motion.type == .fileToFile_rotate_T){
             guard var p = getStoredParams(from: motion.endParamFileName) else {return}
             
             toneCh1.setControlPoint(array: p.controlPoints[0])
@@ -283,7 +294,8 @@ extension ViewController{
                     renderer.rotateModelTo(quaternion: startParams.quaternion)
                     renderer.rotateModel(deltaX: -360.0 / range * i.toFloat(), deltaY: 0, deltaZ: 0)
                     
-                }else if(motion.type == .fileToFile){
+                }else if(motion.type == .fileToFile || motion.type == .fileToFile_rotate_B || motion.type == .fileToFile_rotate_L ||
+                         motion.type == .fileToFile_rotate_R || motion.type == .fileToFile_rotate_T){
                     let params = generateInterpolatedParameters(p1: startParams, p2: endParams!, ratio: i.toFloat() / range)
                     
                     renderer.renderParams = params.renderParams
@@ -299,6 +311,23 @@ extension ViewController{
                         renderer.transferToneArrayToBuffer(toneArray: params.alphaValues![3], targetGpuBuffer: &renderer.toneBuffer_ch4, index: 3)
                     }
                     
+                    // Set additional rotation if needed
+                    switch motion.type {
+                    case .fileToFile_rotate_L:
+                        renderer.rotateModel(deltaX: 0, deltaY: -360.0 / range * i.toFloat(), deltaZ: 0)
+                        
+                    case .fileToFile_rotate_R:
+                        renderer.rotateModel(deltaX: 0, deltaY: 360.0 / range * i.toFloat(), deltaZ: 0)
+                        
+                    case .fileToFile_rotate_T:
+                        renderer.rotateModel(deltaX: 360.0 / range * i.toFloat(), deltaY: 0, deltaZ: 0)
+                        
+                    case .fileToFile_rotate_B:
+                        renderer.rotateModel(deltaX: -360.0 / range * i.toFloat(), deltaY: 0, deltaZ: 0)
+                        
+                    default:
+                        break
+                    }
                 }
                 
                 DispatchQueue.main.sync {

@@ -97,16 +97,22 @@ class ArgumentEncoderManager {
         if needsUpdate[index] == true{
             argumentEncoder?.setTexture(texture, index: index)
             needsUpdate[index] = false
-            print("arg texture index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: texture))), set")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg texture index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: texture))), set")
+            }
 
         }else{
-            print("arg texture index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: texture))), reuse")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg texture index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: texture))), reuse")
+            }
         }
         
     }
     func encodeSampler(filter: MTLSamplerMinMagFilter){
         if(self.sampler == nil){
-            print("arg sampler index:\(ArgumentIndex.sampler.rawValue), \(String(describing: type(of: sampler))), created")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg sampler index:\(ArgumentIndex.sampler.rawValue), \(String(describing: type(of: sampler))), created")
+            }
             self.sampler = device.makeSampler(filter: filter, addressMode: .clampToZero)
             self.currentSamplerFilter = filter
             
@@ -116,11 +122,15 @@ class ArgumentEncoderManager {
             if(self.currentSamplerFilter != filter){
                 self.sampler = device.makeSampler(filter: filter, addressMode: .clampToZero)
                 self.currentSamplerFilter = filter
-                print("arg sampler index:\(ArgumentIndex.sampler.rawValue) (\(ArgumentIndex.sampler.description)), \(String(describing: type(of: sampler))), recreated because filter was changed")
+                if(AppConfig.IS_DEBUG_MODE == true){
+                    print("arg sampler index:\(ArgumentIndex.sampler.rawValue) (\(ArgumentIndex.sampler.description)), \(String(describing: type(of: sampler))), recreated because filter was changed")
+                }
                 argumentEncoder?.setSamplerState(self.sampler, index: ArgumentIndex.sampler.rawValue)
             }else{
                 
-                print("arg sampler index:\(ArgumentIndex.sampler.rawValue) (\(ArgumentIndex.sampler.description)), \(String(describing: type(of: sampler))), reuse")
+                if(AppConfig.IS_DEBUG_MODE == true){
+                    print("arg sampler index:\(ArgumentIndex.sampler.rawValue) (\(ArgumentIndex.sampler.description)), \(String(describing: type(of: sampler))), reuse")
+                }
             }
         }
     }
@@ -132,7 +142,9 @@ class ArgumentEncoderManager {
         let size = MemoryLayout<T>.stride * capacity
         
         if buffers[index] == nil {
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)), LayoutSize:\(MemoryLayout<T>.stride), size:\(size) created -> \(value)")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)), LayoutSize:\(MemoryLayout<T>.stride), size:\(size) created -> \(value)")
+            }
             buffers[index] = device.makeBuffer(length: size, options: [.cpuCacheModeWriteCombined, .storageModeShared])
             buffers[index]?.label = argumentIndex.description
             
@@ -142,7 +154,9 @@ class ArgumentEncoderManager {
             argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
             needsUpdate[index] = false
         }else{
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)) reuse")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)) reuse")
+            }
             
         }
         
@@ -152,7 +166,10 @@ class ArgumentEncoderManager {
             // Set the updated buffer in the argument encoder
             argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
             
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)) update because value change was detected -> \(value)")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)) update because value change was detected -> \(value)")
+            }
+            
             // Reset the update status for this index
             needsUpdate[index] = false
         }
@@ -164,19 +181,25 @@ class ArgumentEncoderManager {
         // If a buffer for this index doesn't exist, create one
         if (buffers[index] == nil) {
             let size = MemoryLayout<float3>.stride * capacity
-            print("arg buffer index:\(index), \(String(describing: float3.self)), LayoutSize:\(MemoryLayout<float3>.stride), size:\(size) created")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index), \(String(describing: float3.self)), LayoutSize:\(MemoryLayout<float3>.stride), size:\(size) created")
+            }
             buffers[index] = device.makeBuffer(bytes: value, length: size, options: [.cpuCacheModeWriteCombined, .storageModeShared])
             buffers[index]?.label = argumentIndex.description
             argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
             needsUpdate[index] = false
         }else{
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: float3.self)) reuse")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: float3.self)) reuse")
+            }
             
         }
 
         if needsUpdate[index] == true {
             let size = MemoryLayout<float3>.stride * capacity
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: float3.self)), LayoutSize:\(MemoryLayout<float3>.stride), size:\(size) created")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: float3.self)), LayoutSize:\(MemoryLayout<float3>.stride), size:\(size) created")
+            }
             buffers[index] = device.makeBuffer(bytes: value, length: size, options: [.cpuCacheModeWriteCombined, .storageModeShared])
             buffers[index]?.label = argumentIndex.description
             argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
@@ -191,10 +214,14 @@ class ArgumentEncoderManager {
             buffers[index] = buffer
             argumentEncoder?.setBuffer(buffer, offset: 0, index: index)
             needsUpdate[index] = false
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: buffer))), set")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: buffer))), set")
+            }
         }else{
             
-            print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: buffer))), reuse")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: buffer))), reuse")
+            }
         }
         
     }
@@ -208,12 +235,16 @@ class ArgumentEncoderManager {
             buffers[index] = outputPxBuffer
             argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
             
-            print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer create \(currentPxByteSize)")
+            if(AppConfig.IS_DEBUG_MODE == true){
+                print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer create \(currentPxByteSize)")
+            }
             
         }else{
             // if pixel size is not changed, same buffer will reuse
             if(currentPxByteSize == drawingViewSize * drawingViewSize * 3){
-                print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer reuse \(currentPxByteSize)")
+                if(AppConfig.IS_DEBUG_MODE == true){
+                    print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer reuse \(currentPxByteSize)")
+                }
                 
             }else{
                 // recreate
@@ -222,7 +253,9 @@ class ArgumentEncoderManager {
                 buffers[index] = outputPxBuffer
                 argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
                 
-                print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer was recreated because drawing view size was chaneged \(currentPxByteSize)")
+                if(AppConfig.IS_DEBUG_MODE == true){
+                    print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer was recreated because drawing view size was chaneged \(currentPxByteSize)")
+                }
             }
         }
     }
@@ -230,7 +263,9 @@ class ArgumentEncoderManager {
     // Provides a way to mark a buffer as updated
     func markAsNeedsUpdate(argumentIndex: ArgumentIndex) {
         needsUpdate[argumentIndex.rawValue] = true
-        print("arg buffer index:\(argumentIndex.rawValue) markes as Needs Updata")
+        if(AppConfig.IS_DEBUG_MODE == true){
+            print("arg buffer index:\(argumentIndex.rawValue) markes as Needs Updata")
+        }
     }
 
     // Provides a way to get the buffer associated with an index (if needed)

@@ -86,9 +86,11 @@ class Segment3DController: NSViewController {
         nodeTable.dataSource = self
         
         
-        // these values are set to the same size as the input image in [prepare for segue]
+        /// these values are set to the same size as the input image in `prepare for segue`
         let viewWidth = renderer.imageParams.outputImageWidth
         let viewHeight = renderer.imageParams.outputImageHeight
+        
+        
         
         // view size should be square
         let viewSizeSquare = max(viewWidth, viewHeight)
@@ -106,6 +108,12 @@ class Segment3DController: NSViewController {
         
         // initial draw
         outputView.image = renderer.renderSlice()
+        
+        
+        labelSlice.integerValue = sliderSlice.integerValue
+        labelSlice.sizeToFit()
+        labelZoom.stringValue = String(format: "%.2f", sliderZoom.floatValue)
+        labelZoom.sizeToFit()
     }
     
     
