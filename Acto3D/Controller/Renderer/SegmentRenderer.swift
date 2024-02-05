@@ -316,7 +316,7 @@ class SegmentRenderer{
                 return
             }
             
-            self.copyMaskToTexture(texIn: self.maskTexture!, texOut: mainTexture, channel: destChannel, binary: false)
+            self.copyMaskToTextureBU(texIn: self.maskTexture!, texOut: mainTexture, channel: destChannel, binary: false)
             self.maskTexture = nil
             
         }else{
@@ -327,7 +327,87 @@ class SegmentRenderer{
         
     }
     
+    /// Copy mask texture to main texture
     public func copyMaskToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
+        
+        guard let computeFunction = mtlLib.makeFunction(name: "transferMaskToTexture2") else {
+            print("error make function")
+            return
+        }
+        var renderPipeline: MTLComputePipelineState!
+        
+        renderPipeline = try? self.device.makeComputePipelineState(function: computeFunction)
+        
+        let cmdBuf = cmdQueue.makeCommandBuffer()!
+        let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
+        computeSliceEncoder.setComputePipelineState(renderPipeline)
+        
+        // Sampler Set
+        var sampler: MTLSamplerState!
+        let samplerDescriptor = MTLSamplerDescriptor()
+        samplerDescriptor.sAddressMode = .clampToZero
+        samplerDescriptor.tAddressMode = .clampToZero
+        samplerDescriptor.minFilter = .linear
+        samplerDescriptor.magFilter = .linear
+        sampler = device.makeSamplerState(descriptor: samplerDescriptor)
+        
+        
+        // Change variables
+        quaternion = simd_quatf(float4x4(1))
+        renderModelParams.scale = 1.0
+        
+        print("** Start to Transfer Mask to Main Texture **")
+        print(imageParams)
+        print(renderModelParams)
+        
+        // Buffer set
+        
+        computeSliceEncoder.setTexture(texIn, index: 0)
+        computeSliceEncoder.setTexture(texOut, index: 1)
+        computeSliceEncoder.setSamplerState(sampler, index: 0)
+        
+        
+        computeSliceEncoder.setBytes(&imageParams, length: MemoryLayout<VolumeData>.stride, index: 0)
+        computeSliceEncoder.setBytes(&renderModelParams, length: MemoryLayout<RenderingParameters>.stride, index: 1)
+        computeSliceEncoder.setBytes(&quaternion, length: MemoryLayout<simd_quatf>.stride, index: 2)
+        
+        
+        var channel:UInt8 = channel
+        computeSliceEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 3)
+        
+        var binary:Bool = binary
+        computeSliceEncoder.setBytes(&binary, length: MemoryLayout<Bool>.stride, index: 4)
+        
+        
+        // Compute optimization
+        let xCount = imageParams.outputImageWidth.toInt()
+        let yCount = imageParams.outputImageHeight.toInt()
+        let zCount = renderModelParams.sliceMax.toInt()
+        
+        let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = renderPipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
+        let height = 8
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
+        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+                                          height: (yCount + height - 1) / height,
+                                          depth: (zCount + depth - 1) / depth)
+        
+        
+        
+        // Metal Dispatch
+        computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        computeSliceEncoder.endEncoding()
+        
+        cmdBuf.commit()
+        cmdBuf.waitUntilCompleted()
+        
+        
+    }
+    
+    // Backup code
+    public func copyMaskToTextureBU(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
         guard let computeFunction = mtlLib.makeFunction(name: "transferMaskToTexture") else {
             print("error make function")
             return
@@ -459,6 +539,8 @@ class SegmentRenderer{
         
         print("METAL MEDIAN DONE")
     }
+    
+    
     
     public func apply_gaussianBlur3D(input texIn: MTLTexture, channel:UInt8) -> MTLTexture?{
         

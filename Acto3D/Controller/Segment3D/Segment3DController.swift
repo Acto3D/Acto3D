@@ -987,6 +987,7 @@ class Segment3DController: NSViewController {
         
     }
     
+    //MARK: Create Texture for Node
     /// Creates a mask texture from a `SegmentNode`.
     /// Transfers the pixel data from the `SegmentNode` to create a texture.
     /// After the texture is created, it is merged into the base image.
@@ -1064,6 +1065,7 @@ class Segment3DController: NSViewController {
         var passSliceNo = node.startSliceNo!.toUInt16()
  
         let passPoint = node.cropArea.origin //.scaling(scaleX: scale, scaleY: scale)
+        print("Pass Point: \(passPoint)")
         
 //        var passRectLeft = UInt16(passPoint.x.rounded())
 //        var passRectTop = UInt16(passPoint.y.rounded())

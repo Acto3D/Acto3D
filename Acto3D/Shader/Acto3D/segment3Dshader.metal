@@ -105,9 +105,9 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
     float4 coordinatePos = matrix_centering_toView * currentPos;
     
     //TODO: consider FLIP
-    float3 samplerPostion = float3(coordinatePos.x / float(meta.inputImageWidth),
-                                   coordinatePos.y / float(meta.inputImageHeight),
-                                   coordinatePos.z / (meta.inputImageDepth * scale_Z)) ;
+    float3 samplerPostion = float3(coordinatePos.x / (float(meta.inputImageWidth)-1),
+                                   coordinatePos.y / (float(meta.inputImageHeight)-1),
+                                   coordinatePos.z / ((meta.inputImageDepth-1) * scale_Z)) ;
     
     if (samplerPostion.x < modelParameter.trimX_min || samplerPostion.x > modelParameter.trimX_max ||
         samplerPostion.y < modelParameter.trimY_min || samplerPostion.y > modelParameter.trimY_max ||
@@ -199,8 +199,8 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
 //    pointXinMPRimg = ((rectLeft - (frameWidth / 2.0)) * meta.outputImageWidth / frameWidth + position.x) / meta.outputImageWidth * frameWidth;
 //    pointYinMPRimg = ((rectTop - (frameHeight / 2.0)) * meta.outputImageHeight / frameHeight + position.y) / meta.outputImageHeight * frameHeight;
 //
-    float pointXinMPRimg = ((rectLeft + position.x * viewScale) - frameWidth / 2.0) / viewScale;
-    float pointYinMPRimg = ((rectTop + position.y * viewScale) - frameHeight / 2.0) / viewScale;
+    float pointXinMPRimg = ((rectLeft + position.x * viewScale) - (frameWidth-1) / 2.0) / viewScale;
+    float pointYinMPRimg = ((rectTop + position.y * viewScale) - (frameHeight-1) / 2.0) / viewScale;
     
     float4 centeredPosition = float4(pointXinMPRimg, pointYinMPRimg, 0, 1);
     
@@ -222,7 +222,10 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
     float4x4 matrix_centering_toView = float4x4(1, 0, 0, 0,
                                                 0, 1, 0, 0,
                                                 0, 0, 1, 0,
-                                                meta.inputImageWidth / 2.0, meta.inputImageHeight / 2.0, meta.inputImageDepth * scale_Z / 2.0, 1);
+                                                (meta.inputImageWidth-1) / 2.0,
+                                                (meta.inputImageHeight-1) / 2.0,
+                                                (meta.inputImageDepth-1) * scale_Z / 2.0,
+                                                1);
     
     
     float radius = modelParameter.sliceMax / 2.0;
@@ -244,9 +247,9 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
     float4 mappedPos = mappedXYZ + ts * directionVector_rotate;
     float4 coordPos = matrix_centering_toView * mappedPos;
     
-    float3 samplerPostion = float3(coordPos.x / float(meta.inputImageWidth),
-                                   (coordPos.y / float(meta.inputImageHeight)),
-                                   (coordPos.z / (meta.inputImageDepth * scale_Z))
+    float3 samplerPostion = float3(coordPos.x / float(meta.inputImageWidth-1),
+                                   (coordPos.y / float(meta.inputImageHeight-1)),
+                                   (coordPos.z / ((meta.inputImageDepth-1) * scale_Z))
                                    ) ;
     
     
@@ -256,15 +259,18 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
         float inputDepth = maskTexture_in.get_depth();
         
         
-        half4 maskIntensity = maskTexture_in.sample(smp, float3(position.x / (inputWidth),
-                                                                position.y / (inputHeight),
-                                                                position.z / (inputDepth)));
+        half4 maskIntensity = maskTexture_in.sample(smp, float3(position.x / (inputWidth-1),
+                                                                position.y / (inputHeight-1),
+                                                                position.z / (inputDepth-1)));
 //        maskIntensity = maskTexture_in.read(position);
 
         
-        ushort3 out_coord = ushort3(round(samplerPostion.x * (maskTexture_out.get_width())),
-                                    round(samplerPostion.y * (maskTexture_out.get_height())),
-                                    round(samplerPostion.z * (maskTexture_out.get_depth())));
+        ushort3 out_coord = ushort3((samplerPostion.x * (maskTexture_out.get_width()-1)),
+                                    (samplerPostion.y * (maskTexture_out.get_height()-1)),
+                                    (samplerPostion.z * (maskTexture_out.get_depth()-1)));
+//        ushort3 out_coord = ushort3(round(samplerPostion.x * (maskTexture_out.get_width()-1)),
+//                                    round(samplerPostion.y * (maskTexture_out.get_height()-1)),
+//                                    round(samplerPostion.z * (maskTexture_out.get_depth()-1)));
         
         if(maskIntensity.r != 0){
             maskTexture_out.write(half4(1.0,0,0,0), out_coord);
@@ -362,39 +368,125 @@ kernel void calcKmeansCluster(constant uint8_t             *inputPixel [[buffer(
 /// if `binary` is `true`, only Zero value will set to zero
 kernel void transferMaskToTexture2(texture3d<half, access::sample>       texIn [[texture(0)]],
                                    texture3d<half, access::read_write>   texOut [[texture(1)]],
-                                   constant uint8_t  &channel [[buffer(0)]],
-                                   constant bool     &binary [[buffer(1)]],
+                                   constant VolumeData            &meta [[buffer(0)]],
+                                   constant RenderingParameters   &modelParameter [[buffer(1)]],
+                                   constant float4                 &quaternions [[buffer(2)]],
+                                   constant uint8_t  &channel [[buffer(3)]],
+                                   constant bool     &binary [[buffer(4)]],
                                    sampler           smp [[ sampler(0) ]],
                                    ushort3           position [[thread_position_in_grid]]){
     
-    float imageWidth = texIn.get_width();
-    float imageHeight = texIn.get_height();
-    float imageDepth = texIn.get_depth();
-    
-    if (position.x >= imageWidth || position.y >= imageHeight || position.z >= imageDepth){
+    if (position.x >= meta.outputImageWidth || position.y >= meta.outputImageHeight){
         return;
     }
     
-    // get color from mask texture
+    uint dstTexWidth= texOut.get_width();
+    uint dstTexHeight = texOut.get_height();
+    uint dstTexDepth = texOut.get_depth();
     
-    // Due to rounding in floating-point calculations, there may be a slight deviation in the value of z.
-    // If necessary, adjust z in the range from -2 to 0 (-2, -1, +0) to correct for this deviation.
-    float eps = -1;
-    half4 inputColor = texIn.sample(smp, float3(position.x / (imageWidth + eps),
-                                                position.y / (imageHeight + eps),
-                                                position.z / (imageDepth + eps)));
     
-    half4 outputColor = texOut.read(position);
+    // index for linear position
+//    uint index = (position.y * meta.outputImageWidth + position.x) * 3;
+//    uint indexInGray = position.y * meta.outputImageWidth + position.x;
     
-    if(binary == true){
-        outputColor[channel] = inputColor.r != 0 ? 1.0 : 0.0;
-//        outputColor[channel] = inputColor.r > 0.2 ? 1.0 : 0.0;
-        
-    }else{
-        outputColor[channel] = inputColor.r ;
+    float4 curPos = float4(position.x, position.y, 0, 1);
+    
+//    float scale = modelParameter.scale;
+//    float scaleMatRatio = 1.0 / scale;
+//    float scale = 1.0;
+    float scaleMatRatio = 1.0;
+    
+    float scale_Z = modelParameter.zScale;
+    
+    float4x4 matrix_centering = float4x4(1, 0, 0, 0,
+                                         0, 1, 0, 0,
+                                         0, 0, 1, 0,
+                                         -(meta.outputImageWidth-1) / 2.0, -(meta.outputImageHeight-1) / 2.0, 0, 1);
+    
+    float4x4 scaleMat = float4x4(scaleMatRatio, 0, 0, 0,
+                                 0, scaleMatRatio, 0, 0,
+                                 0, 0, 1.0, 0,
+                                 0, 0, 0, 1.0);
+    
+    float4x4 matrix_centering_toView = float4x4(1, 0, 0, 0,
+                                                0, 1, 0, 0,
+                                                0, 0, 1, 0,
+                                                (meta.inputImageWidth-1) / 2.0, (meta.inputImageHeight-1) / 2.0, (meta.inputImageDepth) * scale_Z / 2.0, 1);
+    
+    float4x4 transferMat = float4x4(1, 0, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 1.0, 0,
+                                    modelParameter.translationX, modelParameter.translationY, 0, 1.0);
+    
+    float4 directionVector = float4(0,0,1,0);
+    float4 directionVector_rotate = float4(quatMul(quaternions, directionVector.xyz), 0);
+    
+    float3 pos = (transferMat * scaleMat * matrix_centering * curPos).xyz;
+    
+    float4 mappedXYZt = float4(quatMul(quaternions,  pos), 1);
+    
+    float radius = modelParameter.sliceMax / 2.0;
+    
+    if (length(mappedXYZt.xyz) > radius){
+        return;
     }
     
-    texOut.write(outputColor, position);
+    float z_min = -meta.inputImageDepth * scale_Z / 2.0;
+    float z_max = meta.inputImageDepth * scale_Z / 2.0;
+    
+    float t_far = (z_max - mappedXYZt.z) / directionVector_rotate.z;
+    float t_near = (z_min - mappedXYZt.z) / directionVector_rotate.z;
+    
+    float x_far = mappedXYZt.x + t_far * directionVector_rotate.x;
+    float x_near = mappedXYZt.x + t_near * directionVector_rotate.x;
+    
+    float y_far = mappedXYZt.y + t_far * directionVector_rotate.y;
+    float y_near = mappedXYZt.y + t_near * directionVector_rotate.y;
+    
+    if ((x_far < -meta.inputImageWidth/2.0 && x_near < -meta.inputImageWidth/2.0) ||
+        (x_far > meta.inputImageWidth/2.0 && x_near > meta.inputImageWidth/2.0) ||
+        (y_far < -meta.inputImageHeight/2.0 && y_near < -meta.inputImageHeight/2.0) ||
+        (y_far > meta.inputImageHeight/2.0 && y_near > meta.inputImageHeight/2.0) ){
+        
+        return;
+    }
+    
+//    float ts = radius - modelParameter.sliceNo ;
+    float ts = radius - position.z ;
+    
+    float3 current_mapped_pos = mappedXYZt.xyz + ts * directionVector_rotate.xyz;
+    float4 currentPos = float4(current_mapped_pos, 1);
+    float4 coordinatePos = matrix_centering_toView * currentPos;
+    
+    //TODO: consider FLIP
+    float3 samplerPostion = float3(coordinatePos.x / (float(meta.inputImageWidth)-1),
+                                   coordinatePos.y / (float(meta.inputImageHeight)-1),
+                                   coordinatePos.z / ((meta.inputImageDepth-1) * scale_Z)) ;
+    
+
+    
+    half4 CvoxelMask = texIn.sample(smp, samplerPostion);
+    
+    ushort3 writingPosition = ushort3(samplerPostion * float3(dstTexWidth -1,
+                                                              dstTexHeight-1,
+                                                              dstTexDepth-1));
+    writingPosition.z += 1;
+    
+    half4 outputColor = texOut.read(writingPosition);
+    
+    if(binary == true){
+        if(CvoxelMask.r != 0){
+            outputColor[channel] = 1.0;
+        }else{
+            outputColor[channel] = 0;
+        }
+            
+    }else{
+        outputColor[channel] = CvoxelMask.r;
+    }
+    
+    texOut.write(outputColor, writingPosition);
+    
     
 }
 
@@ -418,24 +510,34 @@ kernel void transferMaskToTexture(texture3d<half, access::sample>       texIn [[
         return;
     }
     
+    
     // get color from mask texture
-    half4 inputColor = texIn.sample(smp, float3(position.x / (imageWidth-1),
-                                                position.y / (imageHeight-1),
-                                                position.z / (imageDepth-1)));
+    
     // Due to rounding in floating-point calculations, there may be a slight deviation in the value of z.
     // If necessary, adjust z in the range from -2 to 0 (-2, -1, +0) to correct for this deviation.
+    float eps = -1;
+    
+    float3 samplingPosition = float3(position.x / (imageWidth + eps),
+                                    position.y / (imageHeight + eps),
+                                    position.z / (imageDepth + eps));
+    
+    half4 inputColor = texIn.sample(smp, samplingPosition);
+    
+    
     inputColor = texIn.read(position);
     half4 outputColor = texOut.read(position);
     
     if(binary == true){
-//        outputColor[channel] = inputColor.r != 0 ? 1.0 : 0.0;
-        outputColor[channel] = inputColor.r > 0.2 ? 1.0 : 0.0;
+        outputColor[channel] = inputColor.r != 0 ? 1.0 : 0.0;
+//        outputColor[channel] = inputColor.r > 0.2 ? 1.0 : 0.0;
         
     }else{
         outputColor[channel] = inputColor.r ;
     }
     
-    texOut.write(outputColor, position);
+    ushort3 writingPosition = ushort3(samplingPosition * float3(imageWidth -1, imageHeight-1, imageDepth-1));
+    
+    texOut.write(outputColor, writingPosition);
     
 }
 

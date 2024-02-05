@@ -151,12 +151,12 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         float4 coordinatePos = centeringToViewMatrix * currentPos;
         
         float3 texCoordinate = (flags & (1 << FLIP)) ?
-        float3(coordinatePos.x / float(width),
-               coordinatePos.y / float(height),
-               1.0f - coordinatePos.z / (depth * scale_Z)) :
-        float3(coordinatePos.x / float(width),
-               coordinatePos.y / float(height),
-               coordinatePos.z / (depth * scale_Z)) ;
+        float3(coordinatePos.x / float(width-1),
+               coordinatePos.y / float(height-1),
+               1.0f - coordinatePos.z / ((depth-1) * scale_Z)) :
+        float3(coordinatePos.x / float(width-1),
+               coordinatePos.y / float(height-1),
+               coordinatePos.z / ((depth-1) * scale_Z)) ;
 
         float4 Cvoxel;
         
