@@ -174,12 +174,14 @@ extension CGImage {
     }
     
     
-    func fill(in point:CGPoint) -> (image:CGImage?, value:UInt8){
+    func fill(in point:CGPoint) -> (image:CGImage?, value:UInt8, fillCount:Int){
         
         let px = self.getPixelData()
         var fillImg = [UInt8](repeating: 0, count: px.count)
         let _w = Int(self.size.width.rounded())
         let _h = Int(self.size.height.rounded())
+        
+        var fillCount = 0
         
         let totalBytes = _w * _h
         
@@ -228,6 +230,7 @@ extension CGImage {
             
             fillImg.replaceSubrange((YL * _w + XL )...(YL * _w + XR ), with: repeatElement(255, count: XR-XL+1))
             
+            fillCount += XR-XL+1
             
             
             if (YL - 1 >= 0){
@@ -253,7 +256,7 @@ extension CGImage {
         }
         
         
-        guard let providerRef = CGDataProvider(data: Data(bytes: &fillImg, count: totalBytes) as CFData) else{return (nil, 0)}
+        guard let providerRef = CGDataProvider(data: Data(bytes: &fillImg, count: totalBytes) as CFData) else{return (nil, 0, 0)}
         
         
         guard let fillImage = CGImage(
@@ -268,10 +271,12 @@ extension CGImage {
             decode: nil,
             shouldInterpolate: true,
             intent: .defaultIntent)
-        else { return (nil, 0)}
+        else { return (nil, 0, 0)}
         
+        // Get filled area
+        // let pixel255count = fillImg.filter{$0 == 255}.count
         
-        return (fillImage, th)
+        return (fillImage, th, fillCount)
     }
     
     

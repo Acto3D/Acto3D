@@ -1071,8 +1071,21 @@ class Segment3DController: NSViewController {
 //        var passRectTop = UInt16(passPoint.y.rounded())
         var passRectLeft:Float = passPoint.x.toFloat()
         var passRectTop:Float = passPoint.y.toFloat()
+        
+        print("legacy", passRectLeft, passRectTop)
+         passRectLeft = (passPoint.x * CGFloat(renderer.baseImage!.width) / outputView.bounds.width).toFloat()
+         passRectTop = (passPoint.y * CGFloat(renderer.baseImage!.height) / outputView.bounds.height).toFloat()
+        
+        print("adjust", passRectLeft, passRectTop)
+        passRectLeft = node.cropAreaCoord!.minX.toFloat()
+        passRectTop = node.cropAreaCoord!.minY.toFloat()
+        print("integ", passRectLeft, passRectTop)
+        
+        
+         passRectLeft = Int(passPoint.x * CGFloat(renderer.baseImage!.width) / outputView.bounds.width).toFloat()
+         passRectTop = Int(passPoint.y * CGFloat(renderer.baseImage!.height) / outputView.bounds.height).toFloat()
     
-        print("rect org pos", passRectLeft, passRectTop)
+        print("rect org pos", node.cropAreaCoord!.minX, node.cropAreaCoord!.minY)
 
         
         computeMakeMaskEncoder.setBytes(&renderer.imageParams!, length: MemoryLayout<VolumeData>.stride, index: 0)
@@ -1086,9 +1099,15 @@ class Segment3DController: NSViewController {
 //        computeMakeMaskEncoder.setBytes(&passRectLeft, length: MemoryLayout<UInt16>.stride, index: 4)
 //        computeMakeMaskEncoder.setBytes(&passRectTop, length: MemoryLayout<UInt16>.stride, index: 5)
         
+//
+//        let viewScaleW = outputView.frame.width / renderer.imageParams.outputImageWidth.toCGFloat()
+//        let viewScaleH = outputView.frame.height / renderer.imageParams.outputImageHeight.toCGFloat()
         
-        let viewScaleW = outputView.frame.width / renderer.imageParams.outputImageWidth.toCGFloat()
-        let viewScaleH = outputView.frame.height / renderer.imageParams.outputImageHeight.toCGFloat()
+        print("frame", outputView.frame)
+        print("bounds", outputView.bounds)
+        let viewScaleW = outputView.bounds.width / renderer.baseImage!.width.toCGFloat()
+        let viewScaleH = outputView.bounds.height / renderer.baseImage!.height.toCGFloat()
+        
         var viewScale = Float(min(viewScaleW, viewScaleH))
         
         
@@ -1290,7 +1309,7 @@ class Segment3DController: NSViewController {
         // let maskTexture_gaussian = renderer.apply_gaussianBlur3D(input: maskTexture, channel: 0)!
         
         // This code is necessary to fill small holes within the image.
-        renderer.copyMaskToTexture(texIn: maskTexture, texOut: maskTexture, channel: 0, binary: true)
+        renderer.mapTextureToTexture(texIn: maskTexture, texOut: maskTexture, channel: 0, binary: true)
         
         
         // create output directory
@@ -1454,7 +1473,12 @@ extension Segment3DController:SegmentRenderViewProtocol{
             let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
             
             // scale to image size
+            currentSegmentNode.cropAreaCoord = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
             let scaledArea = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
+            //MARK: WARN
+            // This calculation makes "gap" between “currentSegmentNode.cropAreaCoord“ and "scaledArea"
+            
+            
             print("scaleX:\(scaleX), scaleY:\(scaleY), scaledArea:\(scaledArea)")
             let croppedImg = currentImg.cropping(to: scaledArea.standardized)
             

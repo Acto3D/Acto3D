@@ -295,7 +295,7 @@ class SegmentRenderer{
         
         if (smooth == true){
             print("Mask(Binary) to mainTexture")
-            copyMaskToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
             
             print("mainTexture to Mask")
             copyTextureToMask(texIn: mainTexture, channel: destChannel, texOut: maskTexture)
@@ -316,21 +316,21 @@ class SegmentRenderer{
                 return
             }
             
-            self.copyMaskToTextureBU(texIn: self.maskTexture!, texOut: mainTexture, channel: destChannel, binary: false)
+            self.transferTextureToTexture(texIn: self.maskTexture!, texOut: mainTexture, channel: destChannel, binary: false)
             self.maskTexture = nil
             
         }else{
             // just transfer mask to main texture
-            copyMaskToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+//            self.transferTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
             self.maskTexture = nil
         }
         
     }
     
-    /// Copy mask texture to main texture
-    public func copyMaskToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
+    public func mapTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
         
-        guard let computeFunction = mtlLib.makeFunction(name: "transferMaskToTexture2") else {
+        guard let computeFunction = mtlLib.makeFunction(name: "mapTextureToTexture") else {
             print("error make function")
             return
         }
@@ -352,16 +352,12 @@ class SegmentRenderer{
         sampler = device.makeSamplerState(descriptor: samplerDescriptor)
         
         
-        // Change variables
-        quaternion = simd_quatf(float4x4(1))
-        renderModelParams.scale = 1.0
+        // Variables
+        var quaternion_front = simd_quatf(float4x4(1))
         
         print("** Start to Transfer Mask to Main Texture **")
-        print(imageParams)
-        print(renderModelParams)
         
         // Buffer set
-        
         computeSliceEncoder.setTexture(texIn, index: 0)
         computeSliceEncoder.setTexture(texOut, index: 1)
         computeSliceEncoder.setSamplerState(sampler, index: 0)
@@ -369,7 +365,7 @@ class SegmentRenderer{
         
         computeSliceEncoder.setBytes(&imageParams, length: MemoryLayout<VolumeData>.stride, index: 0)
         computeSliceEncoder.setBytes(&renderModelParams, length: MemoryLayout<RenderingParameters>.stride, index: 1)
-        computeSliceEncoder.setBytes(&quaternion, length: MemoryLayout<simd_quatf>.stride, index: 2)
+        computeSliceEncoder.setBytes(&quaternion_front, length: MemoryLayout<simd_quatf>.stride, index: 2)
         
         
         var channel:UInt8 = channel
@@ -407,8 +403,8 @@ class SegmentRenderer{
     }
     
     // Backup code
-    public func copyMaskToTextureBU(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
-        guard let computeFunction = mtlLib.makeFunction(name: "transferMaskToTexture") else {
+    public func transferTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
+        guard let computeFunction = mtlLib.makeFunction(name: "transferTextureToTexture") else {
             print("error make function")
             return
         }
