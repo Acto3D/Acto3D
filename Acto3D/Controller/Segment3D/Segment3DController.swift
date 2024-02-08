@@ -70,7 +70,8 @@ class Segment3DController: NSViewController {
     
     var filePackage:FilePackage!
     
-    var voxelSize:Float = 0.0
+    var voxelSize:Float = 1.0
+    var originalResolutionZ:Float = 1.0
     var voxelUnit:String = ""
     
     override func viewDidLoad() {
@@ -1480,6 +1481,71 @@ class Segment3DController: NSViewController {
         renderer.maskTexture = nil
         outputView.image = renderer.renderSlice()
     }
+    
+    @IBAction func checkVolumeForSelectedNodes(_ sender: Any){
+        if (nodeTable.selectedRowIndexes.count == 0){
+            Dialog.showDialog(message: "Select items to check volume")
+            return
+        }
+        
+        // First, clear current mask texture
+        clearMaskImage(self)
+        
+        // Create mask texture for selected nodes
+        
+        for i in nodeTable.selectedRowIndexes{
+            _ = createMaskTexture(node: nodeList[i])
+        }
+        
+        outputView.image = renderer.renderSlice()
+        
+        
+        // Calculate pixel count for masked area
+        
+        guard let maskTexture = renderer.maskTexture else {
+            Dialog.showDialog(message: "No mask texture")
+            return
+            
+        }
+        
+        let tmpTexture = maskTexture.createNewTextureWithSameSize(pixelFormat: maskTexture.pixelFormat)!
+        let pixelCount = renderer.mapTextureToTexture(texIn: maskTexture, texOut: tmpTexture, channel: 0, binary: true, countPixel: true)
+        
+        print(pixelCount)
+        
+        let volume = Double(pixelCount) * voxelSize.toDouble() * voxelSize.toDouble() * originalResolutionZ.toDouble()
+        var messageStr = "Volume: \(volume) \(voxelUnit)^3"
+        messageStr += "\n\n ---- Used Parameters --- \n"
+        messageStr += "  XY resolution: \(voxelSize) \(voxelUnit) / px\n"
+        messageStr += "  Z resolution: \(originalResolutionZ) \(voxelUnit) / px"
+        
+        
+        let alert = NSAlert()
+        alert.messageText = "Volume Calculation Result"
+        alert.informativeText = "Selected segments were merged and calculated"
+        
+        // 選択可能なテキストビューの作成
+        let scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: 300, height: 100))
+        scrollView.hasVerticalScroller = true
+        scrollView.borderType = .grooveBorder
+        
+        let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 290, height: 90))
+        textView.isEditable = false
+        textView.isSelectable = true
+        
+        
+        textView.string = messageStr
+        
+        scrollView.documentView = textView
+        alert.accessoryView = scrollView
+        
+        // OKボタンの追加
+        alert.addButton(withTitle: "OK")
+        
+        // ダイアログの表示
+        alert.runModal()
+        
+    }
 }
 
 //MARK: - SegmentRenderViewProtocol
@@ -1762,11 +1828,12 @@ extension Segment3DController:NSTableViewDataSource, NSTableViewDelegate{
         
         tableColumn.width = maxWidth + 10
     }
+    
 
     func adjustAllColumnWidths(for tableView: NSTableView) {
-        tableView.tableColumns.forEach { column in
-            adjustColumnWidth(column, for: tableView)
-        }
+//        tableView.tableColumns.forEach { column in
+//            adjustColumnWidth(column, for: tableView)
+//        }
     }
     
     

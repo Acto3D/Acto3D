@@ -1007,13 +1007,13 @@ isotropic voxel size</string>
                                 <imageCell key="cell" selectable="YES" editable="YES" alignment="left" imageScaling="proportionallyUpOrDown" id="nuH-rb-X6W"/>
                             </imageView>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MyM-4s-Pa4">
-                                <rect key="frame" x="1039" y="60" width="265" height="354"/>
+                                <rect key="frame" x="1039" y="92" width="265" height="322"/>
                                 <clipView key="contentView" id="H2E-QH-AK0">
-                                    <rect key="frame" x="1" y="1" width="263" height="352"/>
+                                    <rect key="frame" x="1" y="1" width="263" height="320"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" headerView="u9X-o8-9iO" viewBased="YES" id="RCp-X1-E21">
-                                            <rect key="frame" x="0.0" y="0.0" width="263" height="324"/>
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" headerView="u9X-o8-9iO" viewBased="YES" id="RCp-X1-E21">
+                                            <rect key="frame" x="0.0" y="0.0" width="263" height="292"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1124,7 +1124,7 @@ isotropic voxel size</string>
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
-                                                <tableColumn identifier="volume" editable="NO" width="60" minWidth="15" maxWidth="2000" id="DTR-yT-E3o">
+                                                <tableColumn identifier="volume" editable="NO" width="45" minWidth="15" maxWidth="2000" id="DTR-yT-E3o">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Volume">
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1137,11 +1137,11 @@ isotropic voxel size</string>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView id="SqT-dJ-zH3">
-                                                            <rect key="frame" x="182" y="0.0" width="57" height="24"/>
+                                                            <rect key="frame" x="182" y="0.0" width="42" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Zy-j2-UAt">
-                                                                    <rect key="frame" x="0.0" y="4" width="57" height="16"/>
+                                                                    <rect key="frame" x="0.0" y="4" width="42" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="EZ2-lq-pJt">
                                                                         <font key="font" metaFont="system"/>
@@ -1444,6 +1444,16 @@ isotropic voxel size</string>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <button verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jxJ-Yh-zyb">
+                                <rect key="frame" x="1032" y="45" width="279" height="32"/>
+                                <buttonCell key="cell" type="push" title="Check Volume" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vpn-mT-4IY">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="checkVolumeForSelectedNodes:" target="2Jc-51-6dz" id="lfL-L1-IYX"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="inY-rO-7Zf" firstAttribute="leading" secondItem="IQV-Jv-APZ" secondAttribute="leading" id="0Hd-GL-rpk"/>
@@ -1473,7 +1483,6 @@ isotropic voxel size</string>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="bottom" secondItem="B6N-yH-dpp" secondAttribute="bottom" id="DNe-Wv-JLV"/>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="width" secondItem="onn-2w-RMs" secondAttribute="width" id="DVC-XD-PZZ"/>
                             <constraint firstItem="Ef1-XR-DkR" firstAttribute="top" secondItem="7Kk-vC-hFf" secondAttribute="bottom" constant="8" symbolic="YES" id="Doa-r2-Edy"/>
-                            <constraint firstItem="yiE-7C-pTD" firstAttribute="top" secondItem="MyM-4s-Pa4" secondAttribute="bottom" constant="20" symbolic="YES" id="E9I-AF-x0R"/>
                             <constraint firstItem="hVt-HB-XDc" firstAttribute="centerY" secondItem="gg2-ga-NK0" secondAttribute="centerY" id="Efs-bA-JS5"/>
                             <constraint firstItem="esn-io-FqE" firstAttribute="leading" secondItem="Ef1-XR-DkR" secondAttribute="leading" id="EpS-5G-ZxZ"/>
                             <constraint firstAttribute="trailing" secondItem="7Kk-vC-hFf" secondAttribute="trailing" constant="35" id="GKu-SV-7lr"/>
@@ -1484,6 +1493,7 @@ isotropic voxel size</string>
                             <constraint firstItem="IQV-Jv-APZ" firstAttribute="top" secondItem="Jpu-Bg-ooR" secondAttribute="top" constant="20" symbolic="YES" id="Hwr-qA-6aP"/>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="leading" secondItem="onn-2w-RMs" secondAttribute="leading" id="Hxp-Lf-jxi"/>
                             <constraint firstItem="2Bc-NR-bU4" firstAttribute="leading" secondItem="B6N-yH-dpp" secondAttribute="trailing" constant="15" id="I8j-qJ-SVN"/>
+                            <constraint firstItem="yiE-7C-pTD" firstAttribute="top" secondItem="jxJ-Yh-zyb" secondAttribute="bottom" constant="12" symbolic="YES" id="JWt-YK-Pc9"/>
                             <constraint firstItem="5Nh-M8-5h4" firstAttribute="width" secondItem="S4e-9C-6jo" secondAttribute="width" id="JYF-8g-04C"/>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="height" secondItem="onn-2w-RMs" secondAttribute="height" id="Jd9-kU-0xp"/>
                             <constraint firstItem="Bch-cp-GIN" firstAttribute="leading" secondItem="esn-io-FqE" secondAttribute="trailing" constant="12" symbolic="YES" id="Jnj-Jd-3zZ"/>
@@ -1508,6 +1518,7 @@ isotropic voxel size</string>
                             <constraint firstItem="5Nh-M8-5h4" firstAttribute="height" secondItem="S4e-9C-6jo" secondAttribute="height" id="TGV-bd-pfi"/>
                             <constraint firstItem="tIj-RM-nmS" firstAttribute="top" secondItem="gg2-ga-NK0" secondAttribute="bottom" constant="8" symbolic="YES" id="U8i-oP-vne"/>
                             <constraint firstItem="3tI-8n-ull" firstAttribute="leading" secondItem="5Nh-M8-5h4" secondAttribute="trailing" constant="8" symbolic="YES" id="UWX-OI-rMD"/>
+                            <constraint firstItem="jxJ-Yh-zyb" firstAttribute="top" secondItem="MyM-4s-Pa4" secondAttribute="bottom" constant="20" symbolic="YES" id="UdF-Uz-ALn"/>
                             <constraint firstItem="0Tm-C3-jkU" firstAttribute="leading" secondItem="onn-2w-RMs" secondAttribute="trailing" constant="8" symbolic="YES" id="Uwc-JN-d9Q"/>
                             <constraint firstItem="3tI-8n-ull" firstAttribute="top" secondItem="5Vg-KO-jpA" secondAttribute="bottom" constant="8" symbolic="YES" id="VCC-bC-d8v"/>
                             <constraint firstItem="zt1-XI-6Lp" firstAttribute="top" secondItem="onn-2w-RMs" secondAttribute="bottom" constant="20" symbolic="YES" id="VEs-Yk-zRl"/>

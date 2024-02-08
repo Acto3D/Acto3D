@@ -107,7 +107,6 @@ class KMeansController{
 //                    }
                 }
                 
-                // 重み確率を算出するために距離の総和を計算
                 // weighed probability
                 let sumOfDistances = distances.reduce(0, +)
                 let probabilities = distances.map { $0.toDouble() / sumOfDistances.toDouble() }

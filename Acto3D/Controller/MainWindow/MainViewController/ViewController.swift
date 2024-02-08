@@ -1313,6 +1313,7 @@ extension ViewController: ImageOptionViewProtocol, Segment3DProtocol{
                 
                 segmentView.voxelSize = renderer.imageParams.scaleX
                 segmentView.voxelUnit = renderer.imageParams.unit
+                segmentView.originalResolutionZ = renderer.imageParams.scaleZ
 
                 
             }

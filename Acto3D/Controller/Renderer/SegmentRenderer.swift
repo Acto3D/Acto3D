@@ -326,13 +326,18 @@ class SegmentRenderer{
             self.maskTexture = nil
         }
         
+        
+    
     }
     
-    public func mapTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
+    /// The function moves pixels from MTLTexture to MTLTexture, but rewrites the pixel values while sampling to account for rotation angle and magnification. The resulting texture tends to be slightly larger.
+    /// - Parameters:
+    ///   - countPixel: If set to true, this function will caluculate the pixel count for masked area
+    public func mapTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool, countPixel:Bool = false) -> UInt32{
         
         guard let computeFunction = mtlLib.makeFunction(name: "mapTextureToTexture") else {
             print("error make function")
-            return
+            return 0
         }
         var renderPipeline: MTLComputePipelineState!
         
@@ -374,6 +379,13 @@ class SegmentRenderer{
         var binary:Bool = binary
         computeSliceEncoder.setBytes(&binary, length: MemoryLayout<Bool>.stride, index: 4)
         
+        var countPixel:Bool = countPixel
+        computeSliceEncoder.setBytes(&countPixel, length: MemoryLayout<Bool>.stride, index: 5)
+        
+        let counterBuffer = device.makeBuffer(length: MemoryLayout<UInt32>.stride, options: [.storageModeShared, .cpuCacheModeWriteCombined])
+        counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1).pointee = 0
+        computeSliceEncoder.setBuffer(counterBuffer, offset: 0, index: 6)
+        
         
         // Compute optimization
         let xCount = imageParams.outputImageWidth.toInt()
@@ -391,7 +403,6 @@ class SegmentRenderer{
                                           depth: (zCount + depth - 1) / depth)
         
         
-        
         // Metal Dispatch
         computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
         computeSliceEncoder.endEncoding()
@@ -399,7 +410,13 @@ class SegmentRenderer{
         cmdBuf.commit()
         cmdBuf.waitUntilCompleted()
         
+        // counterBufferからカウンター値を取得します
+        if let data = counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1) {
+            let counterValue = data.pointee
+            return counterValue
+        }
         
+        return 0
     }
     
     // Backup code

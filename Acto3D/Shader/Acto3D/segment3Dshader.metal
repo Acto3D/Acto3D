@@ -131,19 +131,19 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
             // if Mask Texture is set, obtein mask for the coordinates from the mask texture
             CvoxelMask = maskTexture.sample(smp, samplerPostion);
             
-            if(CvoxelMask.r == 0){
-                outputData[index + 0] = uint8_t( Cvoxel[channel] * 255.0 );
-                outputData[index + 1] = uint8_t( Cvoxel[channel] * 255.0 );
-                outputData[index + 2] = uint8_t( Cvoxel[channel] * 255.0 );
+            if(CvoxelMask.r > 0){
+                // show mask image in Green color
+                float alpha = 0.6;
+                outputData[index + 0] = uint8_t(Cvoxel[channel] * (1.0 - alpha) * 255);
+                outputData[index + 1] = uint8_t((Cvoxel[channel] * (1.0 - alpha) + 1.0 * (alpha)) * 255);
+                outputData[index + 2] = uint8_t(Cvoxel[channel] * (1.0 - alpha) * 255);
                 
                 outputDataBaseCh[indexInGray] = uint8_t(Cvoxel[channel] * 255.0);
 
-            }else{
-                // show mask image in Green color
-                outputData[index + 0] = 0;
-                outputData[index + 1] = 255;
-//                outputData[index + 1] = uint8_t( CvoxelMask.r * 255.0 );
-                outputData[index + 2] = 0;
+            }else {
+                outputData[index + 0] = uint8_t( Cvoxel[channel] * 255.0 );
+                outputData[index + 1] = uint8_t( Cvoxel[channel] * 255.0 );
+                outputData[index + 2] = uint8_t( Cvoxel[channel] * 255.0 );
                 
                 outputDataBaseCh[indexInGray] = uint8_t(Cvoxel[channel] * 255.0);
             }
@@ -347,6 +347,8 @@ kernel void mapTextureToTexture(texture3d<half, access::sample>       texIn [[te
                                 constant float4                 &quaternions [[buffer(2)]],
                                 constant uint8_t  &channel [[buffer(3)]],
                                 constant bool     &binary [[buffer(4)]],
+                                constant bool     &countPixel [[buffer(5)]],
+                                device atomic_uint &counter [[buffer(6)]],
                                 sampler           smp [[ sampler(0) ]],
                                 ushort3           position [[thread_position_in_grid]]){
     
@@ -425,7 +427,7 @@ kernel void mapTextureToTexture(texture3d<half, access::sample>       texIn [[te
     float4 currentPos = float4(mappedXYZt.xyz + ts * directionVector_rotate.xyz, 1);
     float4 coordinatePos = matrix_centering_toView * currentPos;
     
-    //TODO: consider FLIP
+    
     float3 samplerPostion = float3(coordinatePos.x / (float(meta.inputImageWidth)),
                                    coordinatePos.y / (float(meta.inputImageHeight)),
                                    coordinatePos.z / ((meta.inputImageDepth) * scale_Z)) ;
@@ -436,22 +438,36 @@ kernel void mapTextureToTexture(texture3d<half, access::sample>       texIn [[te
     ushort3 writingPosition = ushort3(samplerPostion * float3(dstTexWidth ,
                                                               dstTexHeight,
                                                               dstTexDepth));
-//    writingPosition.z += 1;
-    
+
     half4 outputColor = texOut.read(writingPosition);
     
-    if(binary == true){
-        if(CvoxelMask.r != 0){
-            outputColor[channel] = 1.0;
+    if(outputColor[channel] == 0){
+        if(binary == true){
+            if(CvoxelMask.r > 0){
+                outputColor[channel] = 1.0;
+                if(countPixel == true){
+                    atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
+                }
+                
+//                for(int l = -1; l == 1; l++){
+//                    for(int m = -1; m == 1; m++){
+//                        for(int n = -1; n == 1; n++){
+//                            texOut.write(outputColor, writingPosition + ushort3(l,m,n));
+//                        }
+//                    }
+//                }
+                
+            }else{
+                outputColor[channel] = 0;
+            }
+                
         }else{
-            outputColor[channel] = 0;
+            outputColor[channel] = CvoxelMask.r;
         }
-            
-    }else{
-        outputColor[channel] = CvoxelMask.r;
+        
+        texOut.write(outputColor, writingPosition);
+        
     }
-    
-    texOut.write(outputColor, writingPosition);
     
 }
 
