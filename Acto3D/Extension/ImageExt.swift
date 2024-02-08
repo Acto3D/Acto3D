@@ -280,6 +280,11 @@ extension CGImage {
     }
     
     
+    func getMaskPixelCount() -> Int{
+        return self.getPixelData().filter{$0 == 255}.count
+    }
+    
+    
     func grayScaleImage() -> CGImage? {
         let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         guard let context = CGContext(data: nil,

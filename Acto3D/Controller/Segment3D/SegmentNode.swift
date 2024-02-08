@@ -49,6 +49,8 @@ struct SegmentNode: Codable{
     var maskImage:[CGImage?] = []
     var area:[UInt?] = []
     
+    var pixelCount:Int? = nil
+    
     
     /// Return `false` if this class is not prepared for segmentation
     var isValid:Bool{
@@ -77,6 +79,7 @@ struct SegmentNode: Codable{
         case moment
         case maskImage
         case area
+        case pixelCount
     }
     
     func encode(to encoder: Encoder) throws {
@@ -97,6 +100,8 @@ struct SegmentNode: Codable{
         try container.encodeIfPresent(moment, forKey: .moment)
         
         try container.encodeIfPresent(area, forKey: .area)
+        
+        try container.encodeIfPresent(pixelCount, forKey: .pixelCount)
         
         // Encode CGImages as Data
         try container.encode(maskImage.map { image -> Data? in
@@ -154,6 +159,7 @@ struct SegmentNode: Codable{
         point = try container.decode([CGPoint?].self, forKey: .point)
         moment = try container.decode([CGPoint?].self, forKey: .moment)
         area = try container.decode([UInt?].self, forKey: .area)
+        pixelCount = try container.decodeIfPresent(Int.self, forKey: .pixelCount)
 
         // Decode data as CGImages
         maskImage = try container.decode([Data?].self, forKey: .maskImage).map { data in

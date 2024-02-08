@@ -32,6 +32,10 @@ class Segment3DController: NSViewController {
     var kmeansController:KMeansController!
     
     
+    
+    @IBOutlet weak var voxelSizeField: NSTextField!
+    @IBOutlet weak var voxelUnitField: NSTextField!
+    
     @IBOutlet weak var alertLabel: NSTextField!
     
     @IBOutlet weak var sliderSlice: NSSlider!
@@ -65,6 +69,9 @@ class Segment3DController: NSViewController {
     var fileType:FileType = .none
     
     var filePackage:FilePackage!
+    
+    var voxelSize:Float = 0.0
+    var voxelUnit:String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,6 +121,11 @@ class Segment3DController: NSViewController {
         labelSlice.sizeToFit()
         labelZoom.stringValue = String(format: "%.2f", sliderZoom.floatValue)
         labelZoom.sizeToFit()
+        
+        // Voxel size, Unit string
+        // In this window, images are set to isotropic size
+        voxelSizeField.floatValue = voxelSize
+        voxelUnitField.stringValue = voxelUnit
     }
     
     
@@ -992,15 +1004,17 @@ class Segment3DController: NSViewController {
     /// Transfers the pixel data from the `SegmentNode` to create a texture.
     /// After the texture is created, it is merged into the base image.
     /// Returns `true` if the process completes successfully.
-    private func createMaskTexture(node: SegmentNode) -> Bool{
-        if node.isValid == false {return false}
+    private func createMaskTexture(node: SegmentNode) -> (isSuccessful:Bool, pixelCount:Int){
+        if node.isValid == false {return (false, 0)}
         
         guard let _w = node.width,
-              let _h = node.height else {return false}
+              let _h = node.height else {return (false, 0)}
         
         let sliceCount = node.sliceCount
 
         let pxCountPerSlice = _w * _h
+        
+        var maskPixelCount = 0
         
         // mask texture setting
         let textureDescriptor = MTLTextureDescriptor()
@@ -1029,8 +1043,11 @@ class Segment3DController: NSViewController {
                 memset(&maskBufferPtr[_w * _h * z], 0, _w * _h)
             }else{
                 memmove(&maskBufferPtr[_w * _h * z], node.maskImage[z]!.getPixelData(), _w * _h)
+                
+                maskPixelCount += node.maskImage[z]!.getMaskPixelCount()
             }
         }
+        
         
         var cmdBuf = cmdQueue.makeCommandBuffer()!
         let encoder = cmdBuf.makeBlitCommandEncoder()!
@@ -1051,7 +1068,7 @@ class Segment3DController: NSViewController {
         
         guard let computeFunction = lib.makeFunction(name: "createMaskTexture3D") else {
             print("error make function")
-            return false
+            return (false, 0)
         }
         var renderPipeline: MTLComputePipelineState!
         
@@ -1169,12 +1186,16 @@ class Segment3DController: NSViewController {
         cmdBuf.commit()
         cmdBuf.waitUntilCompleted()
         
-        return true
+        return (true, maskPixelCount)
     }
     
+    /// Add node to list
     @IBAction func applyMaskToTexture(_ sender: Any) {
-        if createMaskTexture(node: currentSegmentNode) == true{
+        let result = createMaskTexture(node: currentSegmentNode)
+        
+        if result.isSuccessful == true{
             // after the mask texture is created, add the node setting to the list
+            currentSegmentNode.pixelCount = result.pixelCount
             nodeList.append(currentSegmentNode)
             
             currentSegmentNode = SegmentNode()
@@ -1189,6 +1210,10 @@ class Segment3DController: NSViewController {
             sliderSegmentSlice.maxValue = 0
             
             nodeTable.reloadData()
+            
+            
+            // 必要な時点でこの関数を呼び出す
+            adjustAllColumnWidths(for: nodeTable)
 
         }
     }
@@ -1287,6 +1312,8 @@ class Segment3DController: NSViewController {
             nodeList = node
             nodeTable.reloadData()
             segmentFileName.stringValue = sender.title
+            
+            adjustAllColumnWidths(for: nodeTable)
             
         }catch{
             Dialog.showDialog(message: "Error in loading segment files")
@@ -1471,6 +1498,10 @@ extension Segment3DController:SegmentRenderViewProtocol{
             
             let scaleX = currentImg.width.toCGFloat() / outputView.bounds.width
             let scaleY = currentImg.height.toCGFloat() / outputView.bounds.height
+            
+            print(outputView.bounds)
+            print(currentImg.size)
+            print(scaleX, scaleY)
             
             // scale to image size
             currentSegmentNode.cropAreaCoord = targetArea.scaling(scaleX: scaleX, scaleY: scaleY).integral
@@ -1682,8 +1713,64 @@ extension Segment3DController:NSTableViewDataSource, NSTableViewDelegate{
     }
     
     func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-        return row
+        switch tableColumn?.title {
+        case "No":
+            return row
+            
+        case "Pixel count":
+            guard let maskPxCount = nodeList[row].pixelCount else {return nil}
+            return maskPxCount
+            
+        case "Scale":
+            let scaleString = String(format: "%.2f", nodeList[row].renderModelParams.scale)
+            return "x" + scaleString
+            
+        case "Volume":
+            guard let maskPxCount = nodeList[row].pixelCount else {return nil}
+            let scale = nodeList[row].renderModelParams.scale
+            let scaledPxSize = Double(voxelSize) / Double(scale)
+            
+            // The slice thickness remains constant regardless of the zoom value.
+            let volumePerVoxel = scaledPxSize * scaledPxSize * Double(voxelSize)
+            let volume = volumePerVoxel * maskPxCount.toDouble()
+            
+            let volumeString = String(format: "%.2f", volume)
+        
+            
+            return volumeString + " " + voxelUnit + "^3"
+        
+            
+        default:
+            return nil
+        }
     }
+    
+    
+    private func adjustColumnWidth(_ tableColumn: NSTableColumn, for tableView: NSTableView) {
+        print(tableColumn.identifier.rawValue)
+        let maxWidth = (0..<tableView.numberOfRows).reduce(0) { maxWidth, row -> CGFloat in
+            guard let cellView = tableView.view(atColumn: tableView.column(withIdentifier: tableColumn.identifier), row: row, makeIfNecessary: true) as? NSTableCellView else {
+                
+                return maxWidth
+            }
+            
+            
+            
+            cellView.textField?.sizeToFit()
+            return max(maxWidth, cellView.textField?.frame.width ?? 10)
+        }
+        
+        tableColumn.width = maxWidth + 10
+    }
+
+    func adjustAllColumnWidths(for tableView: NSTableView) {
+        tableView.tableColumns.forEach { column in
+            adjustColumnWidth(column, for: tableView)
+        }
+    }
+    
+    
+    
     
     func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
         currentSegmentNode = nodeList[row]
@@ -1693,13 +1780,25 @@ extension Segment3DController:NSTableViewDataSource, NSTableViewDelegate{
         
         sliderSlice.integerValue = currentSegmentNode.startSliceNo!
         
+        
+
+            
+        
+        
+        
+        
+        
         self.renderer.renderModelParams = currentSegmentNode.renderModelParams
         
         self.renderer.rotateModelTo(quaternion: currentSegmentNode.quaternion)
         
         renderer?.renderModelParams?.sliceNo = sliderSlice.integerValue.toUInt16()
         
+        sliderZoom.floatValue = self.renderer.renderModelParams.scale
+        
         sliderSliceChanged(sliderSlice)
+        sliderZoomChanged(sliderZoom)
+        
         
         guard let currentImg = renderer.baseImage else {
             return true

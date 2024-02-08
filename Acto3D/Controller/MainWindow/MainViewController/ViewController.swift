@@ -1311,6 +1311,10 @@ extension ViewController: ImageOptionViewProtocol, Segment3DProtocol{
                 segmentView.fileType = filePackage.fileType
                 segmentView.fileList = filePackage.fileList
                 
+                segmentView.voxelSize = renderer.imageParams.scaleX
+                segmentView.voxelUnit = renderer.imageParams.unit
+
+                
             }
             
         }else{
