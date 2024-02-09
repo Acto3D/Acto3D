@@ -1526,6 +1526,9 @@ class Segment3DController: NSViewController {
             return
         }
         
+        renderer.renderModelParams.translationX = 0
+        renderer.renderModelParams.translationY = 0
+        
         let tmpTexture = maskTexture.createNewTextureWithSameSize(pixelFormat: maskTexture.pixelFormat)!
         renderer.mapTextureToTexture(texIn: maskTexture, texOut: tmpTexture, channel: 0, binary: true, countPixel: false)
         let pixelCount = renderer.shrinkMask(texIn: tmpTexture, texOut: maskTexture,

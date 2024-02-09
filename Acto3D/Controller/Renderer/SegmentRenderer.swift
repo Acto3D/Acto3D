@@ -294,6 +294,9 @@ class SegmentRenderer{
             return
         }
         
+        renderModelParams.translationX = 0
+        renderModelParams.translationY = 0
+        
         
         if (smooth == false){
             // First, map the mask texture to a texture which has the same size as the original texture
