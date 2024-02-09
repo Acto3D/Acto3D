@@ -26,9 +26,9 @@ class ImageProcessor{
     }
     
     
-    static func transferChannelToTexture(device: MTLDevice, cmdQueue:MTLCommandQueue, lib:MTLLibrary, inTexture: MTLTexture, dstTexture: MTLTexture, dstChannel: UInt8){
-      
-        guard let computeFunction = lib.makeFunction(name: "transferChannelToTexture") else {
+    static func transferTextureToTexture(device: MTLDevice, cmdQueue:MTLCommandQueue, lib:MTLLibrary, texIn:MTLTexture, texOut:MTLTexture, channelIn:UInt8, channelOut:UInt8){
+        
+        guard let computeFunction = lib.makeFunction(name: "transferTextureToTexture") else {
             print("error make function")
             return
         }
@@ -40,34 +40,31 @@ class ImageProcessor{
         let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
         computeSliceEncoder.setComputePipelineState(renderPipeline)
         
-        // Sampler Set
-        let sampler = makeSampler(device: device)
-        
         // Buffer set
         
-        computeSliceEncoder.setTexture(inTexture, index: 0)
-        computeSliceEncoder.setTexture(dstTexture, index: 1)
-        computeSliceEncoder.setSamplerState(sampler, index: 0)
+        computeSliceEncoder.setTexture(texIn, index: 0)
+        computeSliceEncoder.setTexture(texOut, index: 1)
         
-        var channel:UInt8 = dstChannel
-        computeSliceEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 0)
+        var channelIn:UInt8 = channelIn
+        computeSliceEncoder.setBytes(&channelIn, length: MemoryLayout<UInt8>.stride, index: 0)
         
+        var channelOut:UInt8 = channelOut
+        computeSliceEncoder.setBytes(&channelOut, length: MemoryLayout<UInt8>.stride, index: 1)
         
         // Compute optimization
-        let xCount = inTexture.width
-        let yCount = inTexture.height
-        let zCount = inTexture.depth
+        let xCount = texIn.width
+        let yCount = texIn.height
+        let zCount = texIn.depth
         
-        let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup // 1024
-        let threadExecutionWidth          = renderPipeline.threadExecutionWidth // 32
-        let width  = threadExecutionWidth // 32
+        let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = renderPipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
         let height = 8
-        let depth  = maxTotalThreadsPerThreadgroup / width / height // 1024 / 32 / 8 = 4
-        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth) // MTLSize(width: 32, height: 8, depth: 4)
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
         let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
                                           height: (yCount + height - 1) / height,
                                           depth: (zCount + depth - 1) / depth)
-        
         
         // Metal Dispatch
         computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
@@ -75,8 +72,59 @@ class ImageProcessor{
         
         cmdBuf.commit()
         cmdBuf.waitUntilCompleted()
-        
     }
+    
+//    static func transferChannelToTexture(device: MTLDevice, cmdQueue:MTLCommandQueue, lib:MTLLibrary, inTexture: MTLTexture, dstTexture: MTLTexture, dstChannel: UInt8){
+//
+//        guard let computeFunction = lib.makeFunction(name: "transferTextureToTexture") else {
+//            print("error make function")
+//            return
+//        }
+//        var renderPipeline: MTLComputePipelineState!
+//
+//        renderPipeline = try? device.makeComputePipelineState(function: computeFunction)
+//
+//        let cmdBuf = cmdQueue.makeCommandBuffer()!
+//        let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
+//        computeSliceEncoder.setComputePipelineState(renderPipeline)
+//
+//        // Sampler Set
+//        let sampler = makeSampler(device: device)
+//
+//        // Buffer set
+//
+//        computeSliceEncoder.setTexture(inTexture, index: 0)
+//        computeSliceEncoder.setTexture(dstTexture, index: 1)
+//        computeSliceEncoder.setSamplerState(sampler, index: 0)
+//
+//        var channel:UInt8 = dstChannel
+//        computeSliceEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 0)
+//
+//
+//        // Compute optimization
+//        let xCount = inTexture.width
+//        let yCount = inTexture.height
+//        let zCount = inTexture.depth
+//
+//        let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup // 1024
+//        let threadExecutionWidth          = renderPipeline.threadExecutionWidth // 32
+//        let width  = threadExecutionWidth // 32
+//        let height = 8
+//        let depth  = maxTotalThreadsPerThreadgroup / width / height // 1024 / 32 / 8 = 4
+//        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth) // MTLSize(width: 32, height: 8, depth: 4)
+//        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+//                                          height: (yCount + height - 1) / height,
+//                                          depth: (zCount + depth - 1) / depth)
+//
+//
+//        // Metal Dispatch
+//        computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+//        computeSliceEncoder.endEncoding()
+//
+//        cmdBuf.commit()
+//        cmdBuf.waitUntilCompleted()
+//
+//    }
     
     static func makeSampler(device: MTLDevice, filter: MTLSamplerMinMagFilter = .linear) -> MTLSamplerState{
         let samplerDescriptor = MTLSamplerDescriptor()
@@ -120,7 +168,8 @@ class ImageProcessor{
         let sampler = device.makeSampler(filter: .linear)
         
         // Output Texture
-        let texOut = channel == -1 ? inTexture.createNewTextureWithSameSize(pixelFormat: .bgra8Unorm) : inTexture.createNewTextureWithSameSize(pixelFormat: .r8Unorm)!
+        let texOut = channel == -1 ?
+        inTexture.createNewTextureWithSameSize(pixelFormat: .bgra8Unorm) : inTexture.createNewTextureWithSameSize(pixelFormat: inTexture.pixelFormat)!
         
         computeEncoder.setTexture(inTexture, index: 0)
         computeEncoder.setTexture(texOut, index: 1)
@@ -150,9 +199,6 @@ class ImageProcessor{
         
         computeEncoder.setBytes(&k_size, length: MemoryLayout<UInt8>.stride, index: 1)
         computeEncoder.setBytes(&channel, length: MemoryLayout<Int>.stride, index: 2)
-        
-        
-        
         computeEncoder.setSamplerState(sampler, index: 0)
         
         
@@ -170,8 +216,6 @@ class ImageProcessor{
                                                     options: .storageModeShared)
         cancelPtr = isCancelBuffer?.contents().bindMemory(to: Bool.self, capacity: 1)
         computeEncoder.setBuffer(isCancelBuffer, offset: 0, index: 4)
-        
-        
 //         threadgroup memory
 //         let localCounterSize = MemoryLayout<Int32>.size
         computeEncoder.setThreadgroupMemoryLength(16, index: 0) // multiple of 16

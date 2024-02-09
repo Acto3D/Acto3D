@@ -230,7 +230,13 @@ extension ViewController{
                             if (targetChannel == -1){
                                 self.renderer.mainTexture = result
                             }else{
-                                ImageProcessor.transferChannelToTexture(device: self.renderer.device, cmdQueue:  self.renderer.cmdQueue, lib:  self.renderer.mtlLibrary, inTexture: result!, dstTexture:  self.renderer.mainTexture!, dstChannel: targetChannel.toUInt8())
+                                ImageProcessor.transferTextureToTexture(device: self.renderer.device,
+                                                                        cmdQueue: self.renderer.cmdQueue,
+                                                                        lib: self.renderer.mtlLibrary,
+                                                                        texIn: result!,
+                                                                        texOut: self.renderer.mainTexture!,
+                                                                        channelIn: 0, channelOut: targetChannel.toUInt8())
+
                             }
                             let renderedImage = self.renderer.rendering()
                             self.outputView.image = renderedImage
@@ -397,7 +403,13 @@ extension ViewController{
                              if (targetChannel == -1){
                                  self.renderer.mainTexture = result
                              }else{
-                                 ImageProcessor.transferChannelToTexture(device:  self.renderer.device, cmdQueue:  self.renderer.cmdQueue, lib:  self.renderer.mtlLibrary, inTexture: result!, dstTexture:  self.renderer.mainTexture!, dstChannel: targetChannel.toUInt8())
+                                 ImageProcessor.transferTextureToTexture(device: self.renderer.device,
+                                                                         cmdQueue: self.renderer.cmdQueue,
+                                                                         lib: self.renderer.mtlLibrary,
+                                                                         texIn: result!,
+                                                                         texOut: self.renderer.mainTexture!,
+                                                                         channelIn: 0, channelOut: targetChannel.toUInt8())
+
                              }
                              let renderedImage = self.renderer.rendering()
                              self.outputView.image = renderedImage

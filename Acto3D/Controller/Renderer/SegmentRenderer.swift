@@ -45,7 +45,7 @@ class SegmentRenderer{
     
     var normals = Normals()
     
-    
+    var maskAlpha:Float = 0.8
     
     init(device:MTLDevice, cmdQueue:MTLCommandQueue, mtlLib: MTLLibrary) {
         self.device = device
@@ -136,6 +136,8 @@ class SegmentRenderer{
         }
         cmdEncoder.setBytes(&channelToUse, length: MemoryLayout<UInt8>.stride, index: 5)
         
+        
+        cmdEncoder.setBytes(&maskAlpha, length: MemoryLayout<Float>.stride, index: 7)
         
         let width = renderPipeline.threadExecutionWidth
         let threads_in_group = renderPipeline.maxTotalThreadsPerThreadgroup
@@ -285,7 +287,7 @@ class SegmentRenderer{
 
     }
     
-    public func transferMaskToMainTexture(destChannel : UInt8, smooth:Bool){
+    public func transferMaskToMainTexture(destChannel: UInt8, smooth:Bool, expansionSize:UInt8){
         guard let maskTexture = maskTexture,
               let mainTexture = mainTexture else {
             Dialog.showDialog(message: "No mask image")
@@ -293,36 +295,36 @@ class SegmentRenderer{
         }
         
         
-        if (smooth == true){
-            print("Mask(Binary) to mainTexture")
-            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+        if (smooth == false){
+            // First, map the mask texture to a texture which has the same size as the original texture
+            // Shrink the new texture
+            // Transfer the new texture to main texture
+            // In this code, target channel of the main texture is used as temporary buffer texture to save memory.
             
-            print("mainTexture to Mask")
-            copyTextureToMask(texIn: mainTexture, channel: destChannel, texOut: maskTexture)
+            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+            shrinkMask(texIn: mainTexture, texOut: maskTexture, channelIn: destChannel, channelOut: 0, expansionSize: expansionSize)
+            transferTextureToTexture(texIn: maskTexture, texOut: mainTexture, channelIn: 0, channelOut: destChannel)
+            
+            self.maskTexture = nil
+            
+        }else{
+            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+            shrinkMask(texIn: mainTexture, texOut: maskTexture, channelIn: destChannel, channelOut: 0, expansionSize: expansionSize)
             
             let semaphore = DispatchSemaphore(value: 0)
             
-            print("3")
             let processor = ImageProcessor(device: self.device, cmdQueue: self.cmdQueue, lib: self.mtlLib)
             processor.applyFilter_Gaussian3D(inTexture: maskTexture, k_size: 5, channel: 0){ result in
+             
                 self.maskTexture = result
                 semaphore.signal()
             }
             
-            print("4")
             semaphore.wait()
+          
+        
+            transferTextureToTexture(texIn: self.maskTexture!, texOut: mainTexture, channelIn: 0, channelOut: destChannel)
             
-            if(self.maskTexture == nil){
-                return
-            }
-            
-            self.transferTextureToTexture(texIn: self.maskTexture!, texOut: mainTexture, channel: destChannel, binary: false)
-            self.maskTexture = nil
-            
-        }else{
-            // just transfer mask to main texture
-            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
-//            self.transferTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
             self.maskTexture = nil
         }
         
@@ -333,6 +335,7 @@ class SegmentRenderer{
     /// The function moves pixels from MTLTexture to MTLTexture, but rewrites the pixel values while sampling to account for rotation angle and magnification. The resulting texture tends to be slightly larger.
     /// - Parameters:
     ///   - countPixel: If set to true, this function will caluculate the pixel count for masked area
+    @discardableResult
     public func mapTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool, countPixel:Bool = false) -> UInt32{
         
         guard let computeFunction = mtlLib.makeFunction(name: "mapTextureToTexture") else {
@@ -419,8 +422,86 @@ class SegmentRenderer{
         return 0
     }
     
+    
+    
+    @discardableResult
+    /// This function reduces the contours of a 3D texture.
+    /// During the creation of the mask image, pixels with values other than 0.0 are all set to 1.0, regardless of their original intensity.
+    /// This approach tends to enlarge the perceived contours beyond their actual size.
+    /// Therefore, the function serves to shrink these contours.
+    /// It does so by identifying pixels within the contours—those surrounded by 26 pixels all set to 1.0—and reducing areas not meeting this criterion to 0.0, effectively narrowing the contours.
+    /// Acto3D then uses this modified state as a baseline, expanding the contours again based on the number of surrounding pixels set to 1.0.
+    public func shrinkMask(texIn:MTLTexture, texOut:MTLTexture, channelIn:UInt8, channelOut:UInt8, expansionSize:UInt8, countPixel:Bool = false) -> UInt32{
+        
+        guard let computeFunction = mtlLib.makeFunction(name: "shrinkMask") else {
+            print("error make function")
+            return 0
+        }
+        var renderPipeline: MTLComputePipelineState!
+        
+        renderPipeline = try? self.device.makeComputePipelineState(function: computeFunction)
+        
+        let cmdBuf = cmdQueue.makeCommandBuffer()!
+        let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
+        computeSliceEncoder.setComputePipelineState(renderPipeline)
+        
+        
+        // Buffer set
+        computeSliceEncoder.setTexture(texIn, index: 0)
+        computeSliceEncoder.setTexture(texOut, index: 1)
+        
+    
+        var channelIn:UInt8 = channelIn
+        computeSliceEncoder.setBytes(&channelIn, length: MemoryLayout<UInt8>.stride, index: 0)
+        
+        var channelOut:UInt8 = channelOut
+        computeSliceEncoder.setBytes(&channelOut, length: MemoryLayout<UInt8>.stride, index: 1)
+        
+        var countPixel:Bool = countPixel
+        computeSliceEncoder.setBytes(&countPixel, length: MemoryLayout<Bool>.stride, index: 2)
+        
+        var expansionSize:UInt8 = expansionSize
+        computeSliceEncoder.setBytes(&expansionSize, length: MemoryLayout<Bool>.stride, index: 3)
+        
+        let counterBuffer = device.makeBuffer(length: MemoryLayout<UInt32>.stride, options: [.storageModeShared, .cpuCacheModeWriteCombined])
+        counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1).pointee = 0
+        computeSliceEncoder.setBuffer(counterBuffer, offset: 0, index: 4)
+        
+        
+        // Compute optimization
+        let xCount = texIn.width
+        let yCount = texIn.height
+        let zCount = texIn.depth
+        
+        let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = renderPipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
+        let height = 8
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
+        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+                                          height: (yCount + height - 1) / height,
+                                          depth: (zCount + depth - 1) / depth)
+        
+        
+        // Metal Dispatch
+        computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        computeSliceEncoder.endEncoding()
+        
+        cmdBuf.commit()
+        cmdBuf.waitUntilCompleted()
+        
+        
+        if let data = counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1) {
+            let counterValue = data.pointee
+            return counterValue
+        }
+        
+        return 0
+    }
+    
     // Backup code
-    public func transferTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool){
+    public func transferTextureToTexture(texIn:MTLTexture, texOut:MTLTexture, channelIn:UInt8, channelOut:UInt8){
         guard let computeFunction = mtlLib.makeFunction(name: "transferTextureToTexture") else {
             print("error make function")
             return
@@ -433,26 +514,16 @@ class SegmentRenderer{
         let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
         computeSliceEncoder.setComputePipelineState(renderPipeline)
         
-        // Sampler Set
-        var sampler: MTLSamplerState!
-        let samplerDescriptor = MTLSamplerDescriptor()
-        samplerDescriptor.sAddressMode = .clampToZero
-        samplerDescriptor.tAddressMode = .clampToZero
-        samplerDescriptor.minFilter = .linear
-        samplerDescriptor.magFilter = .linear
-        sampler = device.makeSamplerState(descriptor: samplerDescriptor)
-        
         // Buffer set
         
         computeSliceEncoder.setTexture(texIn, index: 0)
         computeSliceEncoder.setTexture(texOut, index: 1)
-        computeSliceEncoder.setSamplerState(sampler, index: 0)
         
-        var channel:UInt8 = channel
-        computeSliceEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 0)
+        var channelIn:UInt8 = channelIn
+        computeSliceEncoder.setBytes(&channelIn, length: MemoryLayout<UInt8>.stride, index: 0)
         
-        var binary:Bool = binary
-        computeSliceEncoder.setBytes(&binary, length: MemoryLayout<Bool>.stride, index: 1)
+        var channelOut:UInt8 = channelOut
+        computeSliceEncoder.setBytes(&channelOut, length: MemoryLayout<UInt8>.stride, index: 1)
         
         // Compute optimization
         let xCount = texIn.width
@@ -475,8 +546,6 @@ class SegmentRenderer{
         
         cmdBuf.commit()
         cmdBuf.waitUntilCompleted()
-        
-        
     }
     
     public func copyTextureToMask(texIn: MTLTexture, channel: UInt8, texOut:MTLTexture){
