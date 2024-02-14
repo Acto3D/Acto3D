@@ -104,6 +104,9 @@ extension ViewController{
             interpolateParams.alphaValues = interpolate(p1: p1alpha, p2: p2alpha, ratio: ratio)
         }
         
+        interpolateParams.pointClouds = p1.pointClouds
+    
+        
         return interpolateParams
         
         

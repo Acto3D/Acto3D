@@ -53,6 +53,9 @@ class AppConfig {
     
     /// This constant represents the default shader index.
     @CachedUserDefault(key: "DEFAULT_SHADER_NO", defaultValue: 0) static var DEFAULT_SHADER_NO: Int
+    
+    /// This constant represents the default shader index.
+    @CachedUserDefault(key: "CLIPBOARD_WHEN_SNAPSHOT", defaultValue: true) static var CLIPBOARD_WHEN_SNAPSHOT: Bool
 
     private init() {
     }

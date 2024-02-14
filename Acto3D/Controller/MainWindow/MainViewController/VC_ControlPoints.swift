@@ -48,7 +48,6 @@ extension ViewController{
     
     func createPresetControlPoints(){
         controlPoints.append(("Default", [[0,0], [30,0], [255,0.9]], 0))
-//        controlPoints.append(("Default (Spline)", [[0,0], [30,0], [255,0.9]], 1))
         controlPoints.append(("Default (Spline)", [[0,0], [30,0], [65, 0.15], [255,0.9]], 1))
         controlPoints.append(("MPR", [[0,1], [255,1]], 0))
         controlPoints.append(("MPR (Cut low intensity)", [[0,0], [20, 0], [20.1, 1], [255,1]], 0))

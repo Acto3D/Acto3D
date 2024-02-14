@@ -1526,7 +1526,7 @@ isotropic voxel size</string>
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="Bli-RS-uBX">
-                                    <rect key="frame" x="1" y="282" width="335" height="16"/>
+                                    <rect key="frame" x="1" y="274" width="354" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="mOo-06-r4Q">
@@ -2855,11 +2855,11 @@ DQ
                                     </tabViewItem>
                                     <tabViewItem label="Animation" identifier="" id="xtE-3U-hGw">
                                         <view key="view" id="Eti-rw-6gb">
-                                            <rect key="frame" x="10" y="33" width="404" height="809"/>
+                                            <rect key="frame" x="10" y="33" width="404" height="582"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dmX-Je-Xtj">
-                                                    <rect key="frame" x="77" y="779" width="72" height="25"/>
+                                                    <rect key="frame" x="37" y="552" width="72" height="25"/>
                                                     <popUpButtonCell key="cell" type="push" title="1440" bezelStyle="rounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="ZvN-1Y-bJX" id="SIa-FY-Ypn">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                         <font key="font" metaFont="menu"/>
@@ -2894,7 +2894,7 @@ DQ
                                                     </popUpButtonCell>
                                                 </popUpButton>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oQL-nS-TlD">
-                                                    <rect key="frame" x="271" y="739" width="130" height="27"/>
+                                                    <rect key="frame" x="271" y="512" width="130" height="27"/>
                                                     <buttonCell key="cell" type="bevel" title="reload File List" bezelStyle="regularSquare" image="NSRefreshTemplate" imagePosition="leading" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="gua-6p-gXU">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -2904,7 +2904,7 @@ DQ
                                                     </connections>
                                                 </button>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NI7-Nl-0sD">
-                                                    <rect key="frame" x="330" y="776" width="75" height="32"/>
+                                                    <rect key="frame" x="330" y="549" width="75" height="32"/>
                                                     <buttonCell key="cell" type="push" title="Create" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="V8H-Dw-Pfz">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -2914,7 +2914,7 @@ DQ
                                                     </connections>
                                                 </button>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wlp-9e-vqL">
-                                                    <rect key="frame" x="117" y="739" width="117" height="27"/>
+                                                    <rect key="frame" x="117" y="512" width="117" height="27"/>
                                                     <buttonCell key="cell" type="bevel" title="Add rotation" bezelStyle="regularSquare" image="NSAddTemplate" imagePosition="left" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Xyq-sS-BBm">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                         <font key="font" metaFont="system"/>
@@ -2924,13 +2924,13 @@ DQ
                                                     </connections>
                                                 </button>
                                                 <scrollView wantsLayer="YES" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="G5d-6X-Q4l">
-                                                    <rect key="frame" x="6" y="6" width="392" height="729"/>
+                                                    <rect key="frame" x="6" y="6" width="392" height="502"/>
                                                     <clipView key="contentView" id="wJ1-EY-aIT">
-                                                        <rect key="frame" x="1" y="1" width="390" height="727"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <rect key="frame" x="1" y="1" width="390" height="500"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <collectionView selectable="YES" id="WFZ-Kc-Tw5" customClass="MovieCollectionView" customModule="Acto3D" customModuleProvider="target">
-                                                                <rect key="frame" x="0.0" y="0.0" width="390" height="727"/>
+                                                                <rect key="frame" x="0.0" y="0.0" width="390" height="500"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                                                 <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="5" minimumLineSpacing="5" id="udD-kK-3Ad">
                                                                     <size key="itemSize" width="370" height="60"/>
@@ -2946,20 +2946,20 @@ DQ
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
                                                     <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="BJI-Ef-UyG">
-                                                        <rect key="frame" x="376" y="1" width="16" height="442"/>
+                                                        <rect key="frame" x="375" y="1" width="16" height="500"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
                                                 </scrollView>
                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5o4-FZ-XP5">
-                                                    <rect key="frame" x="4" y="785" width="70" height="16"/>
-                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="Movie Size" id="RaO-Xg-cfj">
+                                                    <rect key="frame" x="4" y="558" width="30" height="16"/>
+                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="Size" id="RaO-Xg-cfj">
                                                         <font key="font" metaFont="system"/>
                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="m2J-2k-CAf">
-                                                    <rect key="frame" x="3" y="739" width="112" height="27"/>
+                                                    <rect key="frame" x="3" y="512" width="112" height="27"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="20" id="reU-MY-Yfo"/>
                                                     </constraints>
@@ -2972,7 +2972,7 @@ DQ
                                                     </connections>
                                                 </button>
                                                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qLa-wX-cPS">
-                                                    <rect key="frame" x="250" y="776" width="82" height="32"/>
+                                                    <rect key="frame" x="250" y="549" width="82" height="32"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="push" title="Preview" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vQv-gZ-ku0">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2982,6 +2982,31 @@ DQ
                                                         <action selector="previewMotionSequence:" target="XfG-lQ-9wD" id="JLk-Me-wmo"/>
                                                     </connections>
                                                 </button>
+                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vWh-J1-wAX">
+                                                    <rect key="frame" x="118" y="558" width="28" height="16"/>
+                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="FPS" id="wfQ-YB-aId">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="a6U-1F-aTa">
+                                                    <rect key="frame" x="149" y="552" width="56" height="25"/>
+                                                    <popUpButtonCell key="cell" type="push" title="30" bezelStyle="rounded" alignment="center" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="wD7-Mk-jrQ" id="f9B-0d-VrC">
+                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="menu"/>
+                                                        <menu key="menu" id="45g-LG-Gb9">
+                                                            <items>
+                                                                <menuItem title="30" id="wD7-Mk-jrQ">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                </menuItem>
+                                                                <menuItem title="60" id="bsX-C2-9Wu">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
+                                                    </popUpButtonCell>
+                                                </popUpButton>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="bottom" secondItem="G5d-6X-Q4l" secondAttribute="bottom" constant="6" id="0la-0k-E0S"/>
@@ -2989,21 +3014,25 @@ DQ
                                                 <constraint firstItem="G5d-6X-Q4l" firstAttribute="leading" secondItem="Eti-rw-6gb" secondAttribute="leading" constant="6" id="2in-fj-Iia"/>
                                                 <constraint firstItem="NI7-Nl-0sD" firstAttribute="centerY" secondItem="dmX-Je-Xtj" secondAttribute="centerY" id="4M5-qt-CAQ"/>
                                                 <constraint firstItem="m2J-2k-CAf" firstAttribute="top" secondItem="dmX-Je-Xtj" secondAttribute="bottom" constant="20" id="4dP-QK-JdP"/>
+                                                <constraint firstItem="vWh-J1-wAX" firstAttribute="leading" secondItem="dmX-Je-Xtj" secondAttribute="trailing" constant="15" id="671-BH-XqH"/>
                                                 <constraint firstItem="oQL-nS-TlD" firstAttribute="height" secondItem="m2J-2k-CAf" secondAttribute="height" id="8hH-Lu-FGB"/>
                                                 <constraint firstItem="dmX-Je-Xtj" firstAttribute="centerY" secondItem="5o4-FZ-XP5" secondAttribute="centerY" id="AxN-np-jtv"/>
                                                 <constraint firstItem="oQL-nS-TlD" firstAttribute="top" secondItem="wlp-9e-vqL" secondAttribute="top" id="BMb-vf-JVl"/>
                                                 <constraint firstAttribute="trailing" secondItem="G5d-6X-Q4l" secondAttribute="trailing" constant="6" id="EWB-gT-isQ"/>
+                                                <constraint firstItem="vWh-J1-wAX" firstAttribute="centerY" secondItem="5o4-FZ-XP5" secondAttribute="centerY" id="EhT-Sn-32r"/>
                                                 <constraint firstItem="dmX-Je-Xtj" firstAttribute="top" secondItem="Eti-rw-6gb" secondAttribute="top" constant="6" id="Ge9-bK-ilw"/>
                                                 <constraint firstAttribute="trailing" secondItem="G5d-6X-Q4l" secondAttribute="trailing" constant="6" id="KjO-hv-u4I"/>
                                                 <constraint firstItem="oQL-nS-TlD" firstAttribute="centerY" secondItem="wlp-9e-vqL" secondAttribute="centerY" id="Mbe-NI-i4p"/>
                                                 <constraint firstItem="5o4-FZ-XP5" firstAttribute="leading" secondItem="Eti-rw-6gb" secondAttribute="leading" constant="6" id="Y5t-kw-Br5"/>
                                                 <constraint firstAttribute="trailing" secondItem="oQL-nS-TlD" secondAttribute="trailing" constant="6" id="Zv1-I1-f0l"/>
+                                                <constraint firstItem="a6U-1F-aTa" firstAttribute="leading" secondItem="vWh-J1-wAX" secondAttribute="trailing" constant="8" symbolic="YES" id="dH5-7j-9eY"/>
                                                 <constraint firstItem="wlp-9e-vqL" firstAttribute="height" secondItem="m2J-2k-CAf" secondAttribute="height" id="gub-iE-Di3"/>
                                                 <constraint firstItem="wlp-9e-vqL" firstAttribute="leading" secondItem="m2J-2k-CAf" secondAttribute="trailing" constant="8" symbolic="YES" id="hYn-1S-tdv"/>
                                                 <constraint firstItem="5o4-FZ-XP5" firstAttribute="top" secondItem="Eti-rw-6gb" secondAttribute="top" constant="8" id="k98-mW-Szp"/>
                                                 <constraint firstItem="wlp-9e-vqL" firstAttribute="centerY" secondItem="m2J-2k-CAf" secondAttribute="centerY" id="kC5-i2-T9F"/>
                                                 <constraint firstItem="dmX-Je-Xtj" firstAttribute="leading" secondItem="5o4-FZ-XP5" secondAttribute="trailing" constant="8" symbolic="YES" id="leP-8B-BdO"/>
                                                 <constraint firstItem="G5d-6X-Q4l" firstAttribute="top" secondItem="oQL-nS-TlD" secondAttribute="bottom" constant="8" symbolic="YES" id="mTS-RD-DLL"/>
+                                                <constraint firstItem="a6U-1F-aTa" firstAttribute="centerY" secondItem="vWh-J1-wAX" secondAttribute="centerY" id="rHc-Xc-Pk7"/>
                                                 <constraint firstAttribute="trailing" secondItem="NI7-Nl-0sD" secondAttribute="trailing" constant="6" id="s1t-EG-ieH"/>
                                                 <constraint firstItem="5o4-FZ-XP5" firstAttribute="leading" secondItem="Eti-rw-6gb" secondAttribute="leading" constant="6" id="wzZ-WY-bme"/>
                                                 <constraint firstAttribute="trailing" secondItem="oQL-nS-TlD" secondAttribute="trailing" constant="6" id="xgg-Nj-DgH"/>
@@ -3649,6 +3678,7 @@ DQ
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="animate_movFPS" destination="a6U-1F-aTa" id="bec-O9-pcb"/>
                         <outlet property="animate_movSize" destination="dmX-Je-Xtj" id="nG9-we-Lbb"/>
                         <outlet property="check_adaptive" destination="DcL-Tv-tm8" id="Ruo-4e-JgG"/>
                         <outlet property="crop_Label" destination="j1B-FS-bBg" id="zI9-LT-JkJ"/>
@@ -4354,7 +4384,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="14" height="14"/>
+        <image name="link" catalog="system" width="17" height="17"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

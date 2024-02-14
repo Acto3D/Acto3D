@@ -142,6 +142,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var animate_startPlist: NSPopUpButton!
     @IBOutlet weak var animate_endPlist: NSPopUpButton!
     @IBOutlet weak var animate_movSize: NSPopUpButton!
+    @IBOutlet weak var animate_movFPS: NSPopUpButton!
     
     @IBOutlet weak var durationField: NSTextField!
     

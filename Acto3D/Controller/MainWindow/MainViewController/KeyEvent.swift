@@ -115,10 +115,14 @@ extension ViewController{
                 
                 let baseFileName_wo_ext = "snap_" + NSDate().timeStampYYYYMMDDHHMMSS()
                 
+                var fileURLs:[URL] = []
+                
                 if let tiff = tmpImg_wo_scalebar?.tiffRepresentation,
                    let imgRep = NSBitmapImageRep(data: tiff),
                    let data = imgRep.representation(using: .tiff, properties: [:]) {
                     let saveUrl = filePath.appendingPathComponent(baseFileName_wo_ext + "_wo_scale.tif")
+                    
+                    fileURLs.append(saveUrl)
                     
                     do {
                         try data.write(to: saveUrl)
@@ -131,7 +135,9 @@ extension ViewController{
                 if let tiff = tmpImg_only_scalebar?.tiffRepresentation,
                    let imgRep = NSBitmapImageRep(data: tiff),
                    let data = imgRep.representation(using: .tiff, properties: [:]) {
-                    let saveUrl = filePath.appendingPathComponent(baseFileName_wo_ext + "_scalebar.tif")
+                    let saveUrl = filePath.appendingPathComponent(baseFileName_wo_ext + "_scalebar_\(renderer.imageParams.scalebarLength)\(renderer.imageParams.unit).tif")
+                    
+                    fileURLs.append(saveUrl)
                     
                     do {
                         try data.write(to: saveUrl)
@@ -155,6 +161,14 @@ extension ViewController{
                 }
 
                 renderer.renderOption = RenderOption(rawValue: currentOption)
+                
+                if(AppConfig.CLIPBOARD_WHEN_SNAPSHOT){
+                    let pasteboard = NSPasteboard.general
+                    pasteboard.clearContents()
+                    pasteboard.writeObjects(fileURLs as [NSPasteboardWriting])
+                    
+                    Logger.logPrintAndWrite(message: "Copy files to clipboard")
+                }
                 
             }
             

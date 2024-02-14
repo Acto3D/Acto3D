@@ -26,6 +26,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
      
         performanceMenu.delegate = self
         debug_menu.delegate = self
+        
+        // Obtein command line arguments
+        let arguments = CommandLine.arguments
+        for argument in arguments {
+            print(argument)
+        }
+
+        if arguments.contains("--input") {
+        }
+        
+
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

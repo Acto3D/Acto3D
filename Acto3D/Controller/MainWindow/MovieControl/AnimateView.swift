@@ -121,7 +121,7 @@ extension ViewController{
                 
                 if(previewMode == false){
                     print("*** Convert to MP4 ***")
-                    let movC = MovieCreator(withFps: 30, size: NSSize(width: UInt16(animate_movSize.selectedItem!.title)!.toCGFloat(),
+                    let movC = MovieCreator(withFps: Int(animate_movFPS.titleOfSelectedItem!)!, size: NSSize(width: UInt16(animate_movSize.selectedItem!.title)!.toCGFloat(),
                                                                    height: UInt16(animate_movSize.selectedItem!.title)!.toCGFloat()))
                     //                    movC.create(imagePATH: saveDirUrl.path)
                     movC.createMovie(from: savedFileList, exportFileUrl: saveDirUrl.appendingPathComponent("result.mp4"))
@@ -241,7 +241,11 @@ extension ViewController{
         var imgSeqNo = 0
         
         let duration = motion.duration
-        let range = round(duration * motion.FPS / 1000) - 1  //30fps
+        
+        //MARK: FPS
+        let fps:Float = previewMode == true ? 30.0 : Float( animate_movFPS.titleOfSelectedItem!)!
+        
+        let range = round(duration * fps / 1000) - 1  //30fps
         if (range <= 0){
             Dialog.showDialog(message: "too short duration time")
             return
@@ -348,7 +352,7 @@ extension ViewController{
                         // If it is slower, reduce the image quality.
                         let endTime = CACurrentMediaTime()
                         let processTime = endTime - startTime
-                        let waitTime = (1.0 / 30.0) - processTime
+                        let waitTime = (1.0 / Double(fps)) - processTime
                         if waitTime > 0 {
                             Thread.sleep(forTimeInterval: waitTime)
                         }else{
