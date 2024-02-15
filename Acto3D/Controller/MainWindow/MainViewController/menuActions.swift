@@ -569,14 +569,39 @@ extension ViewController{
             dialog.canChooseDirectories    = false;
             dialog.canCreateDirectories    = true;
             dialog.allowsMultipleSelection = true;
-            dialog.allowedFileTypes        = ["tif", "tiff", "jpg", "jpeg", "png"];
+//            dialog.allowedFileTypes        = ["tif", "tiff", "jpg", "jpeg", "png"];
+            dialog.allowedContentTypes     = [.tiff, .jpeg, .png]
+            
+            
+            let accessoryView = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 40))
+            let textField = NSTextField(string: "FPS")
+            textField.isBezeled = false
+            textField.drawsBackground = false
+            textField.isEditable = false
+            textField.isSelectable = false
+            textField.sizeToFit()
+            textField.setFrameOrigin(NSPoint(x: 0, y: (40 - textField.frame.height) / 2))
+            accessoryView.addSubview(textField)
+            
+            let fpspopup = NSPopUpButton()
+            fpspopup.addItem(withTitle: "30")
+            fpspopup.addItem(withTitle: "60")
+            fpspopup.setFrameSize(NSSize(width: 100, height: 30))
+            fpspopup.sizeToFit()
+            fpspopup.setFrameOrigin(NSPoint(x: textField.frame.maxX + 10, y: (40 - fpspopup.frame.height) / 2 ))
+            
+            accessoryView.addSubview(fpspopup)
             
             if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
                 let result = dialog.urls
                 
                 let savePanel = NSSavePanel()
                 savePanel.title = "Save the movie"
-                savePanel.allowedFileTypes = ["mp4"]
+//                savePanel.allowedFileTypes = [ "mp4"]
+                savePanel.allowedContentTypes = [.mpeg4Movie]
+                
+                savePanel.accessoryView = accessoryView
+                
                 
                 if savePanel.runModal() == NSApplication.ModalResponse.OK {
                     if let saveURL = savePanel.url {
@@ -586,7 +611,7 @@ extension ViewController{
                         }
                         let width = sampleImage.width, height = sampleImage.height
                         
-                        let movCreator = MovieCreator(withFps: 30, size: NSSize(width: width.toCGFloat(), height: height.toCGFloat()))
+                        let movCreator = MovieCreator(withFps: Int(fpspopup.titleOfSelectedItem!)!, size: NSSize(width: width.toCGFloat(), height: height.toCGFloat()))
                         movCreator.createMovie(from: result, exportFileUrl: saveURL)
                     
                     }
