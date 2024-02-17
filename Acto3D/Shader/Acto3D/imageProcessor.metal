@@ -209,3 +209,109 @@ kernel void applyFilter_median3D(texture3d<float, access::sample> inputTexture [
     }
         
 }
+
+
+//MARK: Binarization
+// The function binarizes the pixel values of the specified channel by the specified threshold value
+kernel void applyFilter_binarizationWithThreshold(texture3d<float, access::sample> inputTexture [[texture(0)]],
+                                                  texture3d<float, access::write> outputTexture [[texture(1)]],
+                                                  constant uint8_t& threshold [[buffer(0)]],
+                                                  constant int &channel [[buffer(1)]],
+                                                  constant bool &invert [[buffer(2)]],
+                                                  device atomic_int* globalCounter [[buffer(3)]],
+                                                  constant bool &isCanceled [[buffer(4)]],
+                                                  threadgroup atomic_int* localCounter [[threadgroup(0)]],
+                                                  uint3 gid [[thread_position_in_grid]],
+                                                  uint3 tid [[thread_position_in_threadgroup]])
+{
+    if(isCanceled == true){
+        return;
+    }
+    
+    float4 targetPixelValue = inputTexture.read(gid);
+    
+    if(invert){
+        float outputPixelValue = targetPixelValue[channel] > (threshold / 255.0f) ? 0.0 : 1.0;
+        outputTexture.write(float4(outputPixelValue, 0, 0, 0), gid);
+    }else{
+        float outputPixelValue = targetPixelValue[channel] > (threshold / 255.0f) ? 1.0 : 0.0;
+        outputTexture.write(float4(outputPixelValue, 0, 0, 0), gid);
+    }
+    
+    
+    
+    // Add local counter on the first thread in thread groups
+    if (tid.x == 0 && tid.y == 0 && tid.z == 0) {
+        atomic_store_explicit(localCounter, 0, memory_order_relaxed);
+        atomic_fetch_add_explicit(localCounter, 1, memory_order_relaxed);
+    }
+
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    
+    // Add global counter on the first thread in thread groups
+    if (tid.x == 0 && tid.y == 0 && tid.z == 0) {
+        atomic_fetch_add_explicit(globalCounter, atomic_load_explicit(localCounter, memory_order_relaxed), memory_order_relaxed);
+    }
+}
+
+
+// The function binarizes the pixel values of the specified channel by the specified threshold value
+kernel void applyFilter_binarizationWithThresholdSeries(texture3d<float, access::sample> inputTexture [[texture(0)]],
+                                                        texture3d<float, access::write> outputTexture [[texture(1)]],
+                                                        constant uint8_t* threshold [[buffer(0)]],
+                                                        constant uint8_t &channel [[buffer(1)]],
+                                                        constant bool &invert [[buffer(2)]],
+                                                        device atomic_int* globalCounter [[buffer(3)]],
+                                                        constant bool &isCanceled [[buffer(4)]],
+                                                        threadgroup atomic_int* localCounter [[threadgroup(0)]],
+                                                        uint3 gid [[thread_position_in_grid]],
+                                                        uint3 tid [[thread_position_in_threadgroup]])
+{
+    if(isCanceled == true){
+        return;
+    }
+    
+    float4 targetPixelValue = inputTexture.read(gid);
+    
+    if(invert){
+        float outputPixelValue = targetPixelValue[channel] > (float(threshold[gid.z]) / 255.0f) ? 0.0 : 1.0;
+        outputTexture.write(float4(outputPixelValue, 0, 0, 0), gid);
+    }else{
+        float outputPixelValue = targetPixelValue[channel] > (float(threshold[gid.z]) / 255.0f) ? 1.0 : 0.0;
+        outputTexture.write(float4(outputPixelValue, 0, 0, 0), gid);
+    }
+    
+    
+    
+    // Add local counter on the first thread in thread groups
+    if (tid.x == 0 && tid.y == 0 && tid.z == 0) {
+        atomic_store_explicit(localCounter, 0, memory_order_relaxed);
+        atomic_fetch_add_explicit(localCounter, 1, memory_order_relaxed);
+    }
+
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    
+    // Add global counter on the first thread in thread groups
+    if (tid.x == 0 && tid.y == 0 && tid.z == 0) {
+        atomic_fetch_add_explicit(globalCounter, atomic_load_explicit(localCounter, memory_order_relaxed), memory_order_relaxed);
+    }
+}
+
+
+
+kernel void computeHistogramSliceBySlice(texture3d<float, access::read> inputTexture [[texture(0)]],
+                                         constant uint8_t &channel [[buffer(0)]],
+                                         device atomic_uint *histogramBuffer [[buffer(1)]],
+                                         uint3 gid [[thread_position_in_grid]]
+                                         )
+{
+    if (gid.x < inputTexture.get_width() && gid.y < inputTexture.get_height() && gid.z < inputTexture.get_depth()) {
+        float pixelData = inputTexture.read(gid)[channel];
+        
+        // pixel values are 0 to 1.0. Map them into 0-255
+        uint pixelValue = uint(pixelData * 255.0);
+        
+        atomic_fetch_add_explicit(&histogramBuffer[pixelValue + (256 * gid.z)], 1, memory_order_relaxed);
+        
+    }
+}

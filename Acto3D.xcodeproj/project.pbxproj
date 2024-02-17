@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B002C4042B806C8B004546F7 /* VC_ImageFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002C4032B806C8B004546F7 /* VC_ImageFilter.swift */; };
 		B004633827CFD57800EEEB72 /* PlaneSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004633727CFD57800EEEB72 /* PlaneSection.swift */; };
 		B004633A27D1925A00EEEB72 /* KeyEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004633927D1925A00EEEB72 /* KeyEvent.swift */; };
 		B004C7942916DB5600F79AA5 /* NSRect+.swift in Sources */ = {isa = PBXBuildFile; fileRef = B004C7932916DB5600F79AA5 /* NSRect+.swift */; };
@@ -101,6 +102,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B002C4032B806C8B004546F7 /* VC_ImageFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_ImageFilter.swift; sourceTree = "<group>"; };
 		B004633727CFD57800EEEB72 /* PlaneSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaneSection.swift; sourceTree = "<group>"; };
 		B004633927D1925A00EEEB72 /* KeyEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEvent.swift; sourceTree = "<group>"; };
 		B004C7932916DB5600F79AA5 /* NSRect+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+.swift"; sourceTree = "<group>"; };
@@ -476,6 +478,7 @@
 				B004633927D1925A00EEEB72 /* KeyEvent.swift */,
 				B0CBE0762A4BA183007C6380 /* menuActions.swift */,
 				B01E3587276D85AE00EAF0CA /* FileLoad.swift */,
+				B002C4032B806C8B004546F7 /* VC_ImageFilter.swift */,
 			);
 			path = MainViewController;
 			sourceTree = "<group>";
@@ -697,6 +700,7 @@
 				B09BB662279801A400326EA4 /* VC_make3D_texture.swift in Sources */,
 				B07B6D1B276E4F1900D31400 /* shader.metal in Sources */,
 				B0E9634028A5DF5600797449 /* VC_MouseEvent.swift in Sources */,
+				B002C4042B806C8B004546F7 /* VC_ImageFilter.swift in Sources */,
 				B06A2B16299F8996002B1CC5 /* Permission.swift in Sources */,
 				B0F59D2027D6ECDF00E0644F /* MovieSequence.swift in Sources */,
 				B01E3588276D85AE00EAF0CA /* FileLoad.swift in Sources */,

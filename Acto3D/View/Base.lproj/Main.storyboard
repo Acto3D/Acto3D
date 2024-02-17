@@ -423,9 +423,9 @@ isotropic voxel size</string>
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="ImageProcess" id="sA6-bM-1OV">
+                            <menuItem title="Image Process" id="sA6-bM-1OV">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="ImageProcess" id="ZZl-ri-U8H">
+                                <menu key="submenu" title="Image Process" id="ZZl-ri-U8H">
                                     <items>
                                         <menuItem title="Gaussian 3D" identifier="gaussian" id="Oyg-WA-66v">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -438,6 +438,31 @@ isotropic voxel size</string>
                                             <connections>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="9VI-Ri-I7Y"/>
                                             </connections>
+                                        </menuItem>
+                                        <menuItem title="Binarization" id="450-D7-he8">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Binarization" id="YnM-Pl-iDh">
+                                                <items>
+                                                    <menuItem title="Binarization" identifier="binarization" id="ePG-tH-W60">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="menuAction:" target="Voe-Tx-rLC" id="WUG-5g-fjl"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Binarization (Otsu's Method)" identifier="otsu_binarization" id="Tps-sI-Viw">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="menuAction:" target="Voe-Tx-rLC" id="ynj-NI-Swx"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Binarization (Otsu's Method) - Slice by Slice" identifier="otsu_binarization_slicebyslice" id="pOM-B0-9Bd">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="menuAction:" target="Voe-Tx-rLC" id="oLQ-wY-cg1"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -787,7 +812,7 @@ isotropic voxel size</string>
                                 </constraints>
                                 <sliderCell key="cell" continuous="YES" alignment="left" maxValue="100" doubleValue="53.115234375" tickMarkPosition="above" sliderType="linear" id="tpw-43-zGi"/>
                                 <connections>
-                                    <action selector="sliderSliceChanged:" target="2Jc-51-6dz" id="tZx-2f-Kyw"/>
+                                    <action selector="sliderSliceChanged:" target="2Jc-51-6dz" id="Zay-NN-w3k"/>
                                 </connections>
                             </slider>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rDb-6T-0n6">
@@ -2384,7 +2409,7 @@ DQ
                                                                                     </textFieldCell>
                                                                                 </textField>
                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="g1p-aw-Uht">
-                                                                                    <rect key="frame" x="230" y="138" width="26" height="17"/>
+                                                                                    <rect key="frame" x="230" y="141" width="26" height="17"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Flip" id="9cH-hO-8zW">
                                                                                         <font key="font" metaFont="system"/>
@@ -2393,7 +2418,7 @@ DQ
                                                                                     </textFieldCell>
                                                                                 </textField>
                                                                                 <switch identifier="flip" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" baseWritingDirection="leftToRight" alignment="left" translatesAutoresizingMaskIntoConstraints="NO" id="ueV-cW-VzJ">
-                                                                                    <rect key="frame" x="258" y="132" width="42" height="26"/>
+                                                                                    <rect key="frame" x="264" y="136" width="42" height="26"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                                     <connections>
                                                                                         <action selector="renderOptionSwitch:" target="XfG-lQ-9wD" id="VeG-be-YVl"/>
@@ -2517,15 +2542,6 @@ DQ
                                                                                         <action selector="changeRenderingStep:" target="XfG-lQ-9wD" id="brk-XV-nOc"/>
                                                                                     </connections>
                                                                                 </slider>
-                                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I8Z-pv-o1v">
-                                                                                    <rect key="frame" x="20" y="171" width="85" height="16"/>
-                                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="Render mode" id="c2J-CJ-lXm">
-                                                                                        <font key="font" metaFont="system"/>
-                                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                                                    </textFieldCell>
-                                                                                </textField>
                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3JL-WE-xpE">
                                                                                     <rect key="frame" x="260" y="75" width="22" height="16"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -2595,6 +2611,15 @@ DQ
                                                                                     <rect key="frame" x="225" y="16" width="43" height="16"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Shade" id="eJW-5x-qFB">
+                                                                                        <font key="font" metaFont="system"/>
+                                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                                    </textFieldCell>
+                                                                                </textField>
+                                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I8Z-pv-o1v">
+                                                                                    <rect key="frame" x="18" y="171" width="85" height="16"/>
+                                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="Render mode" id="c2J-CJ-lXm">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2927,7 +2952,7 @@ DQ
                                                     <rect key="frame" x="6" y="6" width="392" height="502"/>
                                                     <clipView key="contentView" id="wJ1-EY-aIT">
                                                         <rect key="frame" x="1" y="1" width="390" height="500"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <collectionView selectable="YES" id="WFZ-Kc-Tw5" customClass="MovieCollectionView" customModule="Acto3D" customModuleProvider="target">
                                                                 <rect key="frame" x="0.0" y="0.0" width="390" height="500"/>
@@ -2992,12 +3017,12 @@ DQ
                                                 </textField>
                                                 <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="a6U-1F-aTa">
                                                     <rect key="frame" x="149" y="552" width="56" height="25"/>
-                                                    <popUpButtonCell key="cell" type="push" title="30" bezelStyle="rounded" alignment="center" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="wD7-Mk-jrQ" id="f9B-0d-VrC">
+                                                    <popUpButtonCell key="cell" type="push" title="30" bezelStyle="rounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="wD7-Mk-jrQ" id="f9B-0d-VrC">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                         <font key="font" metaFont="menu"/>
                                                         <menu key="menu" id="45g-LG-Gb9">
                                                             <items>
-                                                                <menuItem title="30" id="wD7-Mk-jrQ">
+                                                                <menuItem title="30" state="on" id="wD7-Mk-jrQ">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                 </menuItem>
                                                                 <menuItem title="60" id="bsX-C2-9Wu">

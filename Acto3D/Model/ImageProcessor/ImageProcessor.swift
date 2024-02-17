@@ -324,7 +324,7 @@ class ImageProcessor{
         let width  = threadExecutionWidth
         let height = 8
         let depth  = maxTotalThreadsPerThreadgroup / width / height
-        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth) 
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
         let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
                                           height: (yCount + height - 1) / height,
                                           depth: (zCount + depth - 1) / depth)
@@ -350,6 +350,344 @@ class ImageProcessor{
         cmdBuf.commit()
         
     }
+    
+    
+    
+    public func applyFilter_binarizationWithThreshold(inTexture:MTLTexture, threshold: UInt8, channel: Int, invert: Bool, completion: @escaping (MTLTexture?) -> Void) {
+
+        guard let computeFunction = lib.makeFunction(name: "applyFilter_binarizationWithThreshold") else {
+            print("error make function")
+            completion(nil)
+            return
+        }
+        
+        var pipeline:MTLComputePipelineState!
+        do{
+            let pipelineDescriptor = MTLComputePipelineDescriptor()
+            pipelineDescriptor.label = MTL_label.applyFilter_median3D
+            pipelineDescriptor.computeFunction = computeFunction
+            pipeline = try device.makeComputePipelineState(descriptor: pipelineDescriptor, options: [], reflection: nil)
+            
+        }catch{
+            Dialog.showDialog(message: "Error in creating metal pipeline for binarizationWithThreshold")
+            completion(nil)
+            return
+        }
+        
+        let cmdBuf = cmdQueue.makeCommandBuffer()!
+        cmdBuf.label = "Apply Filter"
+        
+        let computeEncoder = cmdBuf.makeComputeCommandEncoder()!
+        computeEncoder.setComputePipelineState(pipeline)
+        
+        // Sampler Set
+        // let sampler = device.makeSampler(filter: .linear)
+        
+        // Output Texture
+        let texOut = channel == -1 ? inTexture.createNewTextureWithSameSize(pixelFormat: .bgra8Unorm) : inTexture.createNewTextureWithSameSize(pixelFormat: .r8Unorm)!
+        
+        computeEncoder.setTexture(inTexture, index: 0)
+        computeEncoder.setTexture(texOut, index: 1)
+        
+        var threshold = threshold
+        var channel = channel
+        var invert = invert
+        
+        computeEncoder.setBytes(&threshold, length: MemoryLayout<UInt8>.stride, index: 0)
+        computeEncoder.setBytes(&channel, length: MemoryLayout<Int>.stride, index: 1)
+        computeEncoder.setBytes(&invert, length: MemoryLayout<Bool>.stride, index: 2)
+        
+        var globalCounterValue: Int32 = 0
+        let globalCounterBuffer = device.makeBuffer(bytes: &globalCounterValue,
+                                                    length: MemoryLayout<Int32>.size,
+                                                    options: .storageModeShared)
+
+        computeEncoder.setBuffer(globalCounterBuffer, offset: 0, index: 3)
+        
+        var isCancel = false
+        let isCancelBuffer = device.makeBuffer(bytes: &isCancel,
+                                                    length: MemoryLayout<Bool>.size,
+                                                    options: .storageModeShared)
+        cancelPtr = isCancelBuffer?.contents().bindMemory(to: Bool.self, capacity: 1)
+        computeEncoder.setBuffer(isCancelBuffer, offset: 0, index: 4)
+        
+        computeEncoder.setThreadgroupMemoryLength(16, index: 0)
+        
+        // Compute optimization
+        let xCount = inTexture.width
+        let yCount = inTexture.height
+        let zCount = inTexture.depth
+        let maxTotalThreadsPerThreadgroup = pipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = pipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
+        let height = 8
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
+        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+                                          height: (yCount + height - 1) / height,
+                                          depth: (zCount + depth - 1) / depth)
+        
+        print("Thread for gaussian", threadsPerThreadgroup, "threadgroupsPerGrid", threadgroupsPerGrid)
+        
+        // counter setting
+        totalCounter = threadgroupsPerGrid.width * threadgroupsPerGrid.height * threadgroupsPerGrid.depth
+        counterPtr = globalCounterBuffer?.contents().bindMemory(to: Int32.self, capacity: 1)
+        
+        // Metal Dispatch
+        computeEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        computeEncoder.endEncoding()
+        
+        
+        // Completion Handler
+        cmdBuf.addCompletedHandler { _ in
+            // Call the completion handler with the output texture
+            completion(texOut)
+        }
+        
+        
+        cmdBuf.commit()
+        
+    }
+    
+    
+    public func applyFilter_calculateHistogramSliceBySlice(inTexture:MTLTexture, channel: Int, invert: Bool, completion: @escaping (MTLTexture?) -> Void) {
+
+        guard let computeFunction = lib.makeFunction(name: "computeHistogramSliceBySlice") else {
+            print("error make function")
+            completion(nil)
+            return
+        }
+        
+        var pipeline:MTLComputePipelineState!
+        do{
+            let pipelineDescriptor = MTLComputePipelineDescriptor()
+            pipelineDescriptor.label = MTL_label.applyFilter_median3D
+            pipelineDescriptor.computeFunction = computeFunction
+            pipeline = try device.makeComputePipelineState(descriptor: pipelineDescriptor, options: [], reflection: nil)
+            
+        }catch{
+            Dialog.showDialog(message: "Error in creating metal pipeline for computeHistogramSliceBySlice")
+            completion(nil)
+            return
+        }
+        
+        var cmdBuf = cmdQueue.makeCommandBuffer()!
+        cmdBuf.label = "Apply Filter"
+        
+        var computeEncoder = cmdBuf.makeComputeCommandEncoder()!
+        computeEncoder.setComputePipelineState(pipeline)
+        
+        
+        
+        print("Create a buffer for retain histogram data")
+        let histogramSize = 256 * inTexture.depth
+        let histogramBuffer = self.device.makeBuffer(length: histogramSize * MemoryLayout<UInt32>.size, options: .storageModeShared)
+        histogramBuffer?.label = "Buffer for histogram"
+        
+        computeEncoder.setTexture(inTexture, index: 0)
+        
+        var channel: UInt8 = UInt8(channel)
+        computeEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 0)
+        computeEncoder.setBuffer(histogramBuffer, offset: 0, index: 1)
+        
+        
+        if(device.checkNonUniformThreadgroup() == true){
+            let threadGroupSize = MTLSizeMake(pipeline.threadExecutionWidth, pipeline.maxTotalThreadsPerThreadgroup / pipeline.threadExecutionWidth, 1)
+            computeEncoder.dispatchThreads(MTLSize(width: inTexture.width,
+                                                   height: inTexture.height,
+                                                   depth: inTexture.depth),
+                                           threadsPerThreadgroup: threadGroupSize)
+            
+        }else{
+            let threadGroupSize = MTLSize(width: pipeline.threadExecutionWidth,
+                                          height: pipeline.maxTotalThreadsPerThreadgroup / pipeline.threadExecutionWidth,
+                                          depth: 1)
+            let threadGroups = MTLSize(width: (inTexture.width + threadGroupSize.width - 1) / threadGroupSize.width,
+                                       height: (inTexture.height + threadGroupSize.height - 1) / threadGroupSize.height,
+                                       depth: inTexture.depth)
+            computeEncoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadGroupSize)
+            
+        }
+        
+        computeEncoder.endEncoding()
+        
+        cmdBuf.commit()
+        cmdBuf.waitUntilCompleted()
+        
+        
+        print("Get histogram")
+        
+        var histogramPerDepth: [[UInt32]] = []
+        
+        for i in 0..<inTexture.depth{
+            
+            let bins = 256
+            let channelSize = bins * MemoryLayout<UInt32>.size
+            let histogramData = UnsafeMutablePointer<UInt32>.allocate(capacity: bins)
+            
+            let offset = i * channelSize
+            memcpy(histogramData, histogramBuffer!.contents().advanced(by: offset), channelSize)
+            
+            let histogramForThisChannel = Array(UnsafeBufferPointer(start: histogramData, count: bins))
+            histogramPerDepth.append(histogramForThisChannel)
+            
+            histogramData.deallocate()
+        }
+        
+        
+        var threshold_otsu:[UInt8] = []
+        for i in 0..<inTexture.depth{
+            threshold_otsu.append(calculateThreshold_Otsu(histogram: histogramPerDepth[i], totalPixels: inTexture.width * inTexture.height))
+        }
+        
+        print(threshold_otsu)
+        
+        
+        
+        
+        
+        
+        guard let computeFunction2 = lib.makeFunction(name: "applyFilter_binarizationWithThresholdSeries") else {
+            print("error make function")
+            completion(nil)
+            return
+        }
+        
+        var pipeline2:MTLComputePipelineState!
+        do{
+            let pipelineDescriptor = MTLComputePipelineDescriptor()
+            pipelineDescriptor.label = MTL_label.other
+            pipelineDescriptor.computeFunction = computeFunction2
+            pipeline2 = try device.makeComputePipelineState(descriptor: pipelineDescriptor, options: [], reflection: nil)
+            
+        }catch{
+            Dialog.showDialog(message: "Error in creating metal pipeline for computeHistogramSliceBySlice")
+            completion(nil)
+            return
+        }
+        
+        var cmdBuf2 = cmdQueue.makeCommandBuffer()!
+        cmdBuf2.label = "Apply Filter"
+        
+        var computeEncoder2 = cmdBuf2.makeComputeCommandEncoder()!
+        computeEncoder2.setComputePipelineState(pipeline2)
+        
+        // Sampler Set
+        // let sampler = device.makeSampler(filter: .linear)
+        
+        // Output Texture
+        let texOut = inTexture.createNewTextureWithSameSize(pixelFormat: .r8Unorm)!
+        
+        computeEncoder2.setTexture(inTexture, index: 0)
+        computeEncoder2.setTexture(texOut, index: 1)
+        
+        
+        var invert = invert
+        
+        computeEncoder2.setBytes(&threshold_otsu, length: MemoryLayout<UInt8>.stride * threshold_otsu.count, index: 0)
+        computeEncoder2.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 1)
+        computeEncoder2.setBytes(&invert, length: MemoryLayout<Bool>.stride, index: 2)
+        
+        var globalCounterValue: Int32 = 0
+        let globalCounterBuffer = device.makeBuffer(bytes: &globalCounterValue,
+                                                    length: MemoryLayout<Int32>.size,
+                                                    options: .storageModeShared)
+
+        computeEncoder2.setBuffer(globalCounterBuffer, offset: 0, index: 3)
+        
+        var isCancel = false
+        let isCancelBuffer = device.makeBuffer(bytes: &isCancel,
+                                                    length: MemoryLayout<Bool>.size,
+                                                    options: .storageModeShared)
+        cancelPtr = isCancelBuffer?.contents().bindMemory(to: Bool.self, capacity: 1)
+        computeEncoder2.setBuffer(isCancelBuffer, offset: 0, index: 4)
+        
+        computeEncoder2.setThreadgroupMemoryLength(16, index: 0)
+        
+        // Compute optimization
+        let xCount = inTexture.width
+        let yCount = inTexture.height
+        let zCount = inTexture.depth
+        let maxTotalThreadsPerThreadgroup = pipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = pipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
+        let height = 8
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
+        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+                                          height: (yCount + height - 1) / height,
+                                          depth: (zCount + depth - 1) / depth)
+        
+        
+        // counter setting
+        totalCounter = threadgroupsPerGrid.width * threadgroupsPerGrid.height * threadgroupsPerGrid.depth
+        counterPtr = globalCounterBuffer?.contents().bindMemory(to: Int32.self, capacity: 1)
+        
+        // Metal Dispatch
+        computeEncoder2.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        computeEncoder2.endEncoding()
+        
+        
+        // Completion Handler
+        cmdBuf2.addCompletedHandler { _ in
+            // Call the completion handler with the output texture
+            completion(texOut)
+        }
+        
+        
+        cmdBuf2.commit()
+        
+        
+    }
+    
+    
+    
+    public func calculateThreshold_Otsu(histogram: [UInt32], totalPixels:Int) -> UInt8{
+        let histogram: [Int] = histogram.map { Int($0) }
+        print(histogram)
+        
+        var sum: Int64 = 0
+        var sumB: Int64 = 0
+        var wB = 0
+        var wF = 0
+        var mB: Float = 0
+        var mF: Float = 0
+        var maxVariance: Float = 0
+        var threshold: UInt8 = 0
+        
+        print("total pixels", totalPixels)
+        
+        for i in 0..<histogram.count {
+            sum += Int64(i) * Int64(histogram[i])
+        }
+        
+        for t in 0..<256 {
+            wB += histogram[t]      // Weight Background
+            if wB == 0 { continue }
+            
+            wF = totalPixels - wB   // Weight Foreground
+            if wF == 0 { break }
+            
+            sumB += Int64(t) * Int64(histogram[t])
+            
+            mB = Float(sumB) / Float(wB)        // Mean Background
+            mF = Float(sum - sumB) / Float(wF)  // Mean Foreground
+            
+            // Between Class Variance
+            let variance = Float(wB) * Float(wF) * (mB - mF) * (mB - mF)
+            
+            // Check if new maximum found
+            if variance > maxVariance {
+                maxVariance = variance
+                threshold = UInt8(t)
+            }
+        }
+        
+        print("threshold", threshold)
+        return threshold
+    }
+    
+    
     /*
     public func applyFilter_Median3D(inTexture:MTLTexture, k_size: UInt8, channel: Int, completion: @escaping (MTLTexture?) -> Void) {
 

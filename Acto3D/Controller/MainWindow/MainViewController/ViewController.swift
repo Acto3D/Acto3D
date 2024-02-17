@@ -1148,7 +1148,6 @@ class ViewController: NSViewController {
         let normals = renderer.quaternion.act(float3(0, 0, 1))
         
         if (Thread.current.isMainThread){
-            print("main thread")
             eularX.floatValue = eular.z
             eularY.floatValue = eular.x
             eularZ.floatValue = eular.y

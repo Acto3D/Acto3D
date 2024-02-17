@@ -16,4 +16,5 @@ public enum MTL_label{
     static let applyFilter_gaussian3D = "applyFilter_gaussian3D"
     static let applyFilter_median3D = "applyFilter_median3D"
     static let transfer_Float = "transfer_Float"
+    static let other = "other"
 }
