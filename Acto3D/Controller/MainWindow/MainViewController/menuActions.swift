@@ -281,6 +281,247 @@ extension ViewController{
             
         case "copy_sample_shaders":
             copySampleShadersToShaderDirectory()
+        
+        case "tori":
+            // creation of tori model
+            if let _ = renderer.mainTexture {
+                if !closeCurrentSession(){
+                    return
+                }
+            }
+            
+            
+            let demoTori = DemoModel(device: renderer.device, lib: renderer.mtlLibrary, cmdQueue: renderer.cmdQueue)
+            
+            guard let texture = demoTori.createDemoModel_tori(imgWidth: 500, imgHeight: 500, radius1: 150, radius2: 30, lineWidth: 5, inside_color: 0, outside_color: 120, edge_color: 240),
+                  let tori_texture = demoTori.gaussian2D(inTexture: texture, k_size: 7, inChannel: 0, outChannel: 1) else{
+                Logger.logPrintAndWrite(message: "Failed to create demo model (tori).")
+                return
+            }
+            
+            
+            renderer.mainTexture = tori_texture
+            
+            renderer.volumeData = VolumeData(outputImageWidth: texture.width.toUInt16(), outputImageHeight: texture.height.toUInt16(),
+                                             inputImageWidth: texture.width.toUInt16(), inputImageHeight: texture.height.toUInt16(), inputImageDepth: texture.depth.toUInt16(), numberOfComponent: 4)
+            
+            renderer.imageParams = ImageParameters()
+            
+            renderer.renderParams = RenderingParameters()
+            zScale_Slider.floatValue = 1.0
+            renderer.renderParams.zScale = 1
+            updateSliceAndScale(currentSliceToMax: true)
+            
+            setDefaultDisplayRanges(bit: 8, channelCount: 4)
+            
+            self.xResolutionField.floatValue = self.renderer.imageParams.scaleX
+            self.yResolutionField.floatValue = self.renderer.imageParams.scaleY
+            self.zResolutionField.floatValue = self.renderer.imageParams.scaleZ
+            self.scaleUnitField.stringValue = self.renderer.imageParams.unit
+            
+            
+            toneCh1.setControlPoint(array: [[0,0], [130,0], [255,1]], redraw: true)
+            toneCh1.interpolateMode = .cubicSpline
+            toneCh2.setControlPoint(array: [[0,0], [130,0], [255,1]], redraw: true)
+            toneCh2.interpolateMode = .cubicSpline
+            
+            
+            renderer.renderOption.changeValue(option: .SAMPLER_LINEAR, value: 1)
+            renderer.renderOption.changeValue(option: .SHADE, value: 0)
+            renderer.renderOption.changeValue(option: .CROP_LOCK, value: 0)
+            renderer.renderOption.changeValue(option: .CROP_TOGGLE, value: 0)
+            renderer.renderOption.changeValue(option: .PLANE, value: 0)
+            renderer.renderOption.changeValue(option: .FLIP, value: 0)
+            renderer.renderOption.changeValue(option: .ADAPTIVE, value: 0)
+            
+            changeSwitchFromValue(object: switch_interpolation, option: renderer.renderOption, element: .SAMPLER_LINEAR)
+            changeSwitchFromValue(object: switch_shade, option: renderer.renderOption, element: .SHADE)
+            changeSwitchFromValue(object: switch_cropLock, option: renderer.renderOption, element: .CROP_LOCK)
+            changeSwitchFromValue(object: switch_cropOpposite, option: renderer.renderOption, element: .CROP_TOGGLE)
+            changeSwitchFromValue(object: switch_plane, option: renderer.renderOption, element: .PLANE)
+            changeSwitchFromValue(object: switch_flip, option: renderer.renderOption, element: .FLIP)
+            changeSwitchFromValue(object: switch_boundingBox, option: renderer.renderOption, element: .BOX)
+            changeCheckButtonFromValue(object: check_adaptive, option: renderer.renderOption, element: .ADAPTIVE)
+            
+            popUpViewSize.selectItem(withTitle: String(renderer.renderParams.viewSize))
+            popUpAlphaPower.selectItem(withTitle: "x\(renderer.renderParams.alphaPower)")
+            
+            renderer.pointClouds = PointClouds()
+            pointSetTable.reloadData()
+            
+            
+            renderer.resetMetalFunctions()
+            renderer.argumentManager = nil
+            
+            renderer.renderParams.sliceNo = renderer.renderParams.sliceMax
+            renderer.renderParams.renderingStep = 1.0
+            renderer.renderParams.scale = 0.8
+            
+            renderer.renderParams.intensityRatio = float4(0.2, 1, 0, 0)
+            
+            updateSliceAndScaleFromParams(params: renderer.renderParams)
+            
+            
+            renderer.currentShader = ShaderManage.getPresetList()[0]
+            segmentRenderMode.selectedSegment = 0
+            
+            transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
+            transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
+            transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
+            transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
+            
+            rotateModel(deltaAxisX: -18, deltaAxisY: -20, deltaAxisZ: -3, performRendering: false)
+            
+            self.outputView.image = self.renderer.rendering()
+            
+            
+            
+            guard let documentToriDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("DemoModel") else {
+                return
+            }
+            do {
+                try FileManager.default.createDirectory(at: documentToriDir.appendingPathComponent("Tori"), withIntermediateDirectories: true, attributes: nil)
+            } catch {
+            }
+            
+            filePackage = FilePackage(fileDir: documentToriDir, fileType: .singleFileMultiPage, fileList: ["Tori.tif"])
+            filePackage?.isSafeDir = true
+            pathField.stringValue = documentToriDir.path
+            
+            Logger.logPrintAndWrite(message: "⭐️ This model contains 2 channel.")
+            Logger.logPrintAndWrite(message: "   The original image is stored in channel 1.")
+            Logger.logPrintAndWrite(message: "   The model with the blur applied is stored in channel 2.")
+            Logger.logPrintAndWrite(message: "🔔 You can export this model in [File] > [Export].")
+            
+            
+        case "sphereincube":
+            // creation of tori model
+            if let _ = renderer.mainTexture {
+                if !closeCurrentSession(){
+                    return
+                }
+            }
+            
+            
+            let demoSp = DemoModel(device: renderer.device, lib: renderer.mtlLibrary, cmdQueue: renderer.cmdQueue)
+            
+            guard let texture = demoSp.createDemoModel_sphereincube(imgWidth: 768, imgHeight: 768, ball_size: 256, square_size: 350),
+                    let sp_texture = demoSp.gaussian2D(inTexture: texture, k_size: 7, inChannel: -1, outChannel: -1) else{
+                Logger.logPrintAndWrite(message: "Failed to create demo model (tori).")
+                return
+            }
+            
+            
+            renderer.mainTexture = sp_texture
+            
+            renderer.volumeData = VolumeData(outputImageWidth: texture.width.toUInt16(), outputImageHeight: texture.height.toUInt16(),
+                                             inputImageWidth: texture.width.toUInt16(), inputImageHeight: texture.height.toUInt16(), inputImageDepth: texture.depth.toUInt16(), numberOfComponent: 4)
+            
+            renderer.imageParams = ImageParameters()
+            
+            renderer.renderParams = RenderingParameters()
+            zScale_Slider.floatValue = 1.0
+            renderer.renderParams.zScale = 1
+            updateSliceAndScale(currentSliceToMax: true)
+            
+            setDefaultDisplayRanges(bit: 8, channelCount: 4)
+            
+            self.xResolutionField.floatValue = self.renderer.imageParams.scaleX
+            self.yResolutionField.floatValue = self.renderer.imageParams.scaleY
+            self.zResolutionField.floatValue = self.renderer.imageParams.scaleZ
+            self.scaleUnitField.stringValue = self.renderer.imageParams.unit
+            
+            
+            toneCh1.setControlPoint(array: [[0,0], [50,0], [100, 0.2], [180, 0] ,[255,0.3]], redraw: true)
+            toneCh1.interpolateMode = .cubicSpline
+            toneCh2.setControlPoint(array: [[0,0], [50,0], [100, 0.2], [180, 0] ,[255,0.3]], redraw: true)
+            toneCh2.interpolateMode = .cubicSpline
+            toneCh3.setControlPoint(array: [[0,0], [50,0], [100, 0.2], [180, 0], [255,0.3]], redraw: true)
+            toneCh3.interpolateMode = .cubicSpline
+            toneCh4.setControlPoint(array: [[0,0], [50,0], [100, 0.2], [180, 0] ,[255,0.3]], redraw: true)
+            toneCh4.interpolateMode = .cubicSpline
+            
+            
+            renderer.renderOption.changeValue(option: .SAMPLER_LINEAR, value: 1)
+            renderer.renderOption.changeValue(option: .SHADE, value: 0)
+            renderer.renderOption.changeValue(option: .CROP_LOCK, value: 0)
+            renderer.renderOption.changeValue(option: .CROP_TOGGLE, value: 0)
+            renderer.renderOption.changeValue(option: .PLANE, value: 0)
+            renderer.renderOption.changeValue(option: .FLIP, value: 0)
+            renderer.renderOption.changeValue(option: .ADAPTIVE, value: 0)
+            
+            changeSwitchFromValue(object: switch_interpolation, option: renderer.renderOption, element: .SAMPLER_LINEAR)
+            changeSwitchFromValue(object: switch_shade, option: renderer.renderOption, element: .SHADE)
+            changeSwitchFromValue(object: switch_cropLock, option: renderer.renderOption, element: .CROP_LOCK)
+            changeSwitchFromValue(object: switch_cropOpposite, option: renderer.renderOption, element: .CROP_TOGGLE)
+            changeSwitchFromValue(object: switch_plane, option: renderer.renderOption, element: .PLANE)
+            changeSwitchFromValue(object: switch_flip, option: renderer.renderOption, element: .FLIP)
+            changeSwitchFromValue(object: switch_boundingBox, option: renderer.renderOption, element: .BOX)
+            changeCheckButtonFromValue(object: check_adaptive, option: renderer.renderOption, element: .ADAPTIVE)
+            
+            popUpViewSize.selectItem(withTitle: String(renderer.renderParams.viewSize))
+            popUpAlphaPower.selectItem(withTitle: "x\(renderer.renderParams.alphaPower)")
+            
+            renderer.pointClouds = PointClouds()
+            pointSetTable.reloadData()
+            
+            
+            renderer.resetMetalFunctions()
+            renderer.argumentManager = nil
+            
+            renderer.renderParams.sliceNo = renderer.renderParams.sliceMax
+            renderer.renderParams.renderingStep = 1.0
+            renderer.renderParams.scale = 0.4
+            
+            renderer.renderParams.intensityRatio = float4(1,1,1,1)
+            
+            renderer.renderParams.color = PackedColor(ch1_color: float4(hex: "ED703A"), ch2_color: float4(hex: "8AF513"), ch3_color: float4(hex: "8BAEF5"), ch4_color: float4(hex: "FFFFFF"))
+            
+            wellCh1.color =  NSColor.color(from: renderer.renderParams.color.ch1_color)
+            wellCh2.color =  NSColor.color(from: renderer.renderParams.color.ch2_color)
+            wellCh3.color =  NSColor.color(from: renderer.renderParams.color.ch3_color)
+            wellCh4.color =  NSColor.color(from: renderer.renderParams.color.ch4_color)
+            
+            // Change the control color for Tone Curve View
+            toneCh1.setDefaultBackgroundColor(color: wellCh1.color)
+            toneCh2.setDefaultBackgroundColor(color: wellCh2.color)
+            toneCh3.setDefaultBackgroundColor(color: wellCh3.color)
+            toneCh4.setDefaultBackgroundColor(color: wellCh4.color)
+            
+            
+            
+            updateSliceAndScaleFromParams(params: renderer.renderParams)
+            
+            
+            renderer.currentShader = ShaderManage.getPresetList()[0]
+            segmentRenderMode.selectedSegment = 0
+            
+            transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
+            transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
+            transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
+            transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
+            
+            rotateModel(deltaAxisX: -18, deltaAxisY: -20, deltaAxisZ: -3, performRendering: false)
+            
+            self.outputView.image = self.renderer.rendering()
+            
+            
+            
+            guard let documentSpDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("DemoModel") else {
+                return
+            }
+            do {
+                try FileManager.default.createDirectory(at: documentSpDir.appendingPathComponent("SphereInCube"), withIntermediateDirectories: true, attributes: nil)
+            } catch {
+            }
+            
+            filePackage = FilePackage(fileDir: documentSpDir, fileType: .singleFileMultiPage, fileList: ["SphereInCube.tif"])
+            filePackage?.isSafeDir = true
+            pathField.stringValue = documentSpDir.path
+            
+            Logger.logPrintAndWrite(message: "⭐️ This model contains 4 channel.")
+            Logger.logPrintAndWrite(message: "🔔 You can export this model in [File] > [Export].")
+            
             
         default:
             break

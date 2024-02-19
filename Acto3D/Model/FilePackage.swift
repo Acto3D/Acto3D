@@ -17,6 +17,8 @@ struct FilePackage{
     /// stack filenames. if single tiff file, fileList[0] is filename
     var fileList:[String]
     
+    var isSafeDir = false
+    
     var parameterDir:URL?{
         get{
             return urlForDirectoryName(directoryName: "parameter")
@@ -25,7 +27,9 @@ struct FilePackage{
     
     var workingDir:URL?{
         get{
-            _ = Permission.checkPermission(url: fileDir)
+            if(!isSafeDir){
+                _ = Permission.checkPermission(url: fileDir)
+            }
             
             var dir:URL?
             if(fileType == .multiFileStacks){
@@ -43,7 +47,10 @@ struct FilePackage{
     
     private func urlForDirectoryName(directoryName:String) -> URL?{
         var dir:URL?
-        _ = Permission.checkPermission(url: fileDir)
+        
+        if(!isSafeDir){
+            _ = Permission.checkPermission(url: fileDir)
+        }
         
         if(fileType == .multiFileStacks){
             dir = fileDir.appendingPathComponent(directoryName)

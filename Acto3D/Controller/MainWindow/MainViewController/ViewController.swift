@@ -616,6 +616,20 @@ class ViewController: NSViewController {
         
     }
     
+    func openDirInFinder(path: String){
+        var isDir:ObjCBool  = false
+        if FileManager.default.fileExists(atPath: path, isDirectory: &isDir) {
+            NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
+        }
+    }
+    func openDirInFinder(url: URL){
+        var isDir:ObjCBool  = false
+        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+    
+    
     func resetCurrentData(){
         self.filePackage = nil
         self.renderer.imageParams = ImageParameters()
@@ -792,6 +806,16 @@ class ViewController: NSViewController {
         stepSlider.floatValue = params.renderingStep
         stepLabel.floatValue = stepSlider.floatValue
         stepLabel.sizeToFit()
+        
+        light_Slider.floatValue = params.light
+        shade_Slider.floatValue = params.shade
+        intensityRatio_slider_1.floatValue = params.intensityRatio[0]
+        intensityRatio_slider_2.floatValue = params.intensityRatio[1]
+        intensityRatio_slider_3.floatValue = params.intensityRatio[2]
+        intensityRatio_slider_4.floatValue = params.intensityRatio[3]
+        
+        
+        
         
         renderer.argumentManager?.markAsNeedsUpdate(argumentIndex: .renderParams)
     }
@@ -1048,6 +1072,37 @@ class ViewController: NSViewController {
         }
         
         return rootMenuItems
+    }
+    
+    /// Close the current session
+    public func closeCurrentSession() -> Bool{
+        let alert = NSAlert()
+        alert.messageText = "This operation will close the current session."
+        alert.informativeText = "Do you want to procees?"
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .warning
+        
+        let response = alert.runModal()
+        switch response {
+        case .alertFirstButtonReturn:
+            filePackage = nil
+            renderer.mainTexture = nil
+            renderer.resetRotation()
+            fileListTable.reloadData()
+            pathField.stringValue = ""
+            outputView.image = nil
+            Logger.logPrintAndWrite(message: "Close the current session.")
+            
+            
+            return true
+            
+        case .cancel:
+            return false
+            
+        default:
+            return false
+        }
     }
 
     

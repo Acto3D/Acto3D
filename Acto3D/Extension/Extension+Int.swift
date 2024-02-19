@@ -107,3 +107,28 @@ typealias float2 = simd_float2
 typealias float3 = simd_float3
 typealias float4 = simd_float4
 typealias float4x4 = matrix_float4x4
+
+
+extension float4{
+    
+    init(hex: String)  {
+        let r, g, b: Float
+        let hexColor = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedHex = hexColor.hasPrefix("#") ? String(hexColor.dropFirst()) : hexColor
+        
+        if cleanedHex.count == 6 {
+            let scanner = Scanner(string: cleanedHex)
+            var hexNumber: UInt64 = 0
+            
+            if scanner.scanHexInt64(&hexNumber) {
+                r = Float((hexNumber & 0xff0000) >> 16) / 255.0
+                g = Float((hexNumber & 0x00ff00) >> 8) / 255.0
+                b = Float(hexNumber & 0x0000ff) / 255.0
+                
+                self = float4(r, g, b, 1)
+                return
+            }
+        }
+        self.init(0, 0, 0, 1)
+    }
+}

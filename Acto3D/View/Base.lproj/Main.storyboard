@@ -63,11 +63,26 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="File" id="bib-Uj-vzu">
                                     <items>
-                                        <menuItem title="Close" keyEquivalent="w" id="xXD-Xh-1te">
-                                            <connections>
-                                                <action selector="performClose:" target="Ady-hI-5gd" id="GPU-Dn-hDM"/>
-                                            </connections>
+                                        <menuItem title="Demo Model" id="4te-wD-RuT">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Demo Model" id="OOu-0P-Vzf">
+                                                <items>
+                                                    <menuItem title="Tori Model" identifier="tori" id="Kgn-zA-zOf">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="menuAction:" target="Voe-Tx-rLC" id="F3S-zj-vgH"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Sphere In Cube Model" identifier="sphereincube" id="l7H-6l-teR">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="menuAction:" target="Voe-Tx-rLC" id="Re6-Gt-AFL"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="uAf-m7-X0h"/>
                                         <menuItem title="Open directory" id="Btf-nG-bph">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Open directory" id="kuI-ff-HIN">
@@ -200,6 +215,12 @@ isotropic voxel size</string>
                                                     </menuItem>
                                                 </items>
                                             </menu>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="T3m-Df-Oos"/>
+                                        <menuItem title="Close" keyEquivalent="w" id="xXD-Xh-1te">
+                                            <connections>
+                                                <action selector="performClose:" target="Ady-hI-5gd" id="GPU-Dn-hDM"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -1133,7 +1154,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Z0-Q5-mG0">
-                                <rect key="frame" x="732" y="205" width="19" height="28"/>
+                                <rect key="frame" x="732" y="204" width="19" height="30"/>
                                 <stepperCell key="cell" continuous="YES" alignment="left" minValue="2" maxValue="20" doubleValue="3" id="jjl-39-roy"/>
                                 <connections>
                                     <action selector="clusterCountStepperChanged:" target="2Jc-51-6dz" id="B9o-UH-JyE"/>
@@ -4409,7 +4430,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="17" height="17"/>
+        <image name="link" catalog="system" width="14" height="14"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

@@ -37,6 +37,7 @@
 		B0693FC627B02ADC00A778CE /* FocusCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0693FC527B02ADC00A778CE /* FocusCircle.swift */; };
 		B06A2B14299E255A002B1CC5 /* SegmentNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B13299E255A002B1CC5 /* SegmentNode.swift */; };
 		B06A2B16299F8996002B1CC5 /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B15299F8996002B1CC5 /* Permission.swift */; };
+		B06FE5C72B837046009592D5 /* DemoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06FE5C62B837046009592D5 /* DemoModel.swift */; };
 		B07507AE2A6CF12000B43C61 /* ViewController-renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07507AD2A6CF12000B43C61 /* ViewController-renderer.swift */; };
 		B0768FDF2A962DDC00291474 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = B0768FDE2A962DDC00291474 /* LICENSE */; };
 		B0768FE12A962DE300291474 /* docs in Resources */ = {isa = PBXBuildFile; fileRef = B0768FE02A962DE300291474 /* docs */; };
@@ -142,6 +143,8 @@
 		B0693FC527B02ADC00A778CE /* FocusCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusCircle.swift; sourceTree = "<group>"; };
 		B06A2B13299E255A002B1CC5 /* SegmentNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentNode.swift; sourceTree = "<group>"; };
 		B06A2B15299F8996002B1CC5 /* Permission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permission.swift; sourceTree = "<group>"; };
+		B06FE5C32B835619009592D5 /* demoModel.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = demoModel.metal; sourceTree = "<group>"; };
+		B06FE5C62B837046009592D5 /* DemoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoModel.swift; sourceTree = "<group>"; };
 		B07395872A6B69F90080A4A0 /* calculateTextureHistogram.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = calculateTextureHistogram.metal; sourceTree = "<group>"; };
 		B07507AD2A6CF12000B43C61 /* ViewController-renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController-renderer.swift"; sourceTree = "<group>"; };
 		B0768FDE2A962DDC00291474 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -234,6 +237,7 @@
 		B01E358F276DD88200EAF0CA /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				B06FE5C52B837033009592D5 /* DemoModel */,
 				B02A31A32A835EA7003B9B3D /* ImageProcessor */,
 				B0F3C92B2795C45400925A30 /* MultiTIFF */,
 				B009959B2785D9BD00E859B9 /* ToneCurve */,
@@ -343,6 +347,7 @@
 			children = (
 				B07B6D1A276E4F1900D31400 /* shader.metal */,
 				B02DD38529AAD6490079B32C /* mainRenderer.metal */,
+				B06FE5C32B835619009592D5 /* demoModel.metal */,
 				B05243D62A4A720800EBAA5C /* preset_FTB.metal */,
 				B04AD2422A477AEB0061E350 /* preset_BTF.metal */,
 				B04AD2342A4726600061E350 /* preset_MIP.metal */,
@@ -375,6 +380,14 @@
 				B09D4E0C2A8FAF88001C77E6 /* FlippedViewForScroll.swift */,
 			);
 			path = custom;
+			sourceTree = "<group>";
+		};
+		B06FE5C52B837033009592D5 /* DemoModel */ = {
+			isa = PBXGroup;
+			children = (
+				B06FE5C62B837046009592D5 /* DemoModel.swift */,
+			);
+			path = DemoModel;
 			sourceTree = "<group>";
 		};
 		B07B6D19276E4EF500D31400 /* Shader */ = {
@@ -656,6 +669,7 @@
 				B0F4D3F029A3447200609702 /* Codable.swift in Sources */,
 				B004633A27D1925A00EEEB72 /* KeyEvent.swift in Sources */,
 				B0A13D8828B3111A00B7F471 /* HistogramView.swift in Sources */,
+				B06FE5C72B837046009592D5 /* DemoModel.swift in Sources */,
 				B092F60A2780487800247CD5 /* BinarySwitch.swift in Sources */,
 				B0E819242A4DBB85009E9B82 /* CubicSplineInterpolator.swift in Sources */,
 				B01E358E276DBE3400EAF0CA /* ImageExt.swift in Sources */,
@@ -895,6 +909,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Acto3D/Acto3D.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 15;
@@ -931,6 +946,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Acto3D/Acto3D.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 15;

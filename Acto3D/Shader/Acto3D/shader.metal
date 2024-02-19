@@ -52,3 +52,4 @@ using namespace metal;
 #include "preset_FTB.metal"
 #include "calculateTextureHistogram.metal"
 
+#include "demoModel.metal"

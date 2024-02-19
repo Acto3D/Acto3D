@@ -875,7 +875,7 @@ class VoluemeRenderer{
         
         let scaleBarLength = self.imageParams.scalebarLength
         
-        var scaleMagnification : CGFloat = drawingViewSize.toCGFloat() / renderParams.viewSize.toCGFloat()
+        let scaleMagnification : CGFloat = drawingViewSize.toCGFloat() / renderParams.viewSize.toCGFloat()
         
         
         let baseVector = quaternion.act(float3(1,0,0))
@@ -1120,7 +1120,7 @@ class VoluemeRenderer{
     
     public func resetRotation(){
         self.normals = Normals()
-        self.quaternion = simd_quatf(float4x4(1))
+        self.quaternion = simd_quatf.init(ix: 0, iy: 0, iz: 0, r: 1)
     }
     
     //MARK: - export
@@ -1394,8 +1394,6 @@ class VoluemeRenderer{
         let outDir_1 = filePackage.createSubdirectoryForUrl(url: exportDir, directoryName: "current_angle_ch2")
         let outDir_2 = filePackage.createSubdirectoryForUrl(url: exportDir, directoryName: "current_angle_ch3")
         let outDir_3 = filePackage.createSubdirectoryForUrl(url: exportDir, directoryName: "current_angle_ch4")
-        
-        
         
         let drawingViewSize = renderParams.viewSize.toInt()
         
