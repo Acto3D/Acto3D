@@ -116,6 +116,44 @@ kernel void createDemoModel_SphereInCube(texture3d<float, access::write> texture
 }
 
 
+
+
+kernel void createDemoModel_ThinLumen(texture3d<float, access::write> texture [[texture(0)]],
+                                      constant float& radius [[buffer(0)]],
+                                      constant float& coefficient [[buffer(1)]],
+                                      constant int& linewidth [[buffer(2)]],
+                                      constant int& edge_color [[buffer(3)]],
+                                      constant int& inside_color [[buffer(4)]],
+                                      constant int& outside_color [[buffer(5)]],
+                                      uint3 gid [[thread_position_in_grid]])
+{
+    uint imageWidth = texture.get_width();
+    uint imageHeight = texture.get_height();
+    uint imageDepth = texture.get_depth();
+    
+    if (gid.x >= imageWidth || gid.y >= imageHeight || gid.z >= imageDepth){
+        return;
+    }
+    
+    float center_x = imageWidth / 2.0;
+    float center_y = imageHeight / 2.0;
+    float center_z = imageDepth / 2.0;
+    
+    float left = pow(float(gid.x - center_x), 2) + pow(float(gid.y - center_y), 2) ;
+    float right1 = pow(coefficient * abs(float(gid.z - center_z)) + radius , 2);
+    float right2 =  pow(coefficient * abs(float(gid.z - center_z)) + radius + linewidth, 2);
+    
+    if(left <= right1){
+        texture.write(float4(0 / 255.0f ,0,0,0), gid);
+    }else if(left <= right2){
+        texture.write(float4(240.0f / 255.0f ,0,0,0), gid);
+    }else{
+        texture.write(float4(120.0f / 255.0, 0,0,0), gid);
+    }
+}
+
+
+
 kernel void applyFilter_gaussian2D(texture3d<float, access::sample> inputTexture [[texture(0)]],
                                    texture3d<float, access::write> outputTexture [[texture(1)]],
                                    constant float* kernel_weights [[buffer(0)]],

@@ -388,14 +388,14 @@ extension ViewController{
             filePackage?.isSafeDir = true
             pathField.stringValue = documentToriDir.path
             
-            Logger.logPrintAndWrite(message: "⭐️ This model contains 2 channel.")
+            Logger.logPrintAndWrite(message: "⭐️ This model contains 2 channels.")
             Logger.logPrintAndWrite(message: "   The original image is stored in channel 1.")
             Logger.logPrintAndWrite(message: "   The model with the blur applied is stored in channel 2.")
             Logger.logPrintAndWrite(message: "🔔 You can export this model in [File] > [Export].")
             
             
         case "sphereincube":
-            // creation of tori model
+            // creation of sphereincube
             if let _ = renderer.mainTexture {
                 if !closeCurrentSession(){
                     return
@@ -407,7 +407,7 @@ extension ViewController{
             
             guard let texture = demoSp.createDemoModel_sphereincube(imgWidth: 768, imgHeight: 768, ball_size: 256, square_size: 350),
                     let sp_texture = demoSp.gaussian2D(inTexture: texture, k_size: 7, inChannel: -1, outChannel: -1) else{
-                Logger.logPrintAndWrite(message: "Failed to create demo model (tori).")
+                Logger.logPrintAndWrite(message: "Failed to create demo model.")
                 return
             }
             
@@ -507,21 +507,178 @@ extension ViewController{
             
             
             
-            guard let documentSpDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("DemoModel") else {
+            guard let documentDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("DemoModel") else {
                 return
             }
             do {
-                try FileManager.default.createDirectory(at: documentSpDir.appendingPathComponent("SphereInCube"), withIntermediateDirectories: true, attributes: nil)
+                try FileManager.default.createDirectory(at: documentDir.appendingPathComponent("SphereInCube"), withIntermediateDirectories: true, attributes: nil)
             } catch {
             }
             
-            filePackage = FilePackage(fileDir: documentSpDir, fileType: .singleFileMultiPage, fileList: ["SphereInCube.tif"])
+            filePackage = FilePackage(fileDir: documentDir, fileType: .singleFileMultiPage, fileList: ["SphereInCube.tif"])
             filePackage?.isSafeDir = true
-            pathField.stringValue = documentSpDir.path
+            pathField.stringValue = documentDir.path
             
-            Logger.logPrintAndWrite(message: "⭐️ This model contains 4 channel.")
+            Logger.logPrintAndWrite(message: "⭐️ This model contains 4 channels.")
             Logger.logPrintAndWrite(message: "🔔 You can export this model in [File] > [Export].")
             
+        case "thin_lumen":
+            // creation of thin_lumen
+            if let _ = renderer.mainTexture {
+                if !closeCurrentSession(){
+                    return
+                }
+            }
+            
+            let thinModelParams = getParametersOfThinModel()
+            if(thinModelParams.sigma == 0 || thinModelParams.coefficient == 0 || thinModelParams.kernelSize == 0 || thinModelParams.radius == 0){
+                return
+            }
+            
+            let demo = DemoModel(device: renderer.device, lib: renderer.mtlLibrary, cmdQueue: renderer.cmdQueue)
+            
+            guard let texture = demo.createDemoModel_thin_lumen(imgWidth: 100, imgHeight: 100, innerRadius: thinModelParams.radius, coefficient: thinModelParams.coefficient, lineWidth: 3, inside_color: 1, outside_color: 1, edge_color: 1) else{
+                Logger.logPrintAndWrite(message: "Failed to create demo model.")
+                return
+            }
+            
+            let processor = ImageProcessor(device: renderer.device, cmdQueue: renderer.cmdQueue, lib: renderer.mtlLibrary)
+            
+            DispatchQueue.global().async {
+                processor.applyFilter_Gaussian3D(inTexture: texture, k_size: thinModelParams.kernelSize.toUInt8(), sigma: thinModelParams.sigma, channel: 0) { result in
+                    
+                    DispatchQueue.main.async {[self] in
+                    ImageProcessor.transferTextureToTexture(device: self.renderer.device,
+                                                            cmdQueue: self.renderer.cmdQueue,
+                                                            lib: self.renderer.mtlLibrary,
+                                                            texIn: result!,
+                                                            texOut: texture,
+                                                            channelIn: 0, channelOut: 1)
+                    
+                    
+                        
+                        renderer.mainTexture = texture
+                        
+                        
+                        renderer.volumeData = VolumeData(outputImageWidth: texture.width.toUInt16(), outputImageHeight: texture.height.toUInt16(),
+                                                         inputImageWidth: texture.width.toUInt16(), inputImageHeight: texture.height.toUInt16(), inputImageDepth: texture.depth.toUInt16(), numberOfComponent: 4)
+                        
+                        renderer.imageParams = ImageParameters()
+                        
+                        renderer.renderParams = RenderingParameters()
+                        zScale_Slider.floatValue = 1.0
+                        renderer.renderParams.zScale = 1
+                        updateSliceAndScale(currentSliceToMax: true)
+                        
+                        setDefaultDisplayRanges(bit: 8, channelCount: 4)
+                        
+                        self.xResolutionField.floatValue = self.renderer.imageParams.scaleX
+                        self.yResolutionField.floatValue = self.renderer.imageParams.scaleY
+                        self.zResolutionField.floatValue = self.renderer.imageParams.scaleZ
+                        self.scaleUnitField.stringValue = self.renderer.imageParams.unit
+                        
+                        
+                        toneCh1.setControlPoint(array: [[0,0], [73,0], [150, 0.0] ,[255,0.3]], redraw: true)
+                        toneCh1.interpolateMode = .cubicSpline
+                        toneCh2.setControlPoint(array: [[0,0], [73,0], [150, 0.1] ,[255,0.3]], redraw: true)
+                        toneCh2.interpolateMode = .cubicSpline
+                        toneCh3.setControlPoint(array: [[0,0], [255,0.3]], redraw: true)
+                        toneCh3.interpolateMode = .cubicSpline
+                        toneCh4.setControlPoint(array: [[0,0],[255,0.3]], redraw: true)
+                        toneCh4.interpolateMode = .cubicSpline
+                        
+                        
+                        renderer.renderOption.changeValue(option: .SAMPLER_LINEAR, value: 1)
+                        renderer.renderOption.changeValue(option: .SHADE, value: 0)
+                        renderer.renderOption.changeValue(option: .CROP_LOCK, value: 0)
+                        renderer.renderOption.changeValue(option: .CROP_TOGGLE, value: 0)
+                        renderer.renderOption.changeValue(option: .PLANE, value: 0)
+                        renderer.renderOption.changeValue(option: .FLIP, value: 0)
+                        renderer.renderOption.changeValue(option: .ADAPTIVE, value: 0)
+                        
+                        changeSwitchFromValue(object: switch_interpolation, option: renderer.renderOption, element: .SAMPLER_LINEAR)
+                        changeSwitchFromValue(object: switch_shade, option: renderer.renderOption, element: .SHADE)
+                        changeSwitchFromValue(object: switch_cropLock, option: renderer.renderOption, element: .CROP_LOCK)
+                        changeSwitchFromValue(object: switch_cropOpposite, option: renderer.renderOption, element: .CROP_TOGGLE)
+                        changeSwitchFromValue(object: switch_plane, option: renderer.renderOption, element: .PLANE)
+                        changeSwitchFromValue(object: switch_flip, option: renderer.renderOption, element: .FLIP)
+                        changeSwitchFromValue(object: switch_boundingBox, option: renderer.renderOption, element: .BOX)
+                        changeCheckButtonFromValue(object: check_adaptive, option: renderer.renderOption, element: .ADAPTIVE)
+                        
+                        popUpViewSize.selectItem(withTitle: String(renderer.renderParams.viewSize))
+                        popUpAlphaPower.selectItem(withTitle: "x\(renderer.renderParams.alphaPower)")
+                        
+                        renderer.pointClouds = PointClouds()
+                        pointSetTable.reloadData()
+                        
+                        
+                        renderer.resetMetalFunctions()
+                        renderer.argumentManager = nil
+                        
+                        renderer.renderParams.sliceNo = renderer.renderParams.sliceMax
+                        renderer.renderParams.renderingStep = 1.0
+                        renderer.renderParams.scale = 0.8
+                        
+                        renderer.renderParams.intensityRatio = float4(0,1,1,1)
+                        
+                        renderer.renderParams.color = PackedColor(ch1_color: float4(hex: "FFFFFF"), ch2_color: float4(hex: "FFFFFF"), ch3_color: float4(hex: "FFFFFF"), ch4_color: float4(hex: "FFFFFF"))
+                        
+                        wellCh1.color =  NSColor.color(from: renderer.renderParams.color.ch1_color)
+                        wellCh2.color =  NSColor.color(from: renderer.renderParams.color.ch2_color)
+                        wellCh3.color =  NSColor.color(from: renderer.renderParams.color.ch3_color)
+                        wellCh4.color =  NSColor.color(from: renderer.renderParams.color.ch4_color)
+                        
+                        // Change the control color for Tone Curve View
+                        toneCh1.setDefaultBackgroundColor(color: wellCh1.color)
+                        toneCh2.setDefaultBackgroundColor(color: wellCh2.color)
+                        toneCh3.setDefaultBackgroundColor(color: wellCh3.color)
+                        toneCh4.setDefaultBackgroundColor(color: wellCh4.color)
+                        
+                        
+                        
+                        updateSliceAndScaleFromParams(params: renderer.renderParams)
+                        
+                        
+                        renderer.currentShader = ShaderManage.getPresetList()[0]
+                        segmentRenderMode.selectedSegment = 0
+                        
+                        transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
+                        transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
+                        transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
+                        transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
+                        
+                        rotateModel(deltaAxisX: -118, deltaAxisY: -90, deltaAxisZ: -60, performRendering: false)
+                        
+                        self.outputView.image = self.renderer.rendering()
+                        
+                        let demoName = "ThinLumen_coef\(thinModelParams.coefficient)_radius\(thinModelParams.radius)_k\(thinModelParams.kernelSize)_sigma\(thinModelParams.sigma)"
+                        
+                        
+                        
+                        guard let documentDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("DemoModel") else {
+                            return
+                        }
+                        do {
+                            try FileManager.default.createDirectory(at: documentDir.appendingPathComponent(demoName), withIntermediateDirectories: true, attributes: nil)
+                        } catch {
+                        }
+                        
+                        filePackage = FilePackage(fileDir: documentDir, fileType: .singleFileMultiPage, fileList: ["\(demoName).tif"])
+                        filePackage?.isSafeDir = true
+                        pathField.stringValue = documentDir.path
+                        
+                        Logger.logPrintAndWrite(message: "⭐️ Thin lumen model was created with the following parameters.")
+                        Logger.logPrintAndWrite(message: "   Thinnest radius: \(thinModelParams.radius), Coefficient: \(thinModelParams.coefficient)")
+                        Logger.logPrintAndWrite(message: "   Kernel size for gaussian blur: \(thinModelParams.kernelSize), Sigma for gaussian blur: \(thinModelParams.sigma)")
+                        Logger.logPrintAndWrite(message: "⭐️ This model contains 2 channel.")
+                        Logger.logPrintAndWrite(message: "   The original image is stored in channel 1. The blurd model for segmentation in stored in channel 2.")
+                        Logger.logPrintAndWrite(message: "🔔 You can export this model in [File] > [Export].")
+                    }
+                }
+                
+                print("B")
+                
+            }
             
         default:
             break

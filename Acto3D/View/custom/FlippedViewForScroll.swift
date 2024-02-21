@@ -32,4 +32,17 @@ class FlippedView: NSView {
         }
         self.setFrameSize(NSSize(width: oldSize.width, height: maxHeight))
     }
+    
+    func adjustHeightOfView(){
+        var maxHeight:CGFloat = 0
+        
+        for item in self.subviews.enumerated(){
+            
+            if (maxHeight <= item.element.frame.maxY){
+                maxHeight = item.element.frame.maxY
+            }
+            
+        }
+        self.setFrameSize(NSSize(width: self.frame.width, height: maxHeight))
+    }
 }
