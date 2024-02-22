@@ -946,8 +946,6 @@ class VoluemeRenderer{
                 pipelineDescriptor.computeFunction = calcHistoFunc
                 pipeline = try device.makeComputePipelineState(descriptor: pipelineDescriptor, options: [], reflection: nil)
                 
-       
-                
             }catch{
                 Dialog.showDialog(message: "Error in creating metal pipeline for histogram")
                 return

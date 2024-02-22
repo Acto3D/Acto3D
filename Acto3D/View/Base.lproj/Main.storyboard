@@ -2183,22 +2183,22 @@ isotropic voxel size</string>
                                                                                     </textFieldCell>
                                                                                 </textField>
                                                                                 <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7FD-rT-Xxv">
-                                                                                    <rect key="frame" x="66" y="123" width="228" height="28"/>
+                                                                                    <rect key="frame" x="66" y="123" width="257" height="28"/>
                                                                                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" sliderType="linear" id="fd2-J0-i1X"/>
                                                                                     <connections>
                                                                                         <action selector="updateSliceSlider:" target="XfG-lQ-9wD" id="Zmt-By-iod"/>
                                                                                     </connections>
                                                                                 </slider>
                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Apl-u8-Qva">
-                                                                                    <rect key="frame" x="298" y="131" width="74" height="16"/>
-                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="- / -" id="ntt-Ot-zOG">
+                                                                                    <rect key="frame" x="352" y="131" width="20" height="16"/>
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="/ 0" id="ntt-Ot-zOG">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
                                                                                 </textField>
                                                                                 <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="te4-V9-v3g">
-                                                                                    <rect key="frame" x="66" y="67" width="246" height="28"/>
+                                                                                    <rect key="frame" x="66" y="67" width="263" height="28"/>
                                                                                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="0.10000000000000001" maxValue="10" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="dtp-1t-oIw"/>
                                                                                     <connections>
                                                                                         <action selector="updateZscaleSlider:" target="XfG-lQ-9wD" id="WtY-UF-tjK"/>
@@ -2211,16 +2211,24 @@ isotropic voxel size</string>
                                                                                         <action selector="updateScaleSlider:" target="XfG-lQ-9wD" id="x4N-7W-BnQ"/>
                                                                                     </connections>
                                                                                 </slider>
-                                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yec-FE-4PF">
+                                                                                <textField identifier="scale" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yec-FE-4PF" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
                                                                                     <rect key="frame" x="333" y="103" width="39" height="16"/>
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="width" constant="35" id="deo-6i-Js9"/>
                                                                                     </constraints>
-                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="0.4" id="4V1-q6-bQc">
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="right" title="0.4" id="4V1-q6-bQc">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
+                                                                                    <userDefinedRuntimeAttributes>
+                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                                                            <integer key="value" value="1"/>
+                                                                                        </userDefinedRuntimeAttribute>
+                                                                                    </userDefinedRuntimeAttributes>
+                                                                                    <connections>
+                                                                                        <action selector="takeDoubleValueFrom:" target="mRT-uX-fg1" id="PfS-fw-8X1"/>
+                                                                                    </connections>
                                                                                 </textField>
                                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4gp-wB-7m5">
                                                                                     <rect key="frame" x="6" y="103" width="38" height="16"/>
@@ -2230,13 +2238,27 @@ isotropic voxel size</string>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
                                                                                 </textField>
-                                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j4n-E4-Ptn">
+                                                                                <textField identifier="zscale" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j4n-E4-Ptn" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
                                                                                     <rect key="frame" x="333" y="75" width="39" height="16"/>
-                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="1.0" id="VUj-bR-Y5T">
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="right" title="1.0" id="VUj-bR-Y5T">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
+                                                                                    <userDefinedRuntimeAttributes>
+                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="typeIndex">
+                                                                                            <integer key="value" value="1"/>
+                                                                                        </userDefinedRuntimeAttribute>
+                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="inputTypeIndex">
+                                                                                            <integer key="value" value="1"/>
+                                                                                        </userDefinedRuntimeAttribute>
+                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                                                            <integer key="value" value="1"/>
+                                                                                        </userDefinedRuntimeAttribute>
+                                                                                    </userDefinedRuntimeAttributes>
+                                                                                    <connections>
+                                                                                        <action selector="takeFloatValueFrom:" target="te4-V9-v3g" id="gYK-Xr-k4D"/>
+                                                                                    </connections>
                                                                                 </textField>
                                                                                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UEs-kF-LQm">
                                                                                     <rect key="frame" x="108" y="20" width="80" height="21"/>
@@ -2330,20 +2352,38 @@ DQ
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
                                                                                 </textField>
+                                                                                <textField identifier="slice_current" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Amk-B0-GUr" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                                                                    <rect key="frame" x="327" y="131" width="24" height="16"/>
+                                                                                    <constraints>
+                                                                                        <constraint firstAttribute="width" constant="20" id="A2v-20-PWj"/>
+                                                                                    </constraints>
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="right" title="0" id="mpc-39-rzw" customClass="I">
+                                                                                        <font key="font" metaFont="system"/>
+                                                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                                    </textFieldCell>
+                                                                                    <userDefinedRuntimeAttributes>
+                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                                                            <integer key="value" value="3"/>
+                                                                                        </userDefinedRuntimeAttribute>
+                                                                                    </userDefinedRuntimeAttributes>
+                                                                                    <connections>
+                                                                                        <action selector="takeIntegerValueFrom:" target="7FD-rT-Xxv" id="tcm-g6-kIi"/>
+                                                                                    </connections>
+                                                                                </textField>
                                                                             </subviews>
                                                                             <constraints>
-                                                                                <constraint firstItem="Apl-u8-Qva" firstAttribute="width" secondItem="j1B-FS-bBg" secondAttribute="width" id="03D-LT-qOE"/>
                                                                                 <constraint firstAttribute="bottom" secondItem="eWA-j1-Qe5" secondAttribute="bottom" constant="20" symbolic="YES" id="0hU-xp-Hza"/>
                                                                                 <constraint firstItem="uos-LZ-Jap" firstAttribute="width" secondItem="eWA-j1-Qe5" secondAttribute="width" id="0pa-eL-Hsl"/>
                                                                                 <constraint firstAttribute="trailing" secondItem="yec-FE-4PF" secondAttribute="trailing" constant="20" symbolic="YES" id="1lL-Ih-XLk"/>
                                                                                 <constraint firstItem="upq-Sf-mUQ" firstAttribute="leading" secondItem="zaY-Xd-sRr" secondAttribute="trailing" constant="8" symbolic="YES" id="2Dx-j9-9sM"/>
                                                                                 <constraint firstItem="LAx-OP-OXt" firstAttribute="leading" secondItem="uos-LZ-Jap" secondAttribute="trailing" constant="25" id="2Gx-Fx-DY4"/>
                                                                                 <constraint firstItem="LAx-OP-OXt" firstAttribute="centerY" secondItem="eWA-j1-Qe5" secondAttribute="centerY" id="8RM-rN-ehv"/>
-                                                                                <constraint firstItem="Apl-u8-Qva" firstAttribute="leading" secondItem="7FD-rT-Xxv" secondAttribute="trailing" constant="8" symbolic="YES" id="9ti-3y-u4u"/>
                                                                                 <constraint firstItem="Vz2-hf-L8i" firstAttribute="top" secondItem="te4-V9-v3g" secondAttribute="bottom" constant="8" symbolic="YES" id="AzG-sA-Ib0"/>
                                                                                 <constraint firstItem="j4n-E4-Ptn" firstAttribute="width" secondItem="yec-FE-4PF" secondAttribute="width" id="BsZ-0Z-NqE"/>
                                                                                 <constraint firstItem="gvb-8e-UWg" firstAttribute="top" secondItem="EKm-fg-7YC" secondAttribute="bottom" constant="8" symbolic="YES" id="EEk-4D-zEc"/>
                                                                                 <constraint firstAttribute="trailing" secondItem="Apl-u8-Qva" secondAttribute="trailing" constant="20" symbolic="YES" id="Fhd-ax-ia6"/>
+                                                                                <constraint firstItem="Apl-u8-Qva" firstAttribute="centerY" secondItem="Amk-B0-GUr" secondAttribute="centerY" id="Gyl-Gy-O0L"/>
                                                                                 <constraint firstItem="gvb-8e-UWg" firstAttribute="leading" secondItem="2Ru-rK-y1g" secondAttribute="trailing" constant="8" symbolic="YES" id="Jsq-Xj-JfJ"/>
                                                                                 <constraint firstItem="PK2-HE-nkx" firstAttribute="trailing" secondItem="sQY-PN-ir9" secondAttribute="trailing" id="Mcm-Js-ToR"/>
                                                                                 <constraint firstItem="EKm-fg-7YC" firstAttribute="centerY" secondItem="Sry-ie-R4B" secondAttribute="centerY" id="MmY-aS-PUz"/>
@@ -2376,14 +2416,16 @@ DQ
                                                                                 <constraint firstItem="KOp-g7-7ml" firstAttribute="trailing" secondItem="Bp1-SO-izz" secondAttribute="trailing" id="bt1-9B-BqU"/>
                                                                                 <constraint firstItem="sQY-PN-ir9" firstAttribute="centerY" secondItem="Jxg-kh-N4e" secondAttribute="centerY" id="cMP-kh-S09"/>
                                                                                 <constraint firstItem="KOp-g7-7ml" firstAttribute="top" secondItem="Bp1-SO-izz" secondAttribute="bottom" constant="8" symbolic="YES" id="cZ2-bA-HBc"/>
+                                                                                <constraint firstItem="Apl-u8-Qva" firstAttribute="leading" secondItem="Amk-B0-GUr" secondAttribute="trailing" constant="5" id="dC9-dQ-NUq"/>
                                                                                 <constraint firstItem="7FD-rT-Xxv" firstAttribute="top" secondItem="N9m-2q-ZcH" secondAttribute="bottom" constant="8" symbolic="YES" id="dai-xX-oD6"/>
                                                                                 <constraint firstItem="yec-FE-4PF" firstAttribute="centerY" secondItem="4gp-wB-7m5" secondAttribute="centerY" id="fJJ-z2-T4c"/>
                                                                                 <constraint firstItem="zaY-Xd-sRr" firstAttribute="leading" secondItem="a3j-HL-j9o" secondAttribute="leading" constant="45" id="ftU-Gp-rDC"/>
                                                                                 <constraint firstItem="Bp1-SO-izz" firstAttribute="leading" secondItem="skc-SP-ubN" secondAttribute="trailing" constant="28" id="g2N-Ou-VQ2"/>
+                                                                                <constraint firstItem="Amk-B0-GUr" firstAttribute="leading" secondItem="7FD-rT-Xxv" secondAttribute="trailing" constant="8" symbolic="YES" id="grV-zS-T96"/>
                                                                                 <constraint firstItem="EKm-fg-7YC" firstAttribute="leading" secondItem="Bp1-SO-izz" secondAttribute="leading" id="h2I-oU-Anb"/>
                                                                                 <constraint firstItem="EKm-fg-7YC" firstAttribute="trailing" secondItem="Bp1-SO-izz" secondAttribute="trailing" id="hNZ-Fc-XNW"/>
                                                                                 <constraint firstItem="mRT-uX-fg1" firstAttribute="centerY" secondItem="4gp-wB-7m5" secondAttribute="centerY" id="hhJ-Kb-Kib"/>
-                                                                                <constraint firstItem="j4n-E4-Ptn" firstAttribute="leading" secondItem="te4-V9-v3g" secondAttribute="trailing" constant="25" id="iq1-e8-xJI"/>
+                                                                                <constraint firstItem="j4n-E4-Ptn" firstAttribute="leading" secondItem="te4-V9-v3g" secondAttribute="trailing" constant="8" symbolic="YES" id="iq1-e8-xJI"/>
                                                                                 <constraint firstItem="EKm-fg-7YC" firstAttribute="top" secondItem="KOp-g7-7ml" secondAttribute="bottom" constant="8" symbolic="YES" id="j98-Oi-m57"/>
                                                                                 <constraint firstItem="Sry-ie-R4B" firstAttribute="leading" secondItem="skc-SP-ubN" secondAttribute="leading" id="jpJ-x3-wNg"/>
                                                                                 <constraint firstItem="THn-Va-tZQ" firstAttribute="width" secondItem="EKm-fg-7YC" secondAttribute="width" id="kfr-a8-I7i"/>
@@ -2610,9 +2652,9 @@ DQ
                                                                                     </connections>
                                                                                 </segmentedControl>
                                                                                 <slider identifier="light" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gIV-zK-H8d">
-                                                                                    <rect key="frame" x="67" y="7" width="111" height="28"/>
+                                                                                    <rect key="frame" x="67" y="7" width="96" height="28"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                                    <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="0.5" maxValue="2" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="A24-g4-wmi"/>
+                                                                                    <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="4" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="A24-g4-wmi"/>
                                                                                     <connections>
                                                                                         <action selector="light_shade_SliderChanged:" target="XfG-lQ-9wD" id="fTw-qw-bEs"/>
                                                                                     </connections>
@@ -2651,6 +2693,23 @@ DQ
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
+                                                                                </textField>
+                                                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O5A-ad-rhF" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                                                                    <rect key="frame" x="169" y="12" width="53" height="21"/>
+                                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" id="H7I-iE-P83">
+                                                                                        <font key="font" metaFont="system"/>
+                                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                                    </textFieldCell>
+                                                                                    <userDefinedRuntimeAttributes>
+                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                                                            <integer key="value" value="1"/>
+                                                                                        </userDefinedRuntimeAttribute>
+                                                                                    </userDefinedRuntimeAttributes>
+                                                                                    <connections>
+                                                                                        <action selector="takeDoubleValueFrom:" target="gIV-zK-H8d" id="QDe-BX-R4W"/>
+                                                                                    </connections>
                                                                                 </textField>
                                                                             </subviews>
                                                                         </view>
@@ -2891,7 +2950,7 @@ DQ
                                                         <rect key="frame" x="-100" y="-100" width="392" height="16"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
-                                                    <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="6he-I2-AMy">
+                                                    <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="6he-I2-AMy">
                                                         <rect key="frame" x="376" y="0.0" width="16" height="570"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
@@ -2979,7 +3038,7 @@ DQ
                                                     <rect key="frame" x="6" y="6" width="392" height="502"/>
                                                     <clipView key="contentView" id="wJ1-EY-aIT">
                                                         <rect key="frame" x="1" y="1" width="390" height="500"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <collectionView selectable="YES" id="WFZ-Kc-Tw5" customClass="MovieCollectionView" customModule="Acto3D" customModuleProvider="target">
                                                                 <rect key="frame" x="0.0" y="0.0" width="390" height="500"/>
@@ -3773,6 +3832,7 @@ DQ
                         <outlet property="segmentRenderMode" destination="8Q7-Ua-LFJ" id="HMe-H3-xwX"/>
                         <outlet property="shade_Slider" destination="oXW-A2-sF9" id="Vn3-Qh-IWM"/>
                         <outlet property="slice_Label" destination="Apl-u8-Qva" id="Rcy-nT-RlK"/>
+                        <outlet property="slice_Label_current" destination="Amk-B0-GUr" id="ZW7-xJ-Y0N"/>
                         <outlet property="slice_Slider" destination="7FD-rT-Xxv" id="Ku1-Oa-DYW"/>
                         <outlet property="stepLabel" destination="3JL-WE-xpE" id="gcu-B0-ZIp"/>
                         <outlet property="stepSlider" destination="RCm-Gy-zW3" id="TQO-gv-cvJ"/>

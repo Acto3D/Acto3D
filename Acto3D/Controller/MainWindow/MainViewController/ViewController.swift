@@ -14,7 +14,10 @@ import IOKit
 
 
 
-class ViewController: NSViewController {
+class ViewController: NSViewController{
+    
+
+    
     @IBOutlet weak var focusCircle: FocusCircle!
     
     var currentCoordinate:float4 = float4(0, 0, 0, 0)
@@ -34,13 +37,14 @@ class ViewController: NSViewController {
     
     
     @IBOutlet weak var scale_Slider: NSSlider!
-    @IBOutlet weak var scale_Label: NSTextField!
+    @IBOutlet weak var scale_Label: ValidatingTextField!
     @IBOutlet weak var slice_Slider: NSSlider!
     @IBOutlet weak var crop_Slider: NSSlider!
     @IBOutlet weak var crop_Label: NSTextField!
     @IBOutlet weak var slice_Label: NSTextField!
+    @IBOutlet weak var slice_Label_current: NSTextField!
     @IBOutlet weak var zScale_Slider: NSSlider!
-    @IBOutlet weak var zScale_Label: NSTextField!
+    @IBOutlet weak var zScale_Label: ValidatingTextField!
     
     
     @IBOutlet weak var light_Slider: NSSlider!
@@ -240,7 +244,11 @@ class ViewController: NSViewController {
         movSeq.vc = self
         
         
+        // Editible Validation Text Field
+        zScale_Label.validationDelegate = self
+        scale_Label.validationDelegate = self
     }
+    
     
 
 
@@ -714,6 +722,7 @@ class ViewController: NSViewController {
         updateSliceAndScale(currentSliceToMax: false)
         outputView.image = renderer.rendering()
     }
+    
     @IBAction func updateZscaleSlider(_ sender: NSSlider) {
         if(slice_Slider.doubleValue == slice_Slider.maxValue){
             updateSliceAndScale(currentSliceToMax: true)
@@ -722,10 +731,12 @@ class ViewController: NSViewController {
         }
         outputView.image = renderer.rendering()
     }
+    
     @IBAction func updateScaleSlider(_ sender: NSSlider) {
         updateSliceAndScale(currentSliceToMax: false)
         outputView.image = renderer.rendering()
     }
+    
     @IBAction func updateCropSlider(_ sender: NSSlider) {
         renderer.renderParams.cropSliceNo = crop_Slider.integerValue.toUInt16()
         
@@ -760,12 +771,27 @@ class ViewController: NSViewController {
         renderer.renderParams.sliceNo = slice_Slider.integerValue.toUInt16()
         renderer.renderParams.scale = scale_Slider.floatValue
         
-        slice_Label.stringValue = "\(slice_Slider.integerValue) / \(slice_Slider.maxValue.toInt())"
+//        slice_Label.stringValue = "\(slice_Slider.integerValue) / \(slice_Slider.maxValue.toInt())"
+        slice_Label_current.stringValue = "\(slice_Slider.integerValue)"
+        slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
         crop_Label.stringValue = "\(crop_Slider.integerValue) / \(crop_Slider.maxValue.toInt())"
         scale_Label.stringValue = "\(scale_Slider.floatValue.toFormatString(format: "%.2f"))"
         zScale_Label.stringValue = "\(zScale_Slider.floatValue.toFormatString(format: "%.2f"))"
         
         slice_Label.sizeToFit()
+        slice_Label_current.sizeToFit()
+        print(
+            slice_Label_current.constraints)
+//        for (index, constraint) in slice_Label_current.constraints.enumerated(){
+//            constraint.firstAttribute = .width
+//        }
+//        slice_Label_current.constraints[0].constant = 60
+        
+        slice_Label_current.sizeToFit()
+        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label_current.frame.width
+        
+        print(slice_Label_current.fittingSize)
+//        slice_Label_current.setFrameSize(NSSize(width: 60, height: slice_Label_current.frame.height))
         crop_Label.sizeToFit()
         scale_Label.sizeToFit()
         zScale_Label.sizeToFit()
@@ -1374,5 +1400,43 @@ extension ViewController: ImageOptionViewProtocol, Segment3DProtocol{
             
         }
         
+    }
+}
+
+extension ViewController: ValidatingTextFieldDelegate {
+    func textFieldDidEndEditing(sender: ValidatingTextField, oldValue: Any, newValue: Any) {
+        print(sender.inputValueType.rawValue)
+        switch sender.inputValueType{
+        case .String:
+            break
+        case .Int:
+            break
+        case .Float:
+//            updateSliceAndScale(currentSliceToMax: false)
+            break
+        default:
+            break
+        }
+        
+        switch sender.identifier?.rawValue{
+        case "scale":
+            scale_Slider.floatValue = newValue as! Float
+            renderer.renderParams.scale = newValue as! Float
+            outputView.image = renderer.rendering()
+            
+        case "zscale":
+            zScale_Slider.floatValue = newValue as! Float
+            renderer.renderParams.zScale = newValue as! Float
+            updateSliceAndScale(currentSliceToMax: true)
+            outputView.image = renderer.rendering()
+            
+        case "slice_current":
+            updateSliceAndScale(currentSliceToMax: true)
+            outputView.image = renderer.rendering()
+            
+            
+        default:
+            break
+        }
     }
 }
