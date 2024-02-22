@@ -193,6 +193,7 @@ class ViewController: NSViewController {
         // the application will create a default library from the compiled default.metallib file.
         do{
             try shaderReCompile(onAppLaunch: true)
+            
         }catch{
             Logger.log(message: "⚠️ Error in compiling custom shaders. Use preset shader.", level: .error, writeToLogfile: true)
             renderer.createDefaultLibrary()
@@ -206,20 +207,15 @@ class ViewController: NSViewController {
         
         setDefaultColorToWell()
         
-        
         // Create preset control points
         createPresetControlPoints()
         
-        
         initToneCurveViews()
-        
         
         transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
         transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
         transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
         transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
-        
-        
         
         // load security bookmarks
         Permission.loadSecurityBookmarks()

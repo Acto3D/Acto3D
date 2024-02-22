@@ -165,16 +165,22 @@ kernel void applyFilter_gaussian2D(texture3d<float, access::sample> inputTexture
     // half size of the kernel size (Odd value)
     int half_kernel_size = k_size / 2;
     
+    int width = inputTexture.get_width();
+    int height = inputTexture.get_height();
+    
     float4 result = float4(0.0);
-    float4 originalValue = inputTexture.read(gid);
     
     for (int i = -half_kernel_size; i <= half_kernel_size; i++) {
         for (int j = -half_kernel_size; j <= half_kernel_size; j++) {
-                float4 value = inputTexture.read(gid + uint3(i, j, 0));
-                int idx = (i + half_kernel_size) * k_size + (j + half_kernel_size);
-                float weight = kernel_weights[idx];
-                result += value * weight;
+            // Check out of area
+            int adjusted_i = max(min(int(gid.x) + i, width - 1), 0);
+            int adjusted_j = max(min(int(gid.y) + j, height - 1), 0);
+            uint3 adjusted_gid = uint3(adjusted_i, adjusted_j, gid.z);
             
+            float4 value = inputTexture.read(adjusted_gid);
+            int idx = (i + half_kernel_size) * k_size + (j + half_kernel_size);
+            float weight = kernel_weights[idx];
+            result += value * weight;
         }
     }
     
@@ -182,10 +188,9 @@ kernel void applyFilter_gaussian2D(texture3d<float, access::sample> inputTexture
         outputTexture.write(result, gid);
         
     }else{
+        float4 originalValue = inputTexture.read(gid);
         originalValue[outputChannel] = result[inputChannel];
         outputTexture.write(originalValue, gid);
-        
     }
-    
 }
 

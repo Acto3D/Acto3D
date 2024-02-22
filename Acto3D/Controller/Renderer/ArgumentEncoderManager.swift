@@ -9,22 +9,17 @@ import Foundation
 import Metal
 
 class ArgumentEncoderManager {
-    // Reference to the Metal device
     private let device: MTLDevice
-
-    // Reference to the Metal function
     private let mtlFunction: MTLFunction
 
     // The argument encoder
-    private var argumentEncoder: MTLArgumentEncoder?
+    private var argumentEncoder: MTLArgumentEncoder!
+    public var argumentBuffer: MTLBuffer!
 
     // A dictionary to store buffers by argument index
     private var buffers = [Int: MTLBuffer]()
-
     // A dictionary to track if a value is updated
     private var needsUpdate = [Int: Bool]()
-    
-    public var argumentBuffer: MTLBuffer?
     
     
     var currentPxByteSize: Int = 0
@@ -33,9 +28,7 @@ class ArgumentEncoderManager {
     var sampler: MTLSamplerState?
     var currentSamplerFilter: MTLSamplerMinMagFilter = .nearest
     
-
-    
-    enum ArgumentIndex: Int, CaseIterable , CustomStringConvertible {
+    enum ArgumentIndex: Int, CaseIterable, CustomStringConvertible {
         var description: String{
             switch self{
             case .mainTexture: return "mainTexture"
@@ -50,7 +43,7 @@ class ArgumentEncoderManager {
             case .sampler: return "sampler"
             case .targetViewSize: return "targetViewSize"
             case .pointSetCountBuffer: return "pointSet count"
-            case .pointSetSelectedBuffer: return "pointSet selecter"
+            case .pointSetSelectedBuffer: return "pointSet selector"
             case .pointCoordsBuffer: return "pointSet coords"
             }
         }
@@ -77,14 +70,21 @@ class ArgumentEncoderManager {
 
         // Create the argument encoder when the manager is initialized
         self.argumentEncoder = mtlFunction.makeArgumentEncoder(bufferIndex: 0)
-        self.argumentEncoder?.label = "Argument Encoder"
+        self.argumentEncoder.label = "Argument Encoder"
         
-        let argumentBufferLength = argumentEncoder!.encodedLength
+        let argumentBufferLength = argumentEncoder.encodedLength
         
         // create argument buffer
-        argumentBuffer = device.makeBuffer(length: argumentBufferLength, options: [.cpuCacheModeWriteCombined, .storageModeShared])
-        argumentBuffer!.label = "Argument Buffer"
-        argumentEncoder?.setArgumentBuffer(argumentBuffer, offset: 0)
+        guard let argumentBuffer = device.makeBuffer(length: argumentBufferLength, options: [.cpuCacheModeWriteCombined, .storageModeShared])
+        else {
+            Dialog.showDialog(message: "Error in creating argument buffer.", level: .error)
+            return
+        }
+        
+        self.argumentBuffer = argumentBuffer
+        self.argumentBuffer.label = "Argument Buffer"
+        
+        self.argumentEncoder.setArgumentBuffer(argumentBuffer, offset: 0)
         
         for argumentIndex in ArgumentIndex.allCases {
             needsUpdate[argumentIndex.rawValue] = true
@@ -95,8 +95,10 @@ class ArgumentEncoderManager {
         let index = argumentIndex.rawValue
         
         if needsUpdate[index] == true{
-            argumentEncoder?.setTexture(texture, index: index)
+            argumentEncoder.setTexture(texture, index: index)
+            
             needsUpdate[index] = false
+            
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg texture index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: texture))), set")
             }
@@ -106,8 +108,8 @@ class ArgumentEncoderManager {
                 print("arg texture index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: texture))), reuse")
             }
         }
-        
     }
+    
     func encodeSampler(filter: MTLSamplerMinMagFilter){
         if(self.sampler == nil){
             if(AppConfig.IS_DEBUG_MODE == true){
@@ -116,18 +118,19 @@ class ArgumentEncoderManager {
             self.sampler = device.makeSampler(filter: filter, addressMode: .clampToZero)
             self.currentSamplerFilter = filter
             
-            argumentEncoder?.setSamplerState(self.sampler, index: ArgumentIndex.sampler.rawValue)
+            argumentEncoder.setSamplerState(self.sampler, index: ArgumentIndex.sampler.rawValue)
             
         }else{
             if(self.currentSamplerFilter != filter){
+                // when sampler description has changed
                 self.sampler = device.makeSampler(filter: filter, addressMode: .clampToZero)
                 self.currentSamplerFilter = filter
                 if(AppConfig.IS_DEBUG_MODE == true){
                     print("arg sampler index:\(ArgumentIndex.sampler.rawValue) (\(ArgumentIndex.sampler.description)), \(String(describing: type(of: sampler))), recreated because filter was changed")
                 }
-                argumentEncoder?.setSamplerState(self.sampler, index: ArgumentIndex.sampler.rawValue)
-            }else{
+                argumentEncoder.setSamplerState(self.sampler, index: ArgumentIndex.sampler.rawValue)
                 
+            }else{
                 if(AppConfig.IS_DEBUG_MODE == true){
                     print("arg sampler index:\(ArgumentIndex.sampler.rawValue) (\(ArgumentIndex.sampler.description)), \(String(describing: type(of: sampler))), reuse")
                 }
@@ -151,8 +154,9 @@ class ArgumentEncoderManager {
             let pointer = buffers[index]!.contents().bindMemory(to: T.self, capacity: capacity)
             pointer.pointee = value
             
-            argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
+            argumentEncoder.setBuffer(buffers[index], offset: 0, index: index)
             needsUpdate[index] = false
+            
         }else{
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)) reuse")
@@ -163,8 +167,9 @@ class ArgumentEncoderManager {
         if memcmp(buffers[index]!.contents(), &value, size) != 0 {
             let pointer = buffers[index]!.contents().bindMemory(to: T.self, capacity: capacity)
             pointer.pointee = value
+            
             // Set the updated buffer in the argument encoder
-            argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
+            argumentEncoder.setBuffer(buffers[index], offset: 0, index: index)
             
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: T.self)) update because value change was detected -> \(value)")
@@ -186,8 +191,9 @@ class ArgumentEncoderManager {
             }
             buffers[index] = device.makeBuffer(bytes: value, length: size, options: [.cpuCacheModeWriteCombined, .storageModeShared])
             buffers[index]?.label = argumentIndex.description
-            argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
+            argumentEncoder.setBuffer(buffers[index], offset: 0, index: index)
             needsUpdate[index] = false
+            
         }else{
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: float3.self)) reuse")
@@ -202,7 +208,7 @@ class ArgumentEncoderManager {
             }
             buffers[index] = device.makeBuffer(bytes: value, length: size, options: [.cpuCacheModeWriteCombined, .storageModeShared])
             buffers[index]?.label = argumentIndex.description
-            argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
+            argumentEncoder.setBuffer(buffers[index], offset: 0, index: index)
             needsUpdate[index] = true
         }
     }
@@ -212,19 +218,19 @@ class ArgumentEncoderManager {
         
         if(needsUpdate[index] == true){
             buffers[index] = buffer
-            argumentEncoder?.setBuffer(buffer, offset: 0, index: index)
+            argumentEncoder.setBuffer(buffer, offset: 0, index: index)
             needsUpdate[index] = false
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: buffer))), set")
             }
-        }else{
             
+        }else{
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg buffer index:\(index) (\(argumentIndex.description)), \(String(describing: type(of: buffer))), reuse")
             }
         }
-        
     }
+    
     func encodeOutputPixel(drawingViewSize: Int){
         let index = ArgumentIndex.outputBuffer.rawValue
         
@@ -233,7 +239,7 @@ class ArgumentEncoderManager {
             currentPxByteSize = drawingViewSize * drawingViewSize * 3
             outputPxBuffer = device.makeBuffer(length: MemoryLayout<UInt8>.stride * currentPxByteSize)
             buffers[index] = outputPxBuffer
-            argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
+            argumentEncoder.setBuffer(buffers[index], offset: 0, index: index)
             
             if(AppConfig.IS_DEBUG_MODE == true){
                 print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer create \(currentPxByteSize)")
@@ -251,7 +257,7 @@ class ArgumentEncoderManager {
                 currentPxByteSize = drawingViewSize * drawingViewSize * 3
                 outputPxBuffer = device.makeBuffer(length: MemoryLayout<UInt8>.stride * currentPxByteSize)
                 buffers[index] = outputPxBuffer
-                argumentEncoder?.setBuffer(buffers[index], offset: 0, index: index)
+                argumentEncoder.setBuffer(buffers[index], offset: 0, index: index)
                 
                 if(AppConfig.IS_DEBUG_MODE == true){
                     print("arg output buffer index:\(ArgumentIndex.outputBuffer.rawValue) (\(ArgumentIndex.outputBuffer.description)), Output pixel buffer was recreated because drawing view size was chaneged \(currentPxByteSize)")

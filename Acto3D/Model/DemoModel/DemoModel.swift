@@ -261,7 +261,7 @@ class DemoModel{
         computeEncoder.setComputePipelineState(pipeline)
         
         // Sampler Set
-        let sampler = device.makeSampler(filter: .linear)
+        let sampler = device.makeSampler(filter: .linear, addressMode: .clampToEdge)
         
         
         computeEncoder.setTexture(inTexture, index: 0)

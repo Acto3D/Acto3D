@@ -40,7 +40,6 @@ extension MTLDevice{
         
         guard width <= 2048, height <= 2048, depth <= 2048 else {
             Dialog.showDialog(message: "The input image must have a height and width of 2048 pixels or less, and the number of Z stacks must be 2048 or fewer.")
-//            Logger.logPrintAndWrite(message: "The input image must have a height and width of 2048 pixels or less, and the number of Z stacks must be 2048 or fewer.")
             
             return nil
         }
@@ -103,7 +102,7 @@ extension MTLDevice{
     
     
     func check_GpuSupport(){
-        // metal gpu family check
+        // Metal GPU family check
         Logger.logOnlyToFile(message: "Check GPU Family Supports")
         for gpu in MTLGPUFamily.allCases{
             Logger.logOnlyToFile(message: "  GPU Family: \(gpu) \(self.supportsFamily(gpu))")
@@ -120,13 +119,16 @@ extension MTLDevice{
             tierstring = "⚠️ The device supports argument buffer tier 1."
             Logger.logPrintAndWrite(message: tierstring, level: .error)
             Logger.logPrintAndWrite(message: "⚠️ Acto3D may not work properly with your GPU device.")
+            
         case .tier2:
             tierstring = "The device supports argument buffer tier 2."
             Logger.log(message: tierstring, level: .info, writeToLogfile: true, onlyToFile: true)
+            
         default:
             tierstring = "⚠️ The device does not support argument buffers."
             Logger.logPrintAndWrite(message: tierstring, level: .error)
             Logger.logPrintAndWrite(message: "⚠️ Acto3D may not work properly with your GPU device.")
+            
         }
         
         switch self.readWriteTextureSupport {
@@ -134,13 +136,16 @@ extension MTLDevice{
             tierstring = "⚠️ The device supports texture read and write tier 1."
             Logger.logPrintAndWrite(message: tierstring, level: .error)
             Logger.logPrintAndWrite(message: "⚠️ Acto3D may not work properly with your GPU device.")
+            
         case .tier2:
             tierstring = "The device supports texture read and write tier 2."
             Logger.log(message: tierstring, level: .info, writeToLogfile: true, onlyToFile: true)
+            
         default:
             tierstring = "⚠️ The device does not support texture read and write."
             Logger.logPrintAndWrite(message: tierstring, level: .error)
             Logger.logPrintAndWrite(message: "⚠️ Acto3D may not work properly with your GPU device.")
+            
         }
         
         if(self.checkNonUniformThreadgroup()){
@@ -196,5 +201,21 @@ extension MTLGPUFamily:CaseIterable, CustomStringConvertible{
         }
         
         return cases
+    }
+}
+
+extension MTLCommandQueue{
+    func makeCommandBuffer(label:String) -> MTLCommandBuffer?{
+        let cmdBuffer = self.makeCommandBuffer()
+        cmdBuffer?.label = label
+        return cmdBuffer
+    }
+}
+
+extension MTLCommandBuffer{
+    func makeComputeCommandEncoder(label:String) -> MTLComputeCommandEncoder?{
+        let cmdEncoder = self.makeComputeCommandEncoder()
+        cmdEncoder?.label = label
+        return cmdEncoder
     }
 }

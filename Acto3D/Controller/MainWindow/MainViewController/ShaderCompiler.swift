@@ -11,30 +11,30 @@ import Cocoa
 
 extension ViewController{
     
-    /// Include built-in shaders
+    
+    /// Replace `#include ***.metal` to source code.
     func preprocessShaderSource(_ shaderSource: String, shaderDirURL:URL) throws -> String {
         var processedSource = shaderSource
         
         let regex = try NSRegularExpression(pattern: #"#include\s+"([^"]+)""#)
 
+        // Find `#include` and get additional file name
         let matches = regex.matches(in: shaderSource, range: NSRange(shaderSource.startIndex..., in: shaderSource))
         
-        for match in matches{
+        Logger.logOnlyToFile(message: "Appending Acto3D bundled additional shader sources.", level: .info)
+        
+        for (index, match) in matches.enumerated(){
             guard let filenameRange = Range(match.range(at: 1), in: shaderSource) else {
                 continue
             }
-            
             let filename = String(shaderSource[filenameRange])
             
-            
+            Logger.logOnlyToFile(message: " [\(String(format: "%02d", index))] \(filename)", level: .info)
             guard let includedSource = try? String(contentsOf: shaderDirURL.appendingPathComponent(filename), encoding: .utf8) else{
-
-     
-                
                 continue
             }
             
-            
+            // Replace `#include ...` to source code.
             processedSource = processedSource.replacingOccurrences(of: shaderSource[Range(match.range, in: shaderSource)!], with: includedSource)
         }
         
@@ -44,43 +44,48 @@ extension ViewController{
     func shaderReCompile(onAppLaunch:Bool = false) throws {
         Logger.logOnlyToFile(message: "** Compile shaders", level: .info)
         
+        // Main shader files are located at "Acto3D.app/Contents/Resources/Shader/"
         let appURL = Bundle.main.bundleURL
         let mainShadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("Acto3D")
-        
         
         guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader") else {
             Logger.logOnlyToFile(message: "Failed to find document directory", level: .error)
             throw NSError(domain: "Failed to find document directory", code: -1, userInfo: nil)
         }
+        
         do {
             try FileManager.default.createDirectory(at: customShadersURL, withIntermediateDirectories: true, attributes: nil)
+            
         } catch {
             Logger.logOnlyToFile(message: "Error in creating custom shader directory", level: .error)
             throw NSError(domain: "Error in creating custom shader directory", code: -1, userInfo: nil)
+            
         }
-        
         
         var customShaderDirUrl:[URL] = [customShadersURL]
         Logger.logOnlyToFile(message: "Main shader directory: \(mainShadersURL.path)", level: .info)
         Logger.logOnlyToFile(message: "Shader directory: \(customShaderDirUrl[0].path)", level: .info)
         
+        // Get the sub-directory list for `customShaderDirUrl`
         customShaderDirUrl += fetchDirectoryURLs(directoryURL: customShadersURL)
 
         var mainShaderURL:URL!
 
+        Logger.logOnlyToFile(message: "** Fetch Acto3D shader files.")
         do {
             let fileURLs = try FileManager.default.contentsOfDirectory(at: mainShadersURL, includingPropertiesForKeys: nil)
             let metalFiles = fileURLs.filter { $0.pathExtension == "metal" }
 
-            for fileURL in metalFiles {
-                print(fileURL)
+            for fileURL in metalFiles{
+                Logger.logOnlyToFile(message: "Main shader file: \(fileURL.path)", level: .info)
+                
                 if(fileURL.lastPathComponent == "shader.metal"){
                     mainShaderURL = fileURL
                 }
             }
             
         } catch {
-            Logger.logOnlyToFile(message: "Failed to retrive shader files.", level: .error)
+            Logger.logOnlyToFile(message: "Failed to retrive Acto3D shader files.", level: .error)
             throw NSError(domain: "Error in finding preset shaders", code: -1, userInfo: nil)
         }
 
@@ -89,24 +94,24 @@ extension ViewController{
         
         var sourceText = ""
         
+        // Create metal shader source code from list of metal files.
         do {
             let shaderSource = try String(contentsOf: mainShaderURL!, encoding: .utf8)
-
             sourceText = try preprocessShaderSource(shaderSource, shaderDirURL: mainShadersURL)
 
         } catch {
             Logger.logOnlyToFile(message: "Failed to retrive preset shader files.", level: .error)
         }
         
+        
+        Logger.logOnlyToFile(message: "** Retrieving custom shaders.", level: .info)
         for dir in customShaderDirUrl{
             do {
                 let fileURLs = try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)
                 let metalFiles = fileURLs.filter { $0.pathExtension == "metal" }
-                print(metalFiles)
-                
-                for metalFile in metalFiles{
-                    Logger.logOnlyToFile(message: "Retrieving contents from: \(metalFile)", level: .info)
-                    
+            
+                for (index, metalFile) in metalFiles.enumerated(){
+                    Logger.logOnlyToFile(message: " [\(String(format: "%02d", index))] \(dir.lastPathComponent)/\(metalFile.lastPathComponent)")
                     guard let source = try? String(contentsOf: metalFile, encoding: .utf8) else{
                         continue
                     }
@@ -114,12 +119,13 @@ extension ViewController{
                     guard let shaderInfo = extractShaderInformation(from: source, path: metalFile.relativePath(from: customShadersURL)!  ) else{
                         // shader file lacks a description of its functionality.
                         // the shader file is invalid
+                        Logger.logOnlyToFile(message: "  \(dir.lastPathComponent)/\(metalFile.lastPathComponent) > Invalid shader file. Check metadata.", level: .error)
                         continue
                     }
                     
                     shaderList.append(shaderInfo)
-                    
                     sourceText += "\n" + source
+                    
                 }
             }catch {
                 Logger.logOnlyToFile(message: "Failed to retrive shader files.", level: .error)
@@ -137,7 +143,7 @@ extension ViewController{
             
             compileOption.libraryType = .executable
             
-            Logger.logOnlyToFile(message: "Try to compile shaders", level: .info)
+            Logger.logOnlyToFile(message: "** Compiling shader from source code.", level: .info)
             let library = try renderer.device.makeLibrary(source: sourceText, options: compileOption)
             
             renderer.mtlLibrary = library
@@ -173,14 +179,12 @@ extension ViewController{
     
     
     func extractShaderInformation(from source: String, path:String) -> ShaderManage? {
-       
         // Regular expressions patterns
         let patterns = [
             "author": "Author:\\s*(.*)",
             "description": "Description:\\s*(.*)",
             "label": "Label:\\s*(.*)",
             "kernel" : "kernel void (.+?)\\("
-            
         ]
         
         // Variables to store the extracted information
@@ -218,11 +222,12 @@ extension ViewController{
               let functionLabel = functionLabel,
               let kernelName = kernelName
         else {return nil}
-        return ShaderManage(functionLabel: functionLabel, kernalName: kernelName, authorName: author, description: description, location: path)
         
+        return ShaderManage(functionLabel: functionLabel, kernalName: kernelName, authorName: author, description: description, location: path)
     }
     
     
+    // Fetch sub-directories at the url.
     func fetchDirectoryURLs(directoryURL: URL) -> [URL] {
         var result: [URL] = []
         let fileManager = FileManager.default

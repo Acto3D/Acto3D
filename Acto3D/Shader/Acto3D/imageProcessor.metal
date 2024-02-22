@@ -26,11 +26,21 @@ kernel void applyFilter_gaussian3D(texture3d<float, access::sample> inputTexture
     // half size of the kernel size (Odd value)
     int half_kernel_size = k_size / 2;
     
+    int width = inputTexture.get_width();
+    int height = inputTexture.get_height();
+    int depth = inputTexture.get_depth();
+    
     float4 result = float4(0.0);
     for (int i = -half_kernel_size; i <= half_kernel_size; i++) {
         for (int j = -half_kernel_size; j <= half_kernel_size; j++) {
             for (int k = -half_kernel_size; k <= half_kernel_size; k++) {
-                float4 value = inputTexture.read(gid + uint3(i, j, k));
+                // check if gid is inside the texture area
+                int adjusted_i = max(min(int(gid.x) + i, width - 1), 0);
+                int adjusted_j = max(min(int(gid.y) + j, height - 1), 0);
+                int adjusted_k = max(min(int(gid.z) + k, depth - 1), 0);
+                uint3 adjusted_gid = uint3(adjusted_i, adjusted_j, adjusted_k);
+                
+                float4 value = inputTexture.read(adjusted_gid);
                 int idx = (i + half_kernel_size) * k_size * k_size + (j + half_kernel_size) * k_size + (k + half_kernel_size);
                 float weight = kernel_weights[idx];
                 result += value * weight;

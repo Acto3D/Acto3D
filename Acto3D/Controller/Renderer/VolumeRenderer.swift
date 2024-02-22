@@ -39,6 +39,7 @@ class VoluemeRenderer{
     
     var quaternion:simd_quatf = simd_quatf.init(ix: 0, iy: 0, iz: 0, r: 1)
     
+    // Store metal buffer of Transfer function (Opacity for pixel value)
     var toneBuffer_ch1:MTLBuffer?
     var toneBuffer_ch2:MTLBuffer?
     var toneBuffer_ch3:MTLBuffer?
@@ -70,9 +71,9 @@ class VoluemeRenderer{
         
         Logger.logOnlyToFile(message: "Metal device on \(self.device.name) is ready for use.")
 
+        // Check device support for Metal and write to log.
         self.device.check_GpuSupport()
     }
-    
     
     public func createDefaultLibrary(){
         guard let mtlLibrary = self.device.makeDefaultLibrary() else{
@@ -86,10 +87,9 @@ class VoluemeRenderer{
         guard let shader = currentShader,
               let mtlFunction = mtlLibrary.makeFunction(name: shader.kernalName) else {
             
-            Dialog.showDialog(message: "No corresponding shader found. Try in preset shader.\n Shader Name: \(currentShader?.kernalName)")
+            Dialog.showDialog(message: "No corresponding shader found. Try in preset shader.")
             
             self.currentShader = ShaderManage.getPresetList()[AppConfig.DEFAULT_SHADER_NO]
-            
                 guard let shader = currentShader,
                       let mtlFunction = mtlLibrary.makeFunction(name: shader.kernalName) else {
                     Dialog.showDialog(message: "Unkown error")
@@ -141,32 +141,27 @@ class VoluemeRenderer{
 //            drawingViewSize = AppConfig.HQ_SIZE.toInt()
 //        }
         
-        
         // check if current function and pipeline are rendering mode
-        if mtlFunction == nil {
-            createMtlFunctionForRendering()
-        }
-        if mtlFunction.label != MTL_label.main_rendering {
+        if (mtlFunction == nil ||
+            mtlFunction.label != MTL_label.main_rendering){
             createMtlFunctionForRendering()
         }
         
-        if renderPipeline == nil{
-            createMtlPipelineForRendering()
-        }
-        if renderPipeline.label != MTL_label.main_rendering {
+        if (renderPipeline == nil ||
+            renderPipeline.label != MTL_label.main_rendering){
             createMtlPipelineForRendering()
         }
         
+        // Old code
         if(currentShader?.kernalName == "btf_perfordmanceCheckInPaper2"){
             return rendering_minimum()
         }
         
-        guard let cmdBuffer = cmdQueue.makeCommandBuffer() else {
-            Dialog.showDialog(message: "Error in creating rendering command buffer")
+        guard let cmdBuffer = cmdQueue.makeCommandBuffer(label: "Acto3D Rendering Command Buffer") else{
+            Dialog.showDialog(message: "Error in creating rendering command buffer", level: .error)
             return nil
         }
         
-        cmdBuffer.label = "Rendering Command Buffer"
         
         //FIXME: Currently, Acto3D only supports Metal2's Argument Encoder
         // Currently, Acto3D only supports Metal2's Argument Encoder.
@@ -209,13 +204,10 @@ class VoluemeRenderer{
             pointCooordinates = [float3(500, 500, 500), float3(5, 7, 9)]
         }
         
-        
         argumentManager?.encodeArray(pointCooordinates, argumentIndex: .pointCoordsBuffer, capacity: tempCount)
         
         
-        
-        let cmdEncoder = cmdBuffer.makeComputeCommandEncoder()!
-        cmdEncoder.label = "Rendering Command Encoder"
+        let cmdEncoder = cmdBuffer.makeComputeCommandEncoder(label: "Acto3D Rendering Encoder")!
         
         cmdEncoder.useResource(mainTexture, usage: .read)
         cmdEncoder.useResource(argumentManager!.getBuffer(argumentIndex: .outputBuffer)!, usage: .write)
@@ -262,11 +254,9 @@ class VoluemeRenderer{
         
         let startTime = Date()
 
-        
         cmdEncoder.endEncoding()
         cmdBuffer.commit()
         cmdBuffer.waitUntilCompleted()
-        
         
         let elapsedTime = Date().timeIntervalSince(startTime) * 1000
         let kernelExecutionTime = (cmdBuffer.kernelEndTime - cmdBuffer.kernelStartTime) * 1000
@@ -276,15 +266,12 @@ class VoluemeRenderer{
             Logger.log(message: "** Thread(\(width), \(height)), Time: Kernel=\(kernelExecutionTime), GPU=\(gpuExecutionTimeInSeconds), CPU=\(elapsedTime)")
         }
         
-        
-        
         // retrive calculated image data from buffer
         guard let providerRef = CGDataProvider(data: Data (bytes: argumentManager!.outputPxBuffer!.contents(),
                                                            count: MemoryLayout<UInt8>.stride * argumentManager!.currentPxByteSize) as CFData)
         else { return nil }
         
-        
-        
+        // Resulting image is 24 bits RGB image
         guard let img = CGImage(
             width: drawingViewSize.toInt(),
             height: drawingViewSize.toInt(),
@@ -312,7 +299,6 @@ class VoluemeRenderer{
             return img.toNSImage
         }
     }
-    
     
     public func rendering_minimum() -> NSImage?{
         guard let mainTexture = mainTexture else {return nil}
