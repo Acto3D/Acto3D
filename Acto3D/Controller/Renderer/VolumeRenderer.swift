@@ -866,22 +866,22 @@ class VoluemeRenderer{
         
         let baseVector = quaternion.act(float3(1,0,0))
         let scaledVector = float3(baseVector.x * scaleMagnification.toFloat() * renderParams.scale / imageParams.scaleX,
-                                        baseVector.y * scaleMagnification.toFloat() * renderParams.scale / imageParams.scaleY,
-                                        baseVector.z * scaleMagnification.toFloat() * renderParams.scale * renderParams.zScale / imageParams.scaleZ)
+                                  baseVector.y * scaleMagnification.toFloat() * renderParams.scale / imageParams.scaleY,
+                                  baseVector.z * scaleMagnification.toFloat() * renderParams.scale * renderParams.zScale / imageParams.scaleZ)
         let scaledVectorLength = length(scaledVector)
 
         
         
         // Set the line color and width
         let scaleBarWidth = drawingViewSize.toCGFloat() / 128.0
-        context.setLineWidth(scaleBarWidth)
+        
         // Define the start and end points of the line
         let origin = NSPoint(x: drawingViewSize.toCGFloat() / 16.0 , y: drawingViewSize.toCGFloat() / 16.0)
         
-        let scaleXvec:CGFloat = 200 * renderParams.scale.toCGFloat() / imageParams.scaleX.toCGFloat()
-        let scaleZvec:CGFloat = 200 * renderParams.scale.toCGFloat() * renderParams.zScale.toCGFloat() / imageParams.scaleZ.toCGFloat()
-        
-        let length = 50.0 * self.renderParams.scale.toCGFloat()
+//        let scaleXvec:CGFloat = 200 * renderParams.scale.toCGFloat() / imageParams.scaleX.toCGFloat()
+//        let scaleZvec:CGFloat = 200 * renderParams.scale.toCGFloat() * renderParams.zScale.toCGFloat() / imageParams.scaleZ.toCGFloat()
+//
+//        let length = 50.0 * self.renderParams.scale.toCGFloat()
         
         
         
@@ -889,6 +889,7 @@ class VoluemeRenderer{
                                          y: origin.y)
         context.move(to: origin)
         context.addLine(to: staticAxisEndPoint)
+        context.setLineWidth(scaleBarWidth)
         context.setStrokeColor(NSColor.yellow.cgColor)
         context.strokePath()
         
@@ -896,24 +897,31 @@ class VoluemeRenderer{
             // show scale string
             
             // Set the font and text color
-            let scaleFontSize = (imageParams.scaleFontSize * drawingViewSize.toFloat() * scaleMagnification.toFloat()  / 512.0 ).toCGFloat()
+            let scaleFontSize = (imageParams.scaleFontSize * drawingViewSize.toFloat() / 512.0 ).toCGFloat()
             let font = NSFont.boldSystemFont(ofSize: scaleFontSize)
-            let attributes: [NSAttributedString.Key: Any] = [
+            let attributes_fore: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: NSColor.white,
-                .strokeColor: NSColor.black,
-                .strokeWidth: -2.0
             ]
             
-            // Draw text
+            let attributes_back: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: NSColor.black,
+                .strokeWidth: -5.0
+            ]
+            
             let text = "\(imageParams.scalebarLength) \(imageParams.unit)"
-            
-            
             let string = CFStringCreateWithCString(nil, text, CFStringBuiltInEncodings.UTF8.rawValue)
-            let attributedString2 = CFAttributedStringCreate(nil, string, attributes as CFDictionary)
-            let line = CTLineCreateWithAttributedString(attributedString2!)
+            
+            let attributedString_fore = CFAttributedStringCreate(nil, string, attributes_fore as CFDictionary)
+            let attributedString_back = CFAttributedStringCreate(nil, string, attributes_back as CFDictionary)
+            let line_fore = CTLineCreateWithAttributedString(attributedString_fore!)
+            let line_back = CTLineCreateWithAttributedString(attributedString_back!)
+            
             context.textPosition = NSPoint(x: origin.x, y: origin.y + scaleBarWidth )
-            CTLineDraw(line, context)
+            CTLineDraw(line_back, context)
+            context.textPosition = NSPoint(x: origin.x, y: origin.y + scaleBarWidth )
+            CTLineDraw(line_fore, context)
             
         }
         
