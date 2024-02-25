@@ -8,10 +8,10 @@
 import Cocoa
 
 @objc enum ValueType: Int {
-    case String
-    case Float
-    case Int
-    case UInt
+    case String // 0
+    case Float  // 1
+    case Int    // 2
+    case UInt   // 3
 }
 
 

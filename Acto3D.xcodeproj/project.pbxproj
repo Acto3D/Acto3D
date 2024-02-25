@@ -33,6 +33,7 @@
 		B04606A729CD3AF800DE1D50 /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04606A629CD3AF800DE1D50 /* ImageProcessor.swift */; };
 		B04AD2392A4741CA0061E350 /* ShaderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04AD2382A4741CA0061E350 /* ShaderManager.swift */; };
 		B04AD2412A4756340061E350 /* URL+relative.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04AD2402A4756340061E350 /* URL+relative.swift */; };
+		B04CC4302B8B2513003888A2 /* TCPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04CC42F2B8B2513003888A2 /* TCPServer.swift */; };
 		B05B03592B0B572000E4C39E /* VC_ControlPoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05B03582B0B572000E4C39E /* VC_ControlPoints.swift */; };
 		B0693FC627B02ADC00A778CE /* FocusCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0693FC527B02ADC00A778CE /* FocusCircle.swift */; };
 		B06A2B14299E255A002B1CC5 /* SegmentNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A2B13299E255A002B1CC5 /* SegmentNode.swift */; };
@@ -136,6 +137,7 @@
 		B04AD2382A4741CA0061E350 /* ShaderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderManager.swift; sourceTree = "<group>"; };
 		B04AD2402A4756340061E350 /* URL+relative.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+relative.swift"; sourceTree = "<group>"; };
 		B04AD2422A477AEB0061E350 /* preset_BTF.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_BTF.metal; sourceTree = "<group>"; };
+		B04CC42F2B8B2513003888A2 /* TCPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCPServer.swift; sourceTree = "<group>"; };
 		B04E1AD72A8AFAD500DE7EDA /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
 		B05243D62A4A720800EBAA5C /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
 		B056CDC52A8D5089001809C3 /* macros.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = macros.metal; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 		B01E358F276DD88200EAF0CA /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				B04CC42E2B8B24F5003888A2 /* Network */,
 				B06FE5C52B837033009592D5 /* DemoModel */,
 				B02A31A32A835EA7003B9B3D /* ImageProcessor */,
 				B0F3C92B2795C45400925A30 /* MultiTIFF */,
@@ -363,6 +366,14 @@
 				B056CDC52A8D5089001809C3 /* macros.metal */,
 			);
 			path = Acto3D;
+			sourceTree = "<group>";
+		};
+		B04CC42E2B8B24F5003888A2 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				B04CC42F2B8B2513003888A2 /* TCPServer.swift */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 		B04E1AD62A8AFA6900DE7EDA /* ShaderTemplates */ = {
@@ -695,6 +706,7 @@
 				B0321D5929666F3F00FA2507 /* Segment3DController.swift in Sources */,
 				B0AAD0662A1282B900A24138 /* DiceCoeff.swift in Sources */,
 				B004C7942916DB5600F79AA5 /* NSRect+.swift in Sources */,
+				B04CC4302B8B2513003888A2 /* TCPServer.swift in Sources */,
 				B02D5A5A2A761B6300A4F9AC /* ImageProcessorCancelButton.swift in Sources */,
 				B0C49F572A62E3E8007D36C2 /* ArgumentEncoderManager.swift in Sources */,
 				B0B281732884E95400424307 /* MTIFF.swift in Sources */,

@@ -42,7 +42,7 @@ class ViewController: NSViewController{
     @IBOutlet weak var crop_Slider: NSSlider!
     @IBOutlet weak var crop_Label: NSTextField!
     @IBOutlet weak var slice_Label: NSTextField!
-    @IBOutlet weak var slice_Label_current: NSTextField!
+    @IBOutlet weak var slice_Label_current: ValidatingTextField!
     @IBOutlet weak var zScale_Slider: NSSlider!
     @IBOutlet weak var zScale_Label: ValidatingTextField!
     
@@ -166,6 +166,8 @@ class ViewController: NSViewController{
     
     var shaderList:[ShaderManage] = ShaderManage.getPresetList()
     
+    var tcpServer:TCPServer?
+    
     //MARK: - Initialize
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -247,6 +249,16 @@ class ViewController: NSViewController{
         // Editible Validation Text Field
         zScale_Label.validationDelegate = self
         scale_Label.validationDelegate = self
+        slice_Label_current.validationDelegate = self
+        
+        
+        if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
+            self.tcpServer = tcpServer
+            self.tcpServer?.delegate = self
+            self.tcpServer?.renderer = renderer
+            self.tcpServer?.vc = self
+            self.tcpServer?.start()
+        }
     }
     
     
@@ -1437,6 +1449,21 @@ extension ViewController: ValidatingTextFieldDelegate {
             
         default:
             break
+        }
+    }
+}
+
+extension ViewController: TCPServerDelegate{
+    func startDataTransfer(sender: TCPServer) {
+        if let _ = renderer.mainTexture {
+            if !closeCurrentSession(){
+                sender.stop()
+                return
+            }else{
+                sender.sendVersionInfoToStartTransferSession()
+            }
+        }else{
+            sender.sendVersionInfoToStartTransferSession()
         }
     }
 }

@@ -36,6 +36,12 @@ extension UInt32{
     func toInt() -> Int{
         return Int(self)
     }
+    func toUInt16() -> UInt16{
+        return UInt16(self)
+    }
+    func toUInt8() -> UInt8{
+        return UInt8(self)
+    }
 }
 
 extension UInt64{

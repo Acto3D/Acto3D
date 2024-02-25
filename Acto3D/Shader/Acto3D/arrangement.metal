@@ -356,3 +356,32 @@ kernel void splitChannelEncoder16bit(constant uint16_t   *inputData          [[b
         outputData[pos + imgWidth * imgHeight * c] = inputData[position.y * imgWidth * imgChannelCount + position.x * imgChannelCount + c];
     }
 }
+
+
+// Write data to 3D texture from rgba slice image
+kernel void createTextureFromCYX_8bit(constant uint8_t                *inputData [[buffer(0)]],
+                                      constant VolumeData            &meta [[buffer(1)]],
+                                      constant uint8_t                &originalImgCh [[buffer(2)]],
+                                      constant uint16_t                &zPos [[buffer(3)]],
+                                      texture3d<float, access::write> tex [[texture(0)]],
+                                      uint2                           position [[thread_position_in_grid]]){
+    uint imgX = meta.inputImageWidth;
+    uint imgY = meta.inputImageHeight;
+    
+    if (position.x >= imgX || position.y >= imgY){
+        return;
+    }
+    
+    float4 outputData = float4(0, 0, 0, 0);
+//    float4 dr_min = float4(0, 0, 0, 0);
+//    float4 dr_max = float4((1<<8) - 1, (1<<8) - 1, (1<<8) - 1, (1<<8) - 1);
+    
+    uint bytePerChannel = imgX * imgY;
+    
+    for (int i = 0; i < originalImgCh; i++) {
+        outputData[i] = inputData[bytePerChannel * i + (imgX * position.y + position.x) ] / 255.0f;
+    }
+    
+    tex.write(outputData, ushort3(position.x, position.y, zPos));
+}
+

@@ -23,14 +23,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
-     
         performanceMenu.delegate = self
         debug_menu.delegate = self
         
         // Obtein command line arguments
         let arguments = CommandLine.arguments
         for argument in arguments {
-            print(argument)
         }
 
         if arguments.contains("--input") {

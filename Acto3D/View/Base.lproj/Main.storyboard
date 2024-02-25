@@ -1160,7 +1160,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Z0-Q5-mG0">
-                                <rect key="frame" x="732" y="204" width="19" height="30"/>
+                                <rect key="frame" x="732" y="205" width="19" height="28"/>
                                 <stepperCell key="cell" continuous="YES" alignment="left" minValue="2" maxValue="20" doubleValue="3" id="jjl-39-roy"/>
                                 <connections>
                                     <action selector="clusterCountStepperChanged:" target="2Jc-51-6dz" id="B9o-UH-JyE"/>
@@ -2246,12 +2246,6 @@ isotropic voxel size</string>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
                                                                                     <userDefinedRuntimeAttributes>
-                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="typeIndex">
-                                                                                            <integer key="value" value="1"/>
-                                                                                        </userDefinedRuntimeAttribute>
-                                                                                        <userDefinedRuntimeAttribute type="number" keyPath="inputTypeIndex">
-                                                                                            <integer key="value" value="1"/>
-                                                                                        </userDefinedRuntimeAttribute>
                                                                                         <userDefinedRuntimeAttribute type="number" keyPath="valueType">
                                                                                             <integer key="value" value="1"/>
                                                                                         </userDefinedRuntimeAttribute>
@@ -2357,7 +2351,7 @@ DQ
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="width" constant="20" id="A2v-20-PWj"/>
                                                                                     </constraints>
-                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="right" title="0" id="mpc-39-rzw" customClass="I">
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="right" title="0" id="mpc-39-rzw">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2950,7 +2944,7 @@ DQ
                                                         <rect key="frame" x="-100" y="-100" width="392" height="16"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
-                                                    <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="6he-I2-AMy">
+                                                    <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="6he-I2-AMy">
                                                         <rect key="frame" x="376" y="0.0" width="16" height="570"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
@@ -3038,7 +3032,7 @@ DQ
                                                     <rect key="frame" x="6" y="6" width="392" height="502"/>
                                                     <clipView key="contentView" id="wJ1-EY-aIT">
                                                         <rect key="frame" x="1" y="1" width="390" height="500"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <collectionView selectable="YES" id="WFZ-Kc-Tw5" customClass="MovieCollectionView" customModule="Acto3D" customModuleProvider="target">
                                                                 <rect key="frame" x="0.0" y="0.0" width="390" height="500"/>
@@ -4496,7 +4490,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="17" height="17"/>
+        <image name="link" catalog="system" width="14" height="14"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

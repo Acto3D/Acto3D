@@ -56,6 +56,9 @@ class AppConfig {
     
     /// This constant represents the default shader index.
     @CachedUserDefault(key: "CLIPBOARD_WHEN_SNAPSHOT", defaultValue: true) static var CLIPBOARD_WHEN_SNAPSHOT: Bool
+    
+    /// This constant represents TCP port.
+    @CachedUserDefault(key: "TCP_PORT", defaultValue: 54847) static var TCP_PORT: UInt16
 
     private init() {
     }
