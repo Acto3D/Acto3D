@@ -19,12 +19,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @IBOutlet weak var performanceMenu:NSMenu!
     @IBOutlet weak var debug_mode: NSMenuItem!
+    @IBOutlet weak var allow_tcp: NSMenuItem!
+    @IBOutlet weak var portnumber: NSMenuItem!
     @IBOutlet weak var debug_menu: NSMenu!
+    @IBOutlet weak var netConnection: NSMenu!
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
         performanceMenu.delegate = self
         debug_menu.delegate = self
+        netConnection.delegate = self
         
         // Obtein command line arguments
         let arguments = CommandLine.arguments
@@ -94,7 +98,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
         switch menu.identifier?.rawValue {
         case "debug":
+            print("aaaaddaaa")
             debug_mode.state = AppConfig.IS_DEBUG_MODE ? .on : .off
+            
+        case "connect":
+            print("aaaaaaa")
+            allow_tcp.state = AppConfig.ACCEPT_TCP_CONNECTION ? .on : .off
+            portnumber.title = "Change Port (\(AppConfig.TCP_PORT))"
             
         case "performance_test":
             menu.removeAllItems()

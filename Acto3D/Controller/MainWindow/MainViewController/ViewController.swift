@@ -252,7 +252,9 @@ class ViewController: NSViewController{
         slice_Label_current.validationDelegate = self
         
         
-        if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
+        
+        if AppConfig.ACCEPT_TCP_CONNECTION == true,
+           let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
             self.tcpServer = tcpServer
             self.tcpServer?.delegate = self
             self.tcpServer?.renderer = renderer

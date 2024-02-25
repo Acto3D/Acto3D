@@ -199,6 +199,9 @@ extension ViewController{
         case "high_quality_size":
             AppConfig.HQ_SIZE = sender.tag.toUInt16()
             
+        case "accept_tcp":
+            AppConfig.ACCEPT_TCP_CONNECTION = !AppConfig.ACCEPT_TCP_CONNECTION
+            
         case "create_mp4":
             let dialog = NSOpenPanel();
             dialog.title                   = "Choose Images";

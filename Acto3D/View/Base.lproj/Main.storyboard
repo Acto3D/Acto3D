@@ -450,6 +450,25 @@ isotropic voxel size</string>
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="Connection" id="MZm-qg-IGR">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Connection" identifier="connect" id="GwA-QX-5Tq">
+                                    <items>
+                                        <menuItem title="Accept External Data Input" state="on" identifier="accept_tcp" id="lcG-2V-GpV">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="tcn-Je-1kf"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Change Port ()" identifier="change_port" id="yMO-1p-MbT">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="wRk-ph-RBI"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
                             <menuItem title="Image Process" id="sA6-bM-1OV">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Image Process" id="ZZl-ri-U8H">
@@ -793,9 +812,12 @@ isotropic voxel size</string>
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Acto3D" customModuleProvider="target">
                     <connections>
+                        <outlet property="allow_tcp" destination="lcG-2V-GpV" id="1bc-K0-rYR"/>
                         <outlet property="debug_menu" destination="IGr-co-nE4" id="t2t-zf-zX6"/>
                         <outlet property="debug_mode" destination="SKa-ix-Rv9" id="hfl-YP-i63"/>
+                        <outlet property="netConnection" destination="GwA-QX-5Tq" id="wEF-4K-pcS"/>
                         <outlet property="performanceMenu" destination="Nxu-sX-6eM" id="tRF-BL-lZg"/>
+                        <outlet property="portnumber" destination="yMO-1p-MbT" id="Zua-Ns-lsG"/>
                     </connections>
                 </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
@@ -1160,7 +1182,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Z0-Q5-mG0">
-                                <rect key="frame" x="732" y="205" width="19" height="28"/>
+                                <rect key="frame" x="732" y="204" width="19" height="30"/>
                                 <stepperCell key="cell" continuous="YES" alignment="left" minValue="2" maxValue="20" doubleValue="3" id="jjl-39-roy"/>
                                 <connections>
                                     <action selector="clusterCountStepperChanged:" target="2Jc-51-6dz" id="B9o-UH-JyE"/>

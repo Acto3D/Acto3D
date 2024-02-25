@@ -57,6 +57,7 @@ class TCPServer {
             
             switch state {
             case .ready:
+                Logger.logPrintAndWrite(message: "Acto3D is accepting data input from external software (Port: \(AppConfig.TCP_PORT))")
                 print("Server is ready at port \(self.port)")
                 
             case .failed(let error):
