@@ -783,27 +783,16 @@ class ViewController: NSViewController{
         renderer.renderParams.sliceNo = slice_Slider.integerValue.toUInt16()
         renderer.renderParams.scale = scale_Slider.floatValue
         
-//        slice_Label.stringValue = "\(slice_Slider.integerValue) / \(slice_Slider.maxValue.toInt())"
         slice_Label_current.stringValue = "\(slice_Slider.integerValue)"
+        slice_Label_current.sizeToFit()
+        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label_current.frame.width
         slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
         crop_Label.stringValue = "\(crop_Slider.integerValue) / \(crop_Slider.maxValue.toInt())"
         scale_Label.stringValue = "\(scale_Slider.floatValue.toFormatString(format: "%.2f"))"
         zScale_Label.stringValue = "\(zScale_Slider.floatValue.toFormatString(format: "%.2f"))"
         
         slice_Label.sizeToFit()
-        slice_Label_current.sizeToFit()
-        print(
-            slice_Label_current.constraints)
-//        for (index, constraint) in slice_Label_current.constraints.enumerated(){
-//            constraint.firstAttribute = .width
-//        }
-//        slice_Label_current.constraints[0].constant = 60
         
-        slice_Label_current.sizeToFit()
-        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label_current.frame.width
-        
-        print(slice_Label_current.fittingSize)
-//        slice_Label_current.setFrameSize(NSSize(width: 60, height: slice_Label_current.frame.height))
         crop_Label.sizeToFit()
         scale_Label.sizeToFit()
         zScale_Label.sizeToFit()
@@ -820,7 +809,10 @@ class ViewController: NSViewController{
         slice_Slider.integerValue = params.sliceNo.toInt()
         crop_Slider.integerValue = params.cropSliceNo.toInt()
         
-        slice_Label.stringValue = "\(slice_Slider.integerValue) / \(slice_Slider.maxValue.toInt())"
+        slice_Label_current.stringValue = "\(slice_Slider.integerValue)"
+        slice_Label_current.sizeToFit()
+        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label_current.frame.width
+        slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
         crop_Label.stringValue = "\(crop_Slider.integerValue) / \(crop_Slider.maxValue.toInt())"
         scale_Label.stringValue = "\(scale_Slider.floatValue.toFormatString(format: "%.2f"))"
         zScale_Label.stringValue = "\(zScale_Slider.floatValue.toFormatString(format: "%.2f"))"
@@ -1443,7 +1435,10 @@ extension ViewController: ValidatingTextFieldDelegate {
             outputView.image = renderer.rendering()
             
         case "slice_current":
-            updateSliceAndScale(currentSliceToMax: true)
+            let no = Int(newValue as! UInt)
+            slice_Slider.integerValue = no
+            renderer.renderParams.sliceNo = no.toUInt16()
+            updateSliceAndScale(currentSliceToMax: false)
             outputView.image = renderer.rendering()
             
             
