@@ -21,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @IBOutlet weak var debug_mode: NSMenuItem!
     @IBOutlet weak var allow_tcp: NSMenuItem!
     @IBOutlet weak var portnumber: NSMenuItem!
+    @IBOutlet weak var ipaddress: NSMenuItem!
     @IBOutlet weak var debug_menu: NSMenu!
     @IBOutlet weak var netConnection: NSMenu!
     
@@ -81,7 +82,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     @IBAction func menuAction(_ sender: NSMenuItem) {
-        
         // find a main view controller in window
         var mainViewController:ViewController?
         for window in NSApplication.shared.windows{
@@ -95,16 +95,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
+    
     func menuWillOpen(_ menu: NSMenu) {
+        ipaddress.isEnabled = false
         switch menu.identifier?.rawValue {
         case "debug":
-            print("aaaaddaaa")
             debug_mode.state = AppConfig.IS_DEBUG_MODE ? .on : .off
             
         case "connect":
-            print("aaaaaaa")
             allow_tcp.state = AppConfig.ACCEPT_TCP_CONNECTION ? .on : .off
-            portnumber.title = "Change Port (\(AppConfig.TCP_PORT))"
+            portnumber.title = "Change Port: \(AppConfig.TCP_PORT)"
+            
+            // 使用例
+            if let localIPAddress = TCPServer.getLocalIPAddress(){
+                ipaddress.title = "IP Address: \(localIPAddress) (Click To Copy)"
+                ipaddress.identifier = NSUserInterfaceItemIdentifier(localIPAddress)
+                ipaddress.target = self
+                ipaddress.action = #selector(copyIPAddress(_:))
+                ipaddress.isEnabled = true
+                
+            } else {
+                ipaddress.title = "No Network Connection"
+                ipaddress.identifier = nil
+                ipaddress.isEnabled = false
+                ipaddress.action = nil
+            }
+            
             
         case "performance_test":
             menu.removeAllItems()
@@ -140,5 +156,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
 
+    @objc func copyIPAddress(_ sender: NSMenuItem) {
+        if let ipAddress = sender.identifier?.rawValue {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(ipAddress, forType: .string)
+        }
+    }
 }
 

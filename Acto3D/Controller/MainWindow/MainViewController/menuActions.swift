@@ -679,7 +679,6 @@ extension ViewController{
                     }
                 }
                 
-                print("B")
                 
             }
             

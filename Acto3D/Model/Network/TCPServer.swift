@@ -440,7 +440,12 @@ class TCPServer {
             if let data = data, let signal = String(data: data, encoding: .utf8), signal == "END" {
                 print("Received end signal. Data transmission completed successfully.")
                 // 通信を正常に終了
+                
+                Logger.logPrintAndWrite(message: "Data transfer succeeded.", level: .info)
+                
                 self.stop()
+                
+                
             } else if let error = error {
                 print("Error receiving end signal: \(error)")
                 self.stop(byError: true)
@@ -456,6 +461,7 @@ class TCPServer {
         print("Server stopped")
     }
     
+    
     deinit {
         // リスナーを停止
         connection?.cancel()
@@ -463,4 +469,32 @@ class TCPServer {
         print("Server on port \(self.port) is stopped.")
     }
     
+    
+    static func getLocalIPAddress() -> String? {
+        var address: String?
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0 else { return nil }
+        guard let firstAddr = ifaddr else { return nil }
+
+        for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+            let interface = ifptr.pointee
+            let addrFamily = interface.ifa_addr.pointee.sa_family
+            if addrFamily == UInt8(AF_INET) { // IPv4
+                var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                let success = getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len),
+                                          &hostname, socklen_t(hostname.count),
+                                          nil, socklen_t(0), NI_NUMERICHOST) == 0
+                if success {
+                    let currentAddress = String(cString: hostname)
+                    if interface.ifa_flags & UInt32(IFF_LOOPBACK) == 0 { // 127.0.0.1 を除外
+                        address = currentAddress
+                        break
+                    }
+                }
+            }
+        }
+        freeifaddrs(ifaddr)
+
+        return address
+    }
 }
