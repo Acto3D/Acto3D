@@ -450,28 +450,6 @@ isotropic voxel size</string>
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Connection" id="MZm-qg-IGR">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Connection" identifier="connect" id="GwA-QX-5Tq">
-                                    <items>
-                                        <menuItem title="Accept External Data Input" state="on" identifier="accept_tcp" id="lcG-2V-GpV">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="tcn-Je-1kf"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Change Port ()" identifier="change_port" id="yMO-1p-MbT">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="wRk-ph-RBI"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="IP address: (Click to Copy)" enabled="NO" id="mlk-Hi-VCG">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
                             <menuItem title="Image Process" id="sA6-bM-1OV">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Image Process" id="ZZl-ri-U8H">
@@ -516,19 +494,6 @@ isotropic voxel size</string>
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Tool" id="dgB-vk-lf0">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Tool" id="onQ-hN-Zod">
-                                    <items>
-                                        <menuItem title="Create MP4 From Images" identifier="create_mp4" id="WHr-gD-Xvq">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="qkq-bP-koe"/>
-                                            </connections>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
                             <menuItem title="Shader" id="utN-pQ-Tbd">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Shader" id="2yu-vr-u7V">
@@ -549,6 +514,41 @@ isotropic voxel size</string>
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="tBm-8S-FoM"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="Connection" id="MZm-qg-IGR">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Connection" identifier="connect" id="GwA-QX-5Tq">
+                                    <items>
+                                        <menuItem title="Enable Integration with Other Apps" state="on" identifier="accept_tcp" id="lcG-2V-GpV">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="tcn-Je-1kf"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Change Port ()" identifier="change_port" id="yMO-1p-MbT">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="wRk-ph-RBI"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="IP address: (Click to Copy)" enabled="NO" id="mlk-Hi-VCG">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="Tool" id="dgB-vk-lf0">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Tool" id="onQ-hN-Zod">
+                                    <items>
+                                        <menuItem title="Create MP4 From Images" identifier="create_mp4" id="WHr-gD-Xvq">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="qkq-bP-koe"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -1186,7 +1186,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Z0-Q5-mG0">
-                                <rect key="frame" x="732" y="204" width="19" height="30"/>
+                                <rect key="frame" x="732" y="205" width="19" height="28"/>
                                 <stepperCell key="cell" continuous="YES" alignment="left" minValue="2" maxValue="20" doubleValue="3" id="jjl-39-roy"/>
                                 <connections>
                                     <action selector="clusterCountStepperChanged:" target="2Jc-51-6dz" id="B9o-UH-JyE"/>
@@ -2714,10 +2714,10 @@ DQ
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                                     </textFieldCell>
                                                                                 </textField>
-                                                                                <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O5A-ad-rhF" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
-                                                                                    <rect key="frame" x="169" y="12" width="53" height="21"/>
+                                                                                <textField identifier="light" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O5A-ad-rhF" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                                                                    <rect key="frame" x="167" y="15" width="35" height="16"/>
                                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" id="H7I-iE-P83">
+                                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" alignment="right" title="1.0" id="H7I-iE-P83">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -3827,6 +3827,7 @@ DQ
                         <outlet property="intensityRatio_slider_3" destination="IJl-bF-T99" id="ksm-gg-bgJ"/>
                         <outlet property="intensityRatio_slider_4" destination="51y-06-3SK" id="3HD-Ri-Z1v"/>
                         <outlet property="light_Slider" destination="gIV-zK-H8d" id="Fgy-El-6fK"/>
+                        <outlet property="light_Slider_current" destination="O5A-ad-rhF" id="Q48-nh-l21"/>
                         <outlet property="logTable" destination="yku-4F-nIA" id="sHa-HC-KLo"/>
                         <outlet property="movCollectionView" destination="WFZ-Kc-Tw5" id="duw-da-j2e"/>
                         <outlet property="mprmodeIndicator" destination="7oi-pC-bcz" id="L2n-TH-pcA"/>

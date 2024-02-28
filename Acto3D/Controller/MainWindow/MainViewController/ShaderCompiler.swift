@@ -154,13 +154,15 @@ extension ViewController{
             Logger.logPrintAndWrite(message: "The shader compilation was successful.")
             
         }catch{
-            print(error)
-            Logger.logPrintAndWrite(message: "⚠️ Error occurs during compiling shaders", level: .error)
+            print(error.localizedDescription)
+            Logger.logPrintAndWrite(message: "⚠️ An error occurred during the shader file compilation. \nThe details of the error are documented in the log file. \nPlease check the log by navigating to [Debug] > [Show Log File]. \n\nIf you have updated the version of Acto3D, the error might be due to outdated shaders.", level: .error)
+            Logger.logPrintAndWrite(message: error.localizedDescription, level: .error)
             
             if(onAppLaunch == true){
                 Dialog.showDialog(message: "Acto3D cannot be started due to an error in the Shader File. Disable the additional shaders and start Acto3D with only the preset shaders enabled.")
+                Dialog.showDialog(message: "An error occurred during the shader file compilation. \nThe details of the error are documented in the log file. \nPlease check the log by navigating to [Debug] > [Show Log File]. \n\nIf you have updated the version of Acto3D, the error might be due to outdated shaders.")
             }else{
-                Dialog.showDialog(message: "Unable to continue due to an error in the Shader File.")
+                Dialog.showDialog(message: "An error occurred during the shader file compilation. \nThe details of the error are documented in the log file. \nPlease check the log by navigating to [Debug] > [Show Log File]. \n\nIf you have updated the version of Acto3D, the error might be due to outdated shaders.")
             }
             
             throw NSError(domain: "Error in compiling custom shaders", code: -1, userInfo: nil)
@@ -204,11 +206,18 @@ extension ViewController{
                     let matchedString = (source as NSString).substring(with: range)
                     
                     switch key {
-                        case "author": author = matchedString
-                        case "description": description = matchedString
-                        case "label": functionLabel = matchedString
-                        case "kernel": kernelName = matchedString
-                        default: break
+                    case "author": author = matchedString
+                    case "description":
+                        description = matchedString
+                        if matchedString.contains("\\n") {
+                            description = matchedString.replacingOccurrences(of: "\\n", with: "\n    ")
+                        }
+                        
+                    case "label":
+                        functionLabel = matchedString
+                        
+                    case "kernel": kernelName = matchedString
+                    default: break
                     }
                 }
             } catch {

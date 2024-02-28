@@ -1,17 +1,7 @@
-//
-//  preset_BTF.metal
-//  Acto3D
-//
-//  Created by Naoki Takeshita on 2023/06/24.
-//
-
-#include <metal_stdlib>
-using namespace metal;
-
-// Label: built-in Back To Front
+// Label: Template for MIP
 // Author: Naoki Takeshita
-// Description: Standard back to front rendering
-kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
+// Description: Standard Maximum Intensity Projection (MIP)
+kernel void TEMPLATE_MIP(device RenderingArguments    &args       [[buffer(0)]],
                        uint2                        position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;
@@ -69,6 +59,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                                               0, 0, 1, 0,
                                               width / 2.0, height / 2.0, depth * scale_Z / 2.0, 1);
     
+    
     // directionVector is the normal vector with respect to the pre-rotation view,
     // and is set to (0, 0, 1, 0).
     // directionVector_rotate is the direction vector of the ray,
@@ -77,6 +68,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float4 directionVector_rotate = quatMul(quaternions, directionVector);
     
     float4 uniformedThreadPosition = transferMatrix * scaleMatix * centeringMatrix * currentThreadPosition;
+    
     float4 mappedPosition = quatMul(quaternions, uniformedThreadPosition);
     
     float radius = modelParameter.sliceMax / 2.0;
@@ -124,9 +116,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     if(flags & (1 << ADAPTIVE)){
         renderingStepAdditionalRatio *= scaleRatio;
     }
-    
 
-    
     
     // The sampling coordinates along the ray direction are at the behind, inside, or in front of the volume.
     uint8_t state = BEHIND_VOLUME;
@@ -135,8 +125,8 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float4 Cin = float4(modelParameter.backgroundColor, 0);
     float4 Cout = float4(modelParameter.backgroundColor, 0);
     
+    
     for (float ts = t_far ; ts >=  max(t_near, radius - modelParameter.sliceNo) ; ts-= modelParameter.renderingStep * renderingStepAdditionalRatio ){
-        
         float4 currentPos = float4((mappedPosition.xyz + ts * directionVector_rotate.xyz), 1);
         float4 coordinatePos = centeringToViewMatrix * currentPos;
         
@@ -267,99 +257,18 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         
         Cin = Cout;
         
-        // Cvoxel is of type float4, accessed like Cvoxel[0] or Cvoxel[3].
-        // It stores pixel values at the sampled coordinates as float values ranging from 0 to 1.0.
-        // Depending on the number of channels in the image, values for each channel are stored in [0]-[3].
-        // Attempting to access a non-existent channel does not result in an error, but returns zero.
-        // Cvoxel can be accessed using [0]-[3], as well as .r, .g, .b, .a, or .x, .y, .z, .w.
         Cvoxel = args.tex.sample(args.smp, texCoordinate);
         
-        // The intensityRatio stores the brightness levels for each channel as specified in the GUI, in float format.
-        // The default value is 0.
         float4 intensityRatio = float4(modelParameter.intensityRatio[0],
                                        modelParameter.intensityRatio[1],
                                        modelParameter.intensityRatio[2],
                                        modelParameter.intensityRatio[3]);
         
-        /* Get opacity for the voxel */
-        /*
-         float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
-        */
-        
-        // Multiply the color by its intensity.
         Cvoxel *= intensityRatio;
         
-        // Get opacity for the voxel
-
-        // Although the texture is 8-bit with pixel values ranging from 0-255 for which we define opacity,
-        // we're transferring to the GPU a transfer function with ten times the precision (to the first decimal place) for smoother results.
-        // Hence, calculations are performed in the range of 0-2550 instead of 0-255.
-
-        // When using the pixel value (C) that has considered the above intensity,
-        // there are cases where the luminance value may exceed 2550, so it is clamped to 2550.
-        // (No need to consider this if fetching opacity before multiplying pixel value with intensity.)
         
-        // args.tone1 to args.tone4 store opacity for each channel's pixel values as floats in the range 0 to 1.0.
-        // For example, to access the opacity for a pixel value of 128,
-        //   use args.tone1[1280].
-        
-        // Here, the pow function is used to exponentiate the opacity from 0 to 1.0.
-        // modelParameter.alphaPower, specified in the GUI and defaulting to 2, squares the opacity.
-        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
-        
-        
-        // While different opacities are defined for the four channels,
-        // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
-        // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
-        float alphaMax = max(alpha);
-        
-        float4 light_intensity = modelParameter.light;
-        
-        if(flags & (1 << SHADE)){
-            // Very simple light and shade
-            
-            float eps = 2;
-            float3 gradient_diff[3] = {
-                float3(1.0 / width, 0, 0) * eps,
-                float3(0, 1.0 / height, 0)* eps,
-                float3(0, 0, 1.0 / depth)* eps
-            };
-            
-            // Calculate the gradient
-            float4 gradient_x = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[0]);
-            float4 gradient_y = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[1]);
-            float4 gradient_z = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[2]);
-            
-            float3 grad_0 = float3(gradient_x[0], gradient_y[0], gradient_z[0]);
-            float3 grad_1 = float3(gradient_x[1], gradient_y[1], gradient_z[1]);
-            float3 grad_2 = float3(gradient_x[2], gradient_y[2], gradient_z[2]);
-            float3 grad_3 = float3(gradient_x[3], gradient_y[3], gradient_z[3]);
-    
-            float diffuse_ratio = modelParameter.shade;
-            
-            // The vector used for shading calculations is currently fixed at (1,1,0).
-            float diffuse0 = diffuse_ratio * max(0.0f, dot(normalize(grad_0), normalize(float3(1,1,0))));
-            float diffuse1 = diffuse_ratio * max(0.0f, dot(normalize(grad_1), normalize(float3(1,1,0))));
-            float diffuse2 = diffuse_ratio * max(0.0f, dot(normalize(grad_2), normalize(float3(1,1,0))));
-            float diffuse3 = diffuse_ratio * max(0.0f, dot(normalize(grad_3), normalize(float3(1,1,0))));
-            
-            light_intensity = float4(
-                                     max(0.0f, light_intensity.x - diffuse0),
-                                     max(0.0f, light_intensity.y - diffuse1),
-                                     max(0.0f, light_intensity.z - diffuse2),
-                                     max(0.0f, light_intensity.w - diffuse3)
-                                     );
-            
-        }
-        
-        Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity;
-        
+        // -----------------------------------------------------------------------------------
+        // If you don't need sphere rendering, you can simply delete these lines.
         
         // Render a small sphere at the specified coordinate if it's marked within the space.
         // Note: Processing speed may be affected if there are many registered coordinates.
@@ -383,10 +292,14 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                     al = _r * _r ;
                 }
                 
-                alphaMax = 0.1;
-                Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity  ;
             }
         }
+        // -----------------------------------------------------------------------------------
+        
+        Cout[0] = max(Cin[0], Cvoxel[0]);
+        Cout[1] = max(Cin[1], Cvoxel[1]);
+        Cout[2] = max(Cin[2], Cvoxel[2]);
+        Cout[3] = max(Cin[3], Cvoxel[3]);
     }
     
     float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;

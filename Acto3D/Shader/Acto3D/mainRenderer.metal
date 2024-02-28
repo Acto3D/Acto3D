@@ -12,12 +12,12 @@ using namespace metal;
 struct RenderingArguments {
     texture3d<float, access::sample> tex          [[id(0)]];
     constant RenderingParameters &params          [[id(1)]];
-    device  uint8_t *outputData                   [[id(2)]];
+    device uint8_t *outputData                    [[id(2)]];
     device float* tone1                           [[id(3)]];
     device float* tone2                           [[id(4)]];
     device float* tone3                           [[id(5)]];
     device float* tone4                           [[id(6)]];
-    constant uint16_t    &flags                   [[id(7)]];
+    constant uint16_t &flags                      [[id(7)]];
     constant float4 &quaternions                  [[id(8)]];
     constant uint16_t &targetViewSize             [[id(9)]];
     sampler smp                                   [[id(10)]];
@@ -183,5 +183,38 @@ IntersectionResult checkIntersection(float4 mappedXYZt,
 }
 
 
+/// check whether the coords are on the edge of the volume
+inline bool isOnBoundaryEdge(float3 coord, float boundaryWidth) {
+    if ((coord.x < boundaryWidth && coord.y < boundaryWidth) ||
+        (coord.x < boundaryWidth && coord.z < boundaryWidth) ||
+        
+        (coord.x < boundaryWidth && coord.y > (1.0 - boundaryWidth)) ||
+        (coord.x < boundaryWidth && coord.z > (1.0 - boundaryWidth)) ||
+        
+        (coord.x > (1.0 - boundaryWidth) && coord.y < boundaryWidth) ||
+        (coord.x > (1.0 - boundaryWidth) && coord.z < boundaryWidth) ||
+        
+        (coord.x > (1.0 - boundaryWidth) && coord.y > (1.0 - boundaryWidth)) ||
+        (coord.x > (1.0 - boundaryWidth) && coord.z > (1.0 - boundaryWidth)) ||
+        
+        (coord.y < boundaryWidth && coord.z < boundaryWidth) ||
+        (coord.y < boundaryWidth && coord.z > (1.0 - boundaryWidth)) ||
+        
+        (coord.y > (1.0 - boundaryWidth) && coord.z < boundaryWidth) ||
+        (coord.y > (1.0 - boundaryWidth) && coord.z > (1.0 - boundaryWidth))
+        
+        ){
+        return true;
+    }
+    return false;
+}
 
 
+inline float max(float4 value){
+    return max(max(value.x, value.y), max(value.z, value.w));
+}
+
+
+inline float max(float x, float y, float z, float w){
+    return max(max(x, y), max(z, w));
+}

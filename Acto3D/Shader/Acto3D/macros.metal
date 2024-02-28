@@ -39,19 +39,15 @@ using namespace metal;
                          modelParameter.intensityRatio[1], \
                          modelParameter.intensityRatio[2], \
                          modelParameter.intensityRatio[3]); \
-        float3 channel_1 = modelParameter.color.ch1.rgb; \
-        float3 channel_2 = modelParameter.color.ch2.rgb; \
-        float3 channel_3 = modelParameter.color.ch3.rgb; \
-        float3 channel_4 = modelParameter.color.ch4.rgb; \
-        float3 lut_c1 = Cvoxel.r * channel_1; \
-        float3 lut_c2 = Cvoxel.g * channel_2; \
-        float3 lut_c3 = Cvoxel.b * channel_3; \
-        float3 lut_c4 = Cvoxel.a * channel_4; \
-        float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r)); \
-        float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g)); \
-        float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b)); \
-        args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0); \
-        args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0); \
-        args.outputData[index + 2] = uint8_t(clamp(cB, 0.0f, 1.0f) * 255.0); \
+        float3 lut_c1 = Cvoxel[0] * modelParameter.color.ch1.rgb; \
+        float3 lut_c2 = Cvoxel[1] * modelParameter.color.ch2.rgb; \
+        float3 lut_c3 = Cvoxel[2] * modelParameter.color.ch3.rgb; \
+        float3 lut_c4 = Cvoxel[3] * modelParameter.color.ch4.rgb; \
+        float cR = max(lut_c1.r, lut_c2.r, lut_c3.r, lut_c4.r); \
+        float cG = max(lut_c1.g, lut_c2.g, lut_c3.g, lut_c4.g); \
+        float cB = max(lut_c1.b, lut_c2.b, lut_c3.b, lut_c4.b); \
+        args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f)); \
+        args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f)); \
+        args.outputData[index + 2] = uint8_t(clamp(cB * 255.0f, 0.0f, 255.0f)); \
     } \
 }\

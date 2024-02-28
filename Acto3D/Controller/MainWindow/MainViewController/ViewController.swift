@@ -48,6 +48,7 @@ class ViewController: NSViewController{
     
     
     @IBOutlet weak var light_Slider: NSSlider!
+    @IBOutlet weak var light_Slider_current: ValidatingTextField!
     @IBOutlet weak var shade_Slider: NSSlider!
     
     
@@ -250,6 +251,7 @@ class ViewController: NSViewController{
         zScale_Label.validationDelegate = self
         scale_Label.validationDelegate = self
         slice_Label_current.validationDelegate = self
+        light_Slider_current.validationDelegate = self
         
         
          intensityRatio_slider_1.onRightClick = {[weak self] event in
@@ -977,6 +979,7 @@ class ViewController: NSViewController{
         switch sender.identifier?.rawValue {
         case "light":
             renderer.renderParams.light = sender.floatValue
+            light_Slider_current.floatValue = sender.floatValue
         case "shade":
             renderer.renderParams.shade = sender.floatValue
         default:
@@ -1509,6 +1512,12 @@ extension ViewController: ValidatingTextFieldDelegate {
             slice_Slider.integerValue = no
             renderer.renderParams.sliceNo = no.toUInt16()
             updateSliceAndScale(currentSliceToMax: false)
+            outputView.image = renderer.rendering()
+            
+        case "light":
+            let light = Float(newValue as! Float)
+            renderer.renderParams.light = light
+//            renderer.argumentManager?.markAsNeedsUpdate(argumentIndex: .renderParams)
             outputView.image = renderer.rendering()
             
             

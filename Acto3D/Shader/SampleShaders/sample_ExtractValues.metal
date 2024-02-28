@@ -1,17 +1,7 @@
-//
-//  preset_BTF.metal
-//  Acto3D
-//
-//  Created by Naoki Takeshita on 2023/06/24.
-//
-
-#include <metal_stdlib>
-using namespace metal;
-
-// Label: built-in Back To Front
+// Label: Extract specific values
 // Author: Naoki Takeshita
-// Description: Standard back to front rendering
-kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
+// Description: (Sample) Extract specific values
+kernel void SAMPLE_EXTRACT_VALUES(device RenderingArguments    &args       [[buffer(0)]],
                        uint2                        position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;
@@ -25,6 +15,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     uint16_t flags = args.flags;
     
     float4 quaternions = args.quaternions;
+    
     
     float width = args.tex.get_width();
     float height = args.tex.get_height();
@@ -48,6 +39,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     constant float3* pointSet = args.pointSet;
     uint16_t pointSelectedIndex = args.pointSelectedIndex;
     
+    
     // uniform matrix
     float4x4 centeringMatrix = float4x4(1, 0, 0, 0,
                                         0, 1, 0, 0,
@@ -59,6 +51,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                                    0, 0, 1.0, 0,
                                    0, 0, 0, 1.0);
     
+    
     float4x4 transferMatrix = float4x4(1, 0, 0, 0,
                                        0, 1, 0, 0,
                                        0, 0, 1.0, 0,
@@ -69,6 +62,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                                               0, 0, 1, 0,
                                               width / 2.0, height / 2.0, depth * scale_Z / 2.0, 1);
     
+    
     // directionVector is the normal vector with respect to the pre-rotation view,
     // and is set to (0, 0, 1, 0).
     // directionVector_rotate is the direction vector of the ray,
@@ -77,6 +71,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float4 directionVector_rotate = quatMul(quaternions, directionVector);
     
     float4 uniformedThreadPosition = transferMatrix * scaleMatix * centeringMatrix * currentThreadPosition;
+    
     float4 mappedPosition = quatMul(quaternions, uniformedThreadPosition);
     
     float radius = modelParameter.sliceMax / 2.0;
@@ -96,12 +91,12 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     }
     
     // Maximum and minimum coordinates of the texture
+    float z_min = -depth * scale_Z / 2.0f;
     float z_max = depth * scale_Z / 2.0f;
-    float z_min = -z_max;
+    float x_min = -width / 2.0f;
     float x_max = width / 2.0f;
-    float x_min = -x_max;
+    float y_min = -height / 2.0f;
     float y_max = height / 2.0f;
-    float y_min = -y_max;
     
     // Compute intersections of rays with the texture boundaries.
     // If a result for vertex of the cube, there will be one intersection, but we will ignore it.
@@ -126,16 +121,20 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     }
     
 
+    float3 channel_1 = modelParameter.color.ch1.rgb;
+    float3 channel_2 = modelParameter.color.ch2.rgb;
+    float3 channel_3 = modelParameter.color.ch3.rgb;
+    float3 channel_4 = modelParameter.color.ch4.rgb;
     
-    
-    // The sampling coordinates along the ray direction are at the behind, inside, or in front of the volume.
-    uint8_t state = BEHIND_VOLUME;
     
     // Accumulated color (C) and opacity (A) for volume rendering.
-    float4 Cin = float4(modelParameter.backgroundColor, 0);
-    float4 Cout = float4(modelParameter.backgroundColor, 0);
+    float4 Cin = 0;
+    float4 Cout = 0 ;
+    float4 Ain = 0;
+    float4 Aout = 0;
     
-    for (float ts = t_far ; ts >=  max(t_near, radius - modelParameter.sliceNo) ; ts-= modelParameter.renderingStep * renderingStepAdditionalRatio ){
+    
+    for (float ts = max(t_near, radius - modelParameter.sliceNo) ; ts <=  t_far  ; ts+= modelParameter.renderingStep * renderingStepAdditionalRatio){
         
         float4 currentPos = float4((mappedPosition.xyz + ts * directionVector_rotate.xyz), 1);
         float4 coordinatePos = centeringToViewMatrix * currentPos;
@@ -143,39 +142,52 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         float3 texCoordinate = (flags & (1 << FLIP)) ?
         float3(coordinatePos.x / float(width),
                coordinatePos.y / float(height),
-               1.0f - coordinatePos.z / (depth * scale_Z)) :
+               1.0f - coordinatePos.z / ((depth) * scale_Z)) :
         float3(coordinatePos.x / float(width),
                coordinatePos.y / float(height),
-               coordinatePos.z / (depth * scale_Z)) ;
-        
+               coordinatePos.z / ((depth) * scale_Z)) ;
+
         float4 Cvoxel;
         
         if (texCoordinate.x < modelParameter.trimX_min || texCoordinate.x > modelParameter.trimX_max ||
             texCoordinate.y < modelParameter.trimY_min || texCoordinate.y > modelParameter.trimY_max ||
             texCoordinate.z < modelParameter.trimZ_min || texCoordinate.z > modelParameter.trimZ_max){
             
-            if (state == INSIDE_VOLUME){
-                // If the sampling has exited the bounding box of the 3D texture from inside to outside,
-                // then terminate the sampling and exit the loop.
-                state = FRONT_VOLUME;
-                break;
-                
-            }else{
-                // Skip processing until the sampling point moves from behind to inside the volume.
-                continue;
-            }
+            // If trimming is applied in the XYZ directions using the GUI slider, areas outside the specified range are not processed.
+            continue;
             
         }else{
             // Render the bounding box when it is turned ON.
             if(flags & (1 << BOX)){
-                if (isOnBoundaryEdge(texCoordinate, boundaryWidth)){
+                if ((texCoordinate.x < boundaryWidth && texCoordinate.y < boundaryWidth) ||
+                    (texCoordinate.x < boundaryWidth && texCoordinate.z < boundaryWidth) ||
+                    
+                    (texCoordinate.x < boundaryWidth && texCoordinate.y > (1.0 - boundaryWidth)) ||
+                    (texCoordinate.x < boundaryWidth && texCoordinate.z > (1.0 - boundaryWidth)) ||
+                    
+                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.y < boundaryWidth) ||
+                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.z < boundaryWidth) ||
+                    
+                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.y > (1.0 - boundaryWidth)) ||
+                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.z > (1.0 - boundaryWidth)) ||
+                    
+                    (texCoordinate.y < boundaryWidth && texCoordinate.z < boundaryWidth) ||
+                    (texCoordinate.y < boundaryWidth && texCoordinate.z > (1.0 - boundaryWidth)) ||
+                    
+                    (texCoordinate.y > (1.0 - boundaryWidth) && texCoordinate.z < boundaryWidth) ||
+                    (texCoordinate.y > (1.0 - boundaryWidth) && texCoordinate.z > (1.0 - boundaryWidth))
+                    
+                    ){
+                    
                     Cin = Cout;
+                    Ain = Aout;
                     
                     // Color and alpha definition for boundary box
                     Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
                     float Alpha = 0.55;
                     
-                    Cout = (1.0 - Alpha) * Cin + Alpha *  Cvoxel;
+                    Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                    Aout = Ain + (1.0 - Ain) * Alpha;
                     
                     continue;
                 }
@@ -184,7 +196,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
             // When 'Crop' is ON, render only one side of the cutting plane.
             // If set to display the cutting surface, render both fragments and the cutting plane.
             if(flags & (1 << CROP_LOCK)){
-                // geometorical transformation in cropped setting
+                // Geometorical transformation in cropped setting
                 float3 directionVector_crop = quatMul(modelParameter.cropLockQuaternions, directionVector.xyz);
                 float4 directionVector_crop_rotate = float4(directionVector_crop, 0);
                 float4 mappedPosition_crop = quatMul(modelParameter.cropLockQuaternions, uniformedThreadPosition);
@@ -198,25 +210,25 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                 float3 _vec = coordinatePos.xyz - coordinatePos_crop.xyz;
                 float t_crop = dot(_vec, directionVector_crop);
                 
-                
                 if(flags & (1 << PLANE)){
-                    float threshold_plane_thickness = 4.5;
+                    float threath = 4.5;
                     
-                    if(t_crop > threshold_plane_thickness){
+                    if(t_crop > threath){
                         // same side
                         
-                    }else if (abs(t_crop) <= threshold_plane_thickness){
-                        Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
-                        
+                    }else if (t_crop <= threath && t_crop >= -threath){
                         Cin = Cout;
+                        Ain = Aout;
                         
+                        Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
                         float Alpha = 0.07;
                         
-                        Cout = (1.0 - Alpha) * Cin + Alpha * Cvoxel;
+                        Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                        Aout = Ain + (1.0 - Ain) * Alpha;
                         
                         continue;
                         
-                    }else if (t_crop < -threshold_plane_thickness){
+                    }else if (t_crop < -threath){
                         // opposite side
                         
                     }
@@ -224,13 +236,14 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                 }else{
                     if (flags & (1 << CROP_TOGGLE)){
                         if(t_crop > 0){
-                            Cvoxel = float4(0, 0, 0, 0);
-                            
                             Cin = Cout;
+                            Ain = Aout;
                             
+                            Cvoxel = float4(0, 0, 0, 0);
                             float Alpha = 0;
                             
-                            Cout = (1.0 - Alpha) * Cin + Alpha * Cvoxel;
+                            Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                            Aout = Ain + (1.0 - Ain) * Alpha;
                             
                             continue;
                             
@@ -240,13 +253,14 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                         
                     }else{
                         if(t_crop < 0){
-                            Cvoxel = float4(0, 0, 0, 0);
-                            
                             Cin = Cout;
+                            Ain = Aout;
                             
-                            float Alpha = 0;
+                            Cvoxel = float4(0, 0, 0, 0);
+                            half Alpha = 0;
                             
-                            Cout = (1.0 - Alpha) * Cin + Alpha * Cvoxel;
+                            Cout = Cin + Cvoxel * (1.0 - Ain) * Alpha;
+                            Aout = Ain + (1.0 - Ain) * Alpha;
                             
                             continue;
                             
@@ -263,30 +277,37 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         // Begin main sampling and compositing process.
         //
         
-        state = INSIDE_VOLUME;
-        
         Cin = Cout;
+        Ain = Aout;
         
-        // Cvoxel is of type float4, accessed like Cvoxel[0] or Cvoxel[3].
-        // It stores pixel values at the sampled coordinates as float values ranging from 0 to 1.0.
-        // Depending on the number of channels in the image, values for each channel are stored in [0]-[3].
-        // Attempting to access a non-existent channel does not result in an error, but returns zero.
-        // Cvoxel can be accessed using [0]-[3], as well as .r, .g, .b, .a, or .x, .y, .z, .w.
         Cvoxel = args.tex.sample(args.smp, texCoordinate);
         
-        // The intensityRatio stores the brightness levels for each channel as specified in the GUI, in float format.
-        // The default value is 0.
         float4 intensityRatio = float4(modelParameter.intensityRatio[0],
                                        modelParameter.intensityRatio[1],
                                        modelParameter.intensityRatio[2],
                                        modelParameter.intensityRatio[3]);
         
+        // If you wish to perform operations on specific pixel values, you can add your processing logic here.
+        // Remember, Cvoxel values are floats ranging from 0 to 1.
+        // If you need to work with values ranging from 0 to 255, multiply by 255 as shown in the following code:
+        if(Cvoxel[0] * 255 > 20 && Cvoxel[0] * 255 < 190){
+            
+        }else{
+            Cvoxel[0] = 0;
+        }
+        
+        if(Cvoxel[2] * 255 > 20 && Cvoxel[2] * 255 < 190){
+            Cvoxel[2] = 0;
+        }else{
+            
+        }
+        
         /* Get opacity for the voxel */
         /*
-         float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        half4 alpha = half4(pow(args.tone1[int(Cvoxel.r * 2550.0h)] ,modelParameter.alphaPower),
+                            pow(args.tone2[int(Cvoxel.g * 2550.0h)] ,modelParameter.alphaPower),
+                            pow(args.tone3[int(Cvoxel.b * 2550.0h)] ,modelParameter.alphaPower),
+                            pow(args.tone4[int(Cvoxel.a * 2550.0h)] ,modelParameter.alphaPower));
         */
         
         // Multiply the color by its intensity.
@@ -302,23 +323,17 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         // there are cases where the luminance value may exceed 2550, so it is clamped to 2550.
         // (No need to consider this if fetching opacity before multiplying pixel value with intensity.)
         
-        // args.tone1 to args.tone4 store opacity for each channel's pixel values as floats in the range 0 to 1.0.
-        // For example, to access the opacity for a pixel value of 128,
-        //   use args.tone1[1280].
-        
-        // Here, the pow function is used to exponentiate the opacity from 0 to 1.0.
-        // modelParameter.alphaPower, specified in the GUI and defaulting to 2, squares the opacity.
-        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel.r * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone2[int(clamp(Cvoxel.g * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone3[int(clamp(Cvoxel.b * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone4[int(clamp(Cvoxel.a * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
         
         
         // While different opacities are defined for the four channels,
         // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
         // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
-        float alphaMax = max(alpha);
-        
+        float4 alphaMax = max(max(alpha.r, alpha.g) , max(alpha.b, alpha.a));
+      
         float4 light_intensity = modelParameter.light;
         
         if(flags & (1 << SHADE)){
@@ -358,14 +373,15 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
             
         }
         
-        Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity;
+        Cout = Cin + Cvoxel * light_intensity * (1.0f - Ain) * alphaMax;
+        Aout = Ain + (1.0f - Ain) * alphaMax;
         
         
         // Render a small sphere at the specified coordinate if it's marked within the space.
         // Note: Processing speed may be affected if there are many registered coordinates.
         
         // Sphere radius definition
-        float ballRadius = 20.0f;
+        float ballRadius = 8.0f;
         
         for (uint8_t p=0; p<pointSetCount; p++){
             float3 _vec = coordinatePos.xyz - pointSet[p];
@@ -383,24 +399,39 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                     al = _r * _r ;
                 }
                 
-                alphaMax = 0.1;
-                Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity  ;
+                Cout = Cin + Cvoxel * (1.0 - Ain) * Cvoxel * Cvoxel * Cvoxel * Cvoxel;
+                Aout = Ain + (1.0 - Ain) * Cvoxel * Cvoxel * Cvoxel * Cvoxel;
+                
             }
         }
+        
+        
+        // Early termination for front-to-back rendering
+        // If the accumulated opacity surpasses a certain threshold, further processing can be skipped.
+        
+        // Setting a higher opacityThreshold results in an image closer to back-to-front rendering,
+        // but at the cost of increased computation.
+        // A realistic range for the threshold is between 0.9 and 0.99.
+        float opacityThreshold = 0.99;
+        if(max(max(Aout.x, Aout.y), max(Aout.z, Aout.a)) > opacityThreshold){
+            break;
+        }
+
+        
     }
     
-    float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
-    float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;
-    float3 lut_c3 = Cout[2] * modelParameter.color.ch3.rgb;
-    float3 lut_c4 = Cout[3] * modelParameter.color.ch4.rgb;
+    float3 lut_c1 = Cout.r * channel_1;
+    float3 lut_c2 = Cout.g * channel_2;
+    float3 lut_c3 = Cout.b * channel_3;
+    float3 lut_c4 = Cout.a * channel_4;
     
-    float cR = max(lut_c1.r, lut_c2.r, lut_c3.r, lut_c4.r);
-    float cG = max(lut_c1.g, lut_c2.g, lut_c3.g, lut_c4.g);
-    float cB = max(lut_c1.b, lut_c2.b, lut_c3.b, lut_c4.b);
+    float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r));
+    float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g));
+    float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b));
     
-    args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f));
-    args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f));
-    args.outputData[index + 2] = uint8_t(clamp(cB * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0);
+    args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0);
+    args.outputData[index + 2] = uint8_t(clamp(cB, 0.0f, 1.0f) * 255.0);
     
     return;
     

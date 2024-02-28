@@ -1,4 +1,3 @@
-//
 //  preset_MIP.metal
 //  Acto3D
 //
@@ -26,7 +25,6 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
     
     float4 quaternions = args.quaternions;
     
-    
     float width = args.tex.get_width();
     float height = args.tex.get_height();
     float depth = args.tex.get_depth();
@@ -45,10 +43,9 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
 
     float scale_Z = modelParameter.zScale;
     
-//    uint16_t pointSetCount = args.pointSetCount;
-//    constant float3* pointSet = args.pointSet;
-//    uint16_t pointSelectedIndex = args.pointSelectedIndex;
-    
+    uint16_t pointSetCount = args.pointSetCount;
+    constant float3* pointSet = args.pointSet;
+    uint16_t pointSelectedIndex = args.pointSelectedIndex;
     
     // uniform matrix
     float4x4 centeringMatrix = float4x4(1, 0, 0, 0,
@@ -60,7 +57,6 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
                                    0, scaleRatio, 0, 0,
                                    0, 0, 1.0, 0,
                                    0, 0, 0, 1.0);
-    
     
     float4x4 transferMatrix = float4x4(1, 0, 0, 0,
                                        0, 1, 0, 0,
@@ -101,12 +97,12 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
     }
     
     // Maximum and minimum coordinates of the texture
-    float z_min = -depth * scale_Z / 2.0f;
     float z_max = depth * scale_Z / 2.0f;
-    float x_min = -width / 2.0f;
+    float z_min = -z_max;
     float x_max = width / 2.0f;
-    float y_min = -height / 2.0f;
+    float x_min = -x_max;
     float y_max = height / 2.0f;
+    float y_min = -y_max;
     
     // Compute intersections of rays with the texture boundaries.
     // If a result for vertex of the cube, there will be one intersection, but we will ignore it.
@@ -129,13 +125,7 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
     if(flags & (1 << ADAPTIVE)){
         renderingStepAdditionalRatio *= scaleRatio;
     }
-    
 
-    float3 channel_1 = modelParameter.color.ch1.rgb;
-    float3 channel_2 = modelParameter.color.ch2.rgb;
-    float3 channel_3 = modelParameter.color.ch3.rgb;
-    float3 channel_4 = modelParameter.color.ch4.rgb;
-    
     
     // The sampling coordinates along the ray direction are at the behind, inside, or in front of the volume.
     uint8_t state = BEHIND_VOLUME;
@@ -177,26 +167,7 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
         }else{
             // Render the bounding box when it is turned ON.
             if(flags & (1 << BOX)){
-                if ((texCoordinate.x < boundaryWidth && texCoordinate.y < boundaryWidth) ||
-                    (texCoordinate.x < boundaryWidth && texCoordinate.z < boundaryWidth) ||
-                    
-                    (texCoordinate.x < boundaryWidth && texCoordinate.y > (1.0 - boundaryWidth)) ||
-                    (texCoordinate.x < boundaryWidth && texCoordinate.z > (1.0 - boundaryWidth)) ||
-                    
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.y < boundaryWidth) ||
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.z < boundaryWidth) ||
-                    
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.y > (1.0 - boundaryWidth)) ||
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.z > (1.0 - boundaryWidth)) ||
-                    
-                    (texCoordinate.y < boundaryWidth && texCoordinate.z < boundaryWidth) ||
-                    (texCoordinate.y < boundaryWidth && texCoordinate.z > (1.0 - boundaryWidth)) ||
-                    
-                    (texCoordinate.y > (1.0 - boundaryWidth) && texCoordinate.z < boundaryWidth) ||
-                    (texCoordinate.y > (1.0 - boundaryWidth) && texCoordinate.z > (1.0 - boundaryWidth))
-                    
-                    ){
-                    
+                if (isOnBoundaryEdge(texCoordinate, boundaryWidth)){
                     Cin = Cout;
                     
                     // Color and alpha definition for boundary box
@@ -228,12 +199,12 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
                 
                 
                 if(flags & (1 << PLANE)){
-                    float threath = 4.5;
+                    float threshold_plane_thickness = 4.5;
                     
-                    if(t_crop > threath){
+                    if(t_crop > threshold_plane_thickness){
                         // same side
                         
-                    }else if (t_crop <= threath && t_crop >= -threath){
+                    }else if (abs(t_crop) <= threshold_plane_thickness){
                         Cvoxel = float4(0.85, 0.85, 0.85, 0.85);
                         
                         Cin = Cout;
@@ -244,7 +215,7 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
                         
                         continue;
                         
-                    }else if (t_crop < -threath){
+                    }else if (t_crop < -threshold_plane_thickness){
                         // opposite side
                         
                     }
@@ -295,7 +266,7 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
         
         Cin = Cout;
         
-        Cvoxel = (float4)args.tex.sample(args.smp, texCoordinate);
+        Cvoxel = args.tex.sample(args.smp, texCoordinate);
         
         float4 intensityRatio = float4(modelParameter.intensityRatio[0],
                                        modelParameter.intensityRatio[1],
@@ -304,24 +275,54 @@ kernel void preset_MIP(device RenderingArguments    &args       [[buffer(0)]],
         
         Cvoxel *= intensityRatio;
         
-        Cout.r = max(Cin.r, Cvoxel.r);
-        Cout.g = max(Cin.g, Cvoxel.g);
-        Cout.b = max(Cin.b, Cvoxel.b);
-        Cout.a = max(Cin.a, Cvoxel.a);
+        
+        // -----------------------------------------------------------------------------------
+        // If you don't need sphere rendering, you can simply delete these lines.
+        
+        // Render a small sphere at the specified coordinate if it's marked within the space.
+        // Note: Processing speed may be affected if there are many registered coordinates.
+        
+        // Sphere radius definition
+        float ballRadius = 20.0f;
+        
+        for (uint8_t p=0; p<pointSetCount; p++){
+            float3 _vec = coordinatePos.xyz - pointSet[p];
+            float _length = length(_vec);
+            
+            if(_length < ballRadius){
+                half _r = (ballRadius - _length) / ballRadius;
+                
+                Cvoxel = float4(_r + 0.25,_r + 0.25, _r + 0.25, _r + 0.25);
+                
+                float al = _r / 3;
+                
+                if(p == pointSelectedIndex){
+                    Cvoxel += float4(0.25,0.25,0.25,0.25);
+                    al = _r * _r ;
+                }
+                
+            }
+        }
+        // -----------------------------------------------------------------------------------
+        
+        Cout[0] = max(Cin[0], Cvoxel[0]);
+        Cout[1] = max(Cin[1], Cvoxel[1]);
+        Cout[2] = max(Cin[2], Cvoxel[2]);
+        Cout[3] = max(Cin[3], Cvoxel[3]);
     }
     
-    float3 lut_c1 = Cout.r * channel_1;
-    float3 lut_c2 = Cout.g * channel_2;
-    float3 lut_c3 = Cout.b * channel_3;
-    float3 lut_c4 = Cout.a * channel_4;
+    float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
+    float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;
+    float3 lut_c3 = Cout[2] * modelParameter.color.ch3.rgb;
+    float3 lut_c4 = Cout[3] * modelParameter.color.ch4.rgb;
     
-    float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r));
-    float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g));
-    float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b));
+    float cR = max(lut_c1.r, lut_c2.r, lut_c3.r, lut_c4.r);
+    float cG = max(lut_c1.g, lut_c2.g, lut_c3.g, lut_c4.g);
+    float cB = max(lut_c1.b, lut_c2.b, lut_c3.b, lut_c4.b);
     
-    args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 2] = uint8_t(clamp(cB, 0.0f, 1.0f) * 255.0);
+    args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 2] = uint8_t(clamp(cB * 255.0f, 0.0f, 255.0f));
     
     return;
     

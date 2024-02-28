@@ -1,18 +1,10 @@
-//
-//  preset_BTF.metal
-//  Acto3D
-//
-//  Created by Naoki Takeshita on 2023/06/24.
-//
-
-#include <metal_stdlib>
-using namespace metal;
-
-// Label: built-in Back To Front
+// Label: Replacing Color with Gradient
 // Author: Naoki Takeshita
-// Description: Standard back to front rendering
-kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
-                       uint2                        position    [[thread_position_in_grid]]){
+// Description: (Sample) Emphasizes boundaries by replacing Color with Gradient.\nUsed in Fig. 3F of the main text\n◯ To apply this effect, please turn the Shade option ON.
+
+
+kernel void SAMPLE_ENHANCE_EDGES(device RenderingArguments    &args       [[buffer(0)]],
+                                 uint2                        position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;
     
@@ -59,6 +51,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                                    0, 0, 1.0, 0,
                                    0, 0, 0, 1.0);
     
+    
     float4x4 transferMatrix = float4x4(1, 0, 0, 0,
                                        0, 1, 0, 0,
                                        0, 0, 1.0, 0,
@@ -77,6 +70,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float4 directionVector_rotate = quatMul(quaternions, directionVector);
     
     float4 uniformedThreadPosition = transferMatrix * scaleMatix * centeringMatrix * currentThreadPosition;
+    
     float4 mappedPosition = quatMul(quaternions, uniformedThreadPosition);
     
     float radius = modelParameter.sliceMax / 2.0;
@@ -117,15 +111,12 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float t_far = max(intersectionResult.t_1, intersectionResult.t_2);
     float t_near = min(intersectionResult.t_1, intersectionResult.t_2);
     
-    
     float boundaryWidth = 0.01;
     
     float renderingStepAdditionalRatio = 1.0f;
     if(flags & (1 << ADAPTIVE)){
         renderingStepAdditionalRatio *= scaleRatio;
     }
-    
-
     
     
     // The sampling coordinates along the ray direction are at the behind, inside, or in front of the volume.
@@ -136,7 +127,6 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float4 Cout = float4(modelParameter.backgroundColor, 0);
     
     for (float ts = t_far ; ts >=  max(t_near, radius - modelParameter.sliceNo) ; ts-= modelParameter.renderingStep * renderingStepAdditionalRatio ){
-        
         float4 currentPos = float4((mappedPosition.xyz + ts * directionVector_rotate.xyz), 1);
         float4 coordinatePos = centeringToViewMatrix * currentPos;
         
@@ -168,7 +158,8 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         }else{
             // Render the bounding box when it is turned ON.
             if(flags & (1 << BOX)){
-                if (isOnBoundaryEdge(texCoordinate, boundaryWidth)){
+                if(isOnBoundaryEdge(texCoordinate, boundaryWidth)){
+                    
                     Cin = Cout;
                     
                     // Color and alpha definition for boundary box
@@ -180,6 +171,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                     continue;
                 }
             }
+            
             
             // When 'Crop' is ON, render only one side of the cutting plane.
             // If set to display the cutting surface, render both fragments and the cutting plane.
@@ -267,15 +259,8 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         
         Cin = Cout;
         
-        // Cvoxel is of type float4, accessed like Cvoxel[0] or Cvoxel[3].
-        // It stores pixel values at the sampled coordinates as float values ranging from 0 to 1.0.
-        // Depending on the number of channels in the image, values for each channel are stored in [0]-[3].
-        // Attempting to access a non-existent channel does not result in an error, but returns zero.
-        // Cvoxel can be accessed using [0]-[3], as well as .r, .g, .b, .a, or .x, .y, .z, .w.
         Cvoxel = args.tex.sample(args.smp, texCoordinate);
         
-        // The intensityRatio stores the brightness levels for each channel as specified in the GUI, in float format.
-        // The default value is 0.
         float4 intensityRatio = float4(modelParameter.intensityRatio[0],
                                        modelParameter.intensityRatio[1],
                                        modelParameter.intensityRatio[2],
@@ -283,10 +268,10 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         
         /* Get opacity for the voxel */
         /*
-         float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                               pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        half4 alpha = half4(pow(args.tone1[int(Cvoxel.r * 2550.0h)] ,modelParameter.alphaPower),
+                            pow(args.tone2[int(Cvoxel.g * 2550.0h)] ,modelParameter.alphaPower),
+                            pow(args.tone3[int(Cvoxel.b * 2550.0h)] ,modelParameter.alphaPower),
+                            pow(args.tone4[int(Cvoxel.a * 2550.0h)] ,modelParameter.alphaPower));
         */
         
         // Multiply the color by its intensity.
@@ -302,29 +287,23 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         // there are cases where the luminance value may exceed 2550, so it is clamped to 2550.
         // (No need to consider this if fetching opacity before multiplying pixel value with intensity.)
         
-        // args.tone1 to args.tone4 store opacity for each channel's pixel values as floats in the range 0 to 1.0.
-        // For example, to access the opacity for a pixel value of 128,
-        //   use args.tone1[1280].
-        
-        // Here, the pow function is used to exponentiate the opacity from 0 to 1.0.
-        // modelParameter.alphaPower, specified in the GUI and defaulting to 2, squares the opacity.
-        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel.r * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone2[int(clamp(Cvoxel.g * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone3[int(clamp(Cvoxel.b * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone4[int(clamp(Cvoxel.a * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
         
         
         // While different opacities are defined for the four channels,
         // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
         // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
-        float alphaMax = max(alpha);
+        float4 alphaMax = max(max(alpha.r, alpha.g) , max(alpha.b, alpha.a));
         
         float4 light_intensity = modelParameter.light;
         
         if(flags & (1 << SHADE)){
             // Very simple light and shade
             
-            float eps = 2;
+            float eps = 1.0;
             float3 gradient_diff[3] = {
                 float3(1.0 / width, 0, 0) * eps,
                 float3(0, 1.0 / height, 0)* eps,
@@ -332,30 +311,30 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
             };
             
             // Calculate the gradient
-            float4 gradient_x = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[0]);
-            float4 gradient_y = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[1]);
-            float4 gradient_z = Cvoxel - intensityRatio * args.tex.sample(args.smp, texCoordinate - gradient_diff[2]);
+            float4 gradient_x = args.tex.sample(args.smp, texCoordinate + gradient_diff[0]) -  args.tex.sample(args.smp, texCoordinate - gradient_diff[0]);
+            float4 gradient_y = args.tex.sample(args.smp, texCoordinate + gradient_diff[1]) -  args.tex.sample(args.smp, texCoordinate - gradient_diff[1]);
+            float4 gradient_z = args.tex.sample(args.smp, texCoordinate + gradient_diff[2]) -  args.tex.sample(args.smp, texCoordinate - gradient_diff[2]);
             
             float3 grad_0 = float3(gradient_x[0], gradient_y[0], gradient_z[0]);
             float3 grad_1 = float3(gradient_x[1], gradient_y[1], gradient_z[1]);
             float3 grad_2 = float3(gradient_x[2], gradient_y[2], gradient_z[2]);
             float3 grad_3 = float3(gradient_x[3], gradient_y[3], gradient_z[3]);
-    
-            float diffuse_ratio = modelParameter.shade;
             
-            // The vector used for shading calculations is currently fixed at (1,1,0).
-            float diffuse0 = diffuse_ratio * max(0.0f, dot(normalize(grad_0), normalize(float3(1,1,0))));
-            float diffuse1 = diffuse_ratio * max(0.0f, dot(normalize(grad_1), normalize(float3(1,1,0))));
-            float diffuse2 = diffuse_ratio * max(0.0f, dot(normalize(grad_2), normalize(float3(1,1,0))));
-            float diffuse3 = diffuse_ratio * max(0.0f, dot(normalize(grad_3), normalize(float3(1,1,0))));
+            float v0 = pow(length(grad_0), 1);
+            float v1 = pow(length(grad_1), 1);
+            float v2 = pow(length(grad_2), 1);
+            float v3 = pow(length(grad_3), 1);
             
-            light_intensity = float4(
-                                     max(0.0f, light_intensity.x - diffuse0),
-                                     max(0.0f, light_intensity.y - diffuse1),
-                                     max(0.0f, light_intensity.z - diffuse2),
-                                     max(0.0f, light_intensity.w - diffuse3)
-                                     );
+            // To emphasize the boundaries more,
+            // increase the second argument of the `pow` function
+            // to raise the gradient length to a higher power.
+            // float v0 = pow(length(grad_0), 2);
+            // float v1 = pow(length(grad_1), 2);
+            // float v2 = pow(length(grad_2), 2);
+            // float v3 = pow(length(grad_3), 2);
             
+            // This shader file replaces the color information at the sampling point with the computed gradient.
+            Cvoxel = float4(v0,v1,v2,v3);
         }
         
         Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity;
@@ -383,11 +362,13 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
                     al = _r * _r ;
                 }
                 
-                alphaMax = 0.1;
+                alphaMax = float4(0.1);
                 Cout = (1.0f - alphaMax) * Cin + alphaMax * Cvoxel * light_intensity  ;
+                
             }
         }
     }
+    
     
     float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
     float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;

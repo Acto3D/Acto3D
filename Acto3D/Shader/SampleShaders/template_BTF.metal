@@ -1,17 +1,7 @@
-//
-//  preset_BTF.metal
-//  Acto3D
-//
-//  Created by Naoki Takeshita on 2023/06/24.
-//
-
-#include <metal_stdlib>
-using namespace metal;
-
-// Label: built-in Back To Front
+// Label: Template for Back To Front Rendering
 // Author: Naoki Takeshita
-// Description: Standard back to front rendering
-kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
+// Description: Template for standard back to front rendering
+kernel void TEMPLATE_BTF(device RenderingArguments    &args       [[buffer(0)]],
                        uint2                        position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;

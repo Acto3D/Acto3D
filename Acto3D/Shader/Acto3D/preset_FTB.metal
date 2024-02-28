@@ -1,10 +1,8 @@
-//
 //  preset_FTB.metal
 //  Acto3D
 //
 //  Created by Naoki Takeshita on 2023/06/27.
 //
-
 
 #include <metal_stdlib>
 using namespace metal;
@@ -26,7 +24,6 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
     uint16_t flags = args.flags;
     
     float4 quaternions = args.quaternions;
-    
     
     float width = args.tex.get_width();
     float height = args.tex.get_height();
@@ -50,7 +47,6 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
     constant float3* pointSet = args.pointSet;
     uint16_t pointSelectedIndex = args.pointSelectedIndex;
     
-    
     // uniform matrix
     float4x4 centeringMatrix = float4x4(1, 0, 0, 0,
                                         0, 1, 0, 0,
@@ -62,7 +58,6 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
                                    0, 0, 1.0, 0,
                                    0, 0, 0, 1.0);
     
-    
     float4x4 transferMatrix = float4x4(1, 0, 0, 0,
                                        0, 1, 0, 0,
                                        0, 0, 1.0, 0,
@@ -73,7 +68,6 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
                                               0, 0, 1, 0,
                                               width / 2.0, height / 2.0, depth * scale_Z / 2.0, 1);
     
-    
     // directionVector is the normal vector with respect to the pre-rotation view,
     // and is set to (0, 0, 1, 0).
     // directionVector_rotate is the direction vector of the ray,
@@ -82,7 +76,6 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
     float4 directionVector_rotate = quatMul(quaternions, directionVector);
     
     float4 uniformedThreadPosition = transferMatrix * scaleMatix * centeringMatrix * currentThreadPosition;
-    
     float4 mappedPosition = quatMul(quaternions, uniformedThreadPosition);
     
     float radius = modelParameter.sliceMax / 2.0;
@@ -98,16 +91,36 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
     // You can terminate the process here when displaying MPR.
     if(flags & (1 << MPR)){
         SHOW_MPR
+        
+        // ------------------------------------------------
+        // If, you want to show plot even in MPR view, use the following code.
+        float ballRadius = 10.0f;
+        for (uint8_t p=0; p<pointSetCount; p++){
+            float ts = radius - modelParameter.sliceNo ;
+            float4 currentPos = float4(mappedPosition.xyz + ts * directionVector_rotate.xyz, 1);
+            float4 coordinatePos = centeringToViewMatrix * currentPos;
+            float3 _vec = coordinatePos.xyz - pointSet[p];
+            
+            float _length = length(_vec);
+            
+            if(_length < ballRadius && _length > ballRadius - 2){
+                args.outputData[index + 0] = 255;
+                args.outputData[index + 1] = 255;
+                args.outputData[index + 2] = 255;
+            }
+        }
+        // ------------------------------------------------
+        
         return;
     }
     
     // Maximum and minimum coordinates of the texture
-    float z_min = -depth * scale_Z / 2.0f;
     float z_max = depth * scale_Z / 2.0f;
-    float x_min = -width / 2.0f;
+    float z_min = -z_max;
     float x_max = width / 2.0f;
-    float y_min = -height / 2.0f;
+    float x_min = -x_max;
     float y_max = height / 2.0f;
+    float y_min = -y_max;
     
     // Compute intersections of rays with the texture boundaries.
     // If a result for vertex of the cube, there will be one intersection, but we will ignore it.
@@ -131,21 +144,13 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         renderingStepAdditionalRatio *= scaleRatio;
     }
     
-
-    float3 channel_1 = modelParameter.color.ch1.rgb;
-    float3 channel_2 = modelParameter.color.ch2.rgb;
-    float3 channel_3 = modelParameter.color.ch3.rgb;
-    float3 channel_4 = modelParameter.color.ch4.rgb;
-    
-    
     // Accumulated color (C) and opacity (A) for volume rendering.
     float4 Cin = 0;
     float4 Cout = 0 ;
     float4 Ain = 0;
     float4 Aout = 0;
     
-    
-    for (float ts = max(t_near, radius - modelParameter.sliceNo) ; ts <=  t_far  ; ts+= modelParameter.renderingStep * renderingStepAdditionalRatio){
+    for (float ts = max(t_near, radius - modelParameter.sliceNo) ; ts <=  t_far ; ts+= modelParameter.renderingStep * renderingStepAdditionalRatio){
         
         float4 currentPos = float4((mappedPosition.xyz + ts * directionVector_rotate.xyz), 1);
         float4 coordinatePos = centeringToViewMatrix * currentPos;
@@ -170,25 +175,7 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         }else{
             // Render the bounding box when it is turned ON.
             if(flags & (1 << BOX)){
-                if ((texCoordinate.x < boundaryWidth && texCoordinate.y < boundaryWidth) ||
-                    (texCoordinate.x < boundaryWidth && texCoordinate.z < boundaryWidth) ||
-                    
-                    (texCoordinate.x < boundaryWidth && texCoordinate.y > (1.0 - boundaryWidth)) ||
-                    (texCoordinate.x < boundaryWidth && texCoordinate.z > (1.0 - boundaryWidth)) ||
-                    
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.y < boundaryWidth) ||
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.z < boundaryWidth) ||
-                    
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.y > (1.0 - boundaryWidth)) ||
-                    (texCoordinate.x > (1.0 - boundaryWidth) && texCoordinate.z > (1.0 - boundaryWidth)) ||
-                    
-                    (texCoordinate.y < boundaryWidth && texCoordinate.z < boundaryWidth) ||
-                    (texCoordinate.y < boundaryWidth && texCoordinate.z > (1.0 - boundaryWidth)) ||
-                    
-                    (texCoordinate.y > (1.0 - boundaryWidth) && texCoordinate.z < boundaryWidth) ||
-                    (texCoordinate.y > (1.0 - boundaryWidth) && texCoordinate.z > (1.0 - boundaryWidth))
-                    
-                    ){
+                if(isOnBoundaryEdge(texCoordinate, boundaryWidth)){
                     
                     Cin = Cout;
                     Ain = Aout;
@@ -222,12 +209,12 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
                 float t_crop = dot(_vec, directionVector_crop);
                 
                 if(flags & (1 << PLANE)){
-                    float threath = 4.5;
+                    float threshold_plane_thickness = 4.5;
                     
-                    if(t_crop > threath){
+                    if(t_crop > threshold_plane_thickness){
                         // same side
                         
-                    }else if (t_crop <= threath && t_crop >= -threath){
+                    }else if (abs(t_crop) <= threshold_plane_thickness){
                         Cin = Cout;
                         Ain = Aout;
                         
@@ -239,7 +226,7 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
                         
                         continue;
                         
-                    }else if (t_crop < -threath){
+                    }else if (t_crop < -threshold_plane_thickness){
                         // opposite side
                         
                     }
@@ -291,21 +278,28 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         Cin = Cout;
         Ain = Aout;
         
-        Cvoxel = args.tex.sample(args.smp, texCoordinate);
         
+        // Cvoxel is of type float4, accessed like Cvoxel[0] or Cvoxel[3].
+        // It stores pixel values at the sampled coordinates as float values ranging from 0 to 1.0.
+        // Depending on the number of channels in the image, values for each channel are stored in [0]-[3].
+        // Attempting to access a non-existent channel does not result in an error, but returns zero.
+        // Cvoxel can be accessed using [0]-[3], as well as .r, .g, .b, .a, or .x, .y, .z, .w.
+        Cvoxel = args.tex.sample(args.smp, texCoordinate);
+ 
+        /* Get opacity for the voxel */
+        /*
+         float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel.r * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                               pow(args.tone2[int(clamp(Cvoxel.g * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                               pow(args.tone3[int(clamp(Cvoxel.b * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                               pow(args.tone4[int(clamp(Cvoxel.a * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        */
+        
+        // The intensityRatio stores the brightness levels for each channel as specified in the GUI, in float format.
+        // The default value is 0.
         float4 intensityRatio = float4(modelParameter.intensityRatio[0],
                                        modelParameter.intensityRatio[1],
                                        modelParameter.intensityRatio[2],
                                        modelParameter.intensityRatio[3]);
-        
-        
-        /* Get opacity for the voxel */
-        /*
-        half4 alpha = half4(pow(args.tone1[int(Cvoxel.r * 2550.0h)] ,modelParameter.alphaPower),
-                            pow(args.tone2[int(Cvoxel.g * 2550.0h)] ,modelParameter.alphaPower),
-                            pow(args.tone3[int(Cvoxel.b * 2550.0h)] ,modelParameter.alphaPower),
-                            pow(args.tone4[int(Cvoxel.a * 2550.0h)] ,modelParameter.alphaPower));
-        */
         
         // Multiply the color by its intensity.
         Cvoxel *= intensityRatio;
@@ -320,17 +314,22 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         // there are cases where the luminance value may exceed 2550, so it is clamped to 2550.
         // (No need to consider this if fetching opacity before multiplying pixel value with intensity.)
         
-        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel.r * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(clamp(Cvoxel.g * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(clamp(Cvoxel.b * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(clamp(Cvoxel.a * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
+        // args.tone1 to args.tone4 store opacity for each channel's pixel values as floats in the range 0 to 1.0.
+        // For example, to access the opacity for a pixel value of 128,
+        //   use args.tone1[1280].
         
+        // Here, the pow function is used to exponentiate the opacity from 0 to 1.0.
+        // modelParameter.alphaPower, specified in the GUI and defaulting to 2, squares the opacity.
+        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
         
         // While different opacities are defined for the four channels,
         // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
         // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
-        float4 alphaMax = max(max(alpha.r, alpha.g) , max(alpha.b, alpha.a));
-      
+        float alphaMax = max(alpha);
+        
         float4 light_intensity = modelParameter.light;
         
         if(flags & (1 << SHADE)){
@@ -339,8 +338,8 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
             float eps = 2;
             float3 gradient_diff[3] = {
                 float3(1.0 / width, 0, 0) * eps,
-                float3(0, 1.0 / height, 0)* eps,
-                float3(0, 0, 1.0 / depth)* eps
+                float3(0, 1.0 / height, 0) * eps,
+                float3(0, 0, 1.0 / depth) * eps
             };
             
             // Calculate the gradient
@@ -362,15 +361,20 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
             float diffuse3 = diffuse_ratio * max(0.0f, dot(normalize(grad_3), normalize(float3(1,1,0))));
             
             light_intensity = float4(
-                                     max(0.0f, light_intensity.x - diffuse0),
-                                     max(0.0f, light_intensity.y - diffuse1),
-                                     max(0.0f, light_intensity.z - diffuse2),
-                                     max(0.0f, light_intensity.w - diffuse3)
+                                     max(0.0f, light_intensity[0] - diffuse0),
+                                     max(0.0f, light_intensity[1] - diffuse1),
+                                     max(0.0f, light_intensity[2] - diffuse2),
+                                     max(0.0f, light_intensity[3] - diffuse3)
                                      );
+            
+            Cvoxel *= light_intensity;
             
         }
         
-        Cout = Cin + Cvoxel * light_intensity * (1.0f - Ain) * alphaMax;
+        
+        Cvoxel *= light_intensity;
+        
+        Cout = Cin + Cvoxel * (1.0f - Ain) * alphaMax;
         Aout = Ain + (1.0f - Ain) * alphaMax;
         
         
@@ -381,24 +385,26 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         float ballRadius = 20.0f;
         
         for (uint8_t p=0; p<pointSetCount; p++){
+            Cin = Cout;
+            Ain = Aout;
+            
             float3 _vec = coordinatePos.xyz - pointSet[p];
             float _length = length(_vec);
             
             if(_length < ballRadius){
-                half _r = (ballRadius - _length) / ballRadius;
+                float _ballColor = pow(1.0f - (_length / ballRadius) * 0.3, 2);
+                float _ballAlpha = 1.0f - (_length / ballRadius);
                 
-                Cvoxel = float4(_r + 0.25,_r + 0.25, _r + 0.25, _r + 0.25);
-                
-                float al = _r / 3;
+                // For more soft rendering result, use the following code.
+                // float _ballAlpha = pow(1.0f - (_length / ballRadius), 2);
                 
                 if(p == pointSelectedIndex){
-                    Cvoxel += float4(0.25,0.25,0.25,0.25);
-                    al = _r * _r ;
+                    // Brighter for currently selected point
+                    _ballColor += 0.25;
                 }
                 
-                Cout = Cin + Cvoxel * (1.0 - Ain) * Cvoxel * Cvoxel * Cvoxel * Cvoxel;
-                Aout = Ain + (1.0 - Ain) * Cvoxel * Cvoxel * Cvoxel * Cvoxel;
-                
+                Cout = Cin + (1.0 - Ain) * _ballColor * _ballAlpha;
+                Aout = Ain + (1.0 - Ain) * _ballAlpha;
             }
         }
         
@@ -417,18 +423,18 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
         
     }
     
-    float3 lut_c1 = Cout.r * channel_1;
-    float3 lut_c2 = Cout.g * channel_2;
-    float3 lut_c3 = Cout.b * channel_3;
-    float3 lut_c4 = Cout.a * channel_4;
+    float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
+    float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;
+    float3 lut_c3 = Cout[2] * modelParameter.color.ch3.rgb;
+    float3 lut_c4 = Cout[3] * modelParameter.color.ch4.rgb;
     
-    float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r));
-    float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g));
-    float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b));
+    float cR = max(lut_c1.r, lut_c2.r, lut_c3.r, lut_c4.r);
+    float cG = max(lut_c1.g, lut_c2.g, lut_c3.g, lut_c4.g);
+    float cB = max(lut_c1.b, lut_c2.b, lut_c3.b, lut_c4.b);
     
-    args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 2] = uint8_t(clamp(cB, 0.0f, 1.0f) * 255.0);
+    args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 2] = uint8_t(clamp(cB * 255.0f, 0.0f, 255.0f));
     
     return;
     
