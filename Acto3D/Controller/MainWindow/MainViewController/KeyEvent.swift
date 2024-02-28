@@ -217,6 +217,7 @@ extension ViewController{
             outputView.image = renderer.rendering()
             break
             
+            
         default:
             print("View Key Down :\(event.keyCode)")
             break
@@ -253,6 +254,9 @@ extension ViewController{
                 print("C up")
                 keyboard["C"] = false
             }
+        case 53:  // ESC key
+            self.view.window?.makeFirstResponder(self)
+            
         default:
             print("View Key UP :\(event.keyCode)")
             break

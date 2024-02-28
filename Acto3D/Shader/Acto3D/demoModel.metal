@@ -143,6 +143,7 @@ kernel void createDemoModel_ThinLumen(texture3d<float, access::write> texture [[
     float right1 = pow(coefficient * abs(float(gid.z - center_z)) + radius , 2);
     float right2 =  pow(coefficient * abs(float(gid.z - center_z)) + radius + linewidth, 2);
     
+    
     if(left <= right1){
         texture.write(float4(0 / 255.0f ,0,0,0), gid);
     }else if(left <= right2){

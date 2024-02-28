@@ -68,10 +68,10 @@ class ViewController: NSViewController{
     let controlPointsMenu: NSMenu = NSMenu()
     
     
-    @IBOutlet weak var intensityRatio_slider_1: NSSlider!
-    @IBOutlet weak var intensityRatio_slider_2: NSSlider!
-    @IBOutlet weak var intensityRatio_slider_3: NSSlider!
-    @IBOutlet weak var intensityRatio_slider_4: NSSlider!
+    @IBOutlet weak var intensityRatio_slider_1: NSSliderWithRightClick!
+    @IBOutlet weak var intensityRatio_slider_2: NSSliderWithRightClick!
+    @IBOutlet weak var intensityRatio_slider_3: NSSliderWithRightClick!
+    @IBOutlet weak var intensityRatio_slider_4: NSSliderWithRightClick!
     
     @IBOutlet weak var wellCh1: NSColorWell!
     @IBOutlet weak var wellCh2: NSColorWell!
@@ -252,6 +252,19 @@ class ViewController: NSViewController{
         slice_Label_current.validationDelegate = self
         
         
+         intensityRatio_slider_1.onRightClick = {[weak self] event in
+            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_1)
+        }
+        intensityRatio_slider_2.onRightClick = {[weak self] event in
+           self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_2)
+       }
+        intensityRatio_slider_3.onRightClick = {[weak self] event in
+           self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_3)
+       }
+        intensityRatio_slider_4.onRightClick = {[weak self] event in
+           self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_4)
+       }
+        
         
         if AppConfig.ACCEPT_TCP_CONNECTION == true,
            let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
@@ -263,6 +276,55 @@ class ViewController: NSViewController{
         }
     }
     
+    // 共通の
+    
+    // 共通の onRightClick アクション
+    func commonOnRightClick(_ event: NSEvent, slider: NSSlider) {
+        let menu = NSMenu()
+        
+        let defaultItem = NSMenuItem(title: "Set to Default", action: #selector(menuActionSlider(_:)), keyEquivalent: "")
+        defaultItem.target = self
+        defaultItem.tag = 1
+        let zeroItem = NSMenuItem(title: "Set to 0", action: #selector(menuActionSlider(_:)), keyEquivalent: "")
+        zeroItem.target = self
+        zeroItem.tag = 0
+        // スライダーのidentifierをrepresentedObjectに設定
+        defaultItem.representedObject = slider.identifier?.rawValue
+        zeroItem.representedObject = slider.identifier?.rawValue
+        menu.addItem(defaultItem)
+        menu.addItem(zeroItem)
+        
+        
+        NSMenu.popUpContextMenu(menu, with: event, for: slider)
+    }
+
+    @objc func menuActionSlider(_ sender: NSMenuItem) {
+        if let sliderIdentifier = sender.representedObject as? String {
+            print("Action for \(sliderIdentifier), ", sender.tag)
+            // どのスライダーかに応じた処理をここで行う
+            switch sliderIdentifier {
+            case "intensity_ch0":
+                print("Set to Default for Slider 1")
+                intensityRatio_slider_1.floatValue = sender.tag.toFloat()
+                intensityRatioSliderChanged(intensityRatio_slider_1)
+            case "intensity_ch1":
+                print("Set to Default for Slider 1")
+                intensityRatio_slider_2.floatValue = sender.tag.toFloat()
+                intensityRatioSliderChanged(intensityRatio_slider_2)
+            case "intensity_ch2":
+                print("Set to Default for Slider 1")
+                intensityRatio_slider_3.floatValue = sender.tag.toFloat()
+                intensityRatioSliderChanged(intensityRatio_slider_3)
+            case "intensity_ch3":
+                print("Set to Default for Slider 1")
+                intensityRatio_slider_4.floatValue = sender.tag.toFloat()
+                intensityRatioSliderChanged(intensityRatio_slider_4)
+                
+            default:
+                break
+            }
+        }
+    }
     
 
 
@@ -785,15 +847,17 @@ class ViewController: NSViewController{
         renderer.renderParams.sliceNo = slice_Slider.integerValue.toUInt16()
         renderer.renderParams.scale = scale_Slider.floatValue
         
+        slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
+        slice_Label.sizeToFit()
+        
         slice_Label_current.stringValue = "\(slice_Slider.integerValue)"
         slice_Label_current.sizeToFit()
-        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label_current.frame.width
-        slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
+        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label.frame.width
+        
         crop_Label.stringValue = "\(crop_Slider.integerValue) / \(crop_Slider.maxValue.toInt())"
         scale_Label.stringValue = "\(scale_Slider.floatValue.toFormatString(format: "%.2f"))"
         zScale_Label.stringValue = "\(zScale_Slider.floatValue.toFormatString(format: "%.2f"))"
         
-        slice_Label.sizeToFit()
         
         crop_Label.sizeToFit()
         scale_Label.sizeToFit()
@@ -811,10 +875,13 @@ class ViewController: NSViewController{
         slice_Slider.integerValue = params.sliceNo.toInt()
         crop_Slider.integerValue = params.cropSliceNo.toInt()
         
+        slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
+        slice_Label.sizeToFit()
+        
         slice_Label_current.stringValue = "\(slice_Slider.integerValue)"
         slice_Label_current.sizeToFit()
-        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label_current.frame.width
-        slice_Label.stringValue = "/ \(slice_Slider.maxValue.toInt())"
+        slice_Label_current.constraints.first(where: {$0.firstAttribute == .width})?.constant = slice_Label.frame.width
+        
         crop_Label.stringValue = "\(crop_Slider.integerValue) / \(crop_Slider.maxValue.toInt())"
         scale_Label.stringValue = "\(scale_Slider.floatValue.toFormatString(format: "%.2f"))"
         zScale_Label.stringValue = "\(zScale_Slider.floatValue.toFormatString(format: "%.2f"))"
@@ -904,6 +971,7 @@ class ViewController: NSViewController{
         renderer.argumentManager?.markAsNeedsUpdate(argumentIndex: .renderParams)
         outputView.image = renderer.rendering()
     }
+    
     
     @IBAction func light_shade_SliderChanged(_ sender: NSSlider) {
         switch sender.identifier?.rawValue {

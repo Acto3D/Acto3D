@@ -2242,7 +2242,7 @@ isotropic voxel size</string>
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="width" constant="35" id="deo-6i-Js9"/>
                                                                                     </constraints>
-                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="right" title="0.4" id="4V1-q6-bQc">
+                                                                                    <textFieldCell key="cell" lineBreakMode="clipping" selectable="YES" editable="YES" continuous="YES" alignment="right" title="0.4" id="4V1-q6-bQc">
                                                                                         <font key="font" metaFont="system"/>
                                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -3679,7 +3679,7 @@ DQ
                                             <action selector="rotateButton:" target="XfG-lQ-9wD" id="FrL-cZ-rJE"/>
                                         </connections>
                                     </button>
-                                    <slider horizontalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="IJl-bF-T99">
+                                    <slider identifier="intensity_ch2" horizontalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="IJl-bF-T99" customClass="NSSliderWithRightClick" customModule="Acto3D" customModuleProvider="target">
                                         <rect key="frame" x="152" y="66" width="24" height="61"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <sliderCell key="cell" controlSize="mini" continuous="YES" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="right" sliderType="linear" id="BN1-6y-pV0"/>
@@ -3687,7 +3687,7 @@ DQ
                                             <action selector="intensityRatioSliderChanged:" target="XfG-lQ-9wD" id="JvA-Bf-H8G"/>
                                         </connections>
                                     </slider>
-                                    <slider horizontalHuggingPriority="750" fixedFrame="YES" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="51y-06-3SK">
+                                    <slider identifier="intensity_ch3" horizontalHuggingPriority="750" fixedFrame="YES" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="51y-06-3SK" customClass="NSSliderWithRightClick" customModule="Acto3D" customModuleProvider="target">
                                         <rect key="frame" x="152" y="1" width="24" height="61"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <sliderCell key="cell" controlSize="mini" continuous="YES" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="right" sliderType="linear" id="evd-Rs-GgA"/>
@@ -3695,7 +3695,7 @@ DQ
                                             <action selector="intensityRatioSliderChanged:" target="XfG-lQ-9wD" id="1QD-6S-lBK"/>
                                         </connections>
                                     </slider>
-                                    <slider horizontalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="xJL-yK-ia7">
+                                    <slider identifier="intensity_ch1" horizontalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="xJL-yK-ia7" customClass="NSSliderWithRightClick" customModule="Acto3D" customModuleProvider="target">
                                         <rect key="frame" x="152" y="131" width="24" height="61"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <sliderCell key="cell" controlSize="mini" continuous="YES" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="right" sliderType="linear" id="XSc-YX-UPb"/>
@@ -3703,7 +3703,7 @@ DQ
                                             <action selector="intensityRatioSliderChanged:" target="XfG-lQ-9wD" id="Hdr-ge-8E1"/>
                                         </connections>
                                     </slider>
-                                    <slider horizontalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c88-W6-xBM">
+                                    <slider identifier="intensity_ch0" horizontalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c88-W6-xBM" customClass="NSSliderWithRightClick" customModule="Acto3D" customModuleProvider="target">
                                         <rect key="frame" x="152" y="194" width="24" height="61"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <sliderCell key="cell" controlSize="mini" continuous="YES" alignment="left" maxValue="2" doubleValue="1" tickMarkPosition="right" sliderType="linear" id="kOD-bb-ca3"/>
@@ -4516,7 +4516,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="17" height="17"/>
+        <image name="link" catalog="system" width="14" height="14"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

@@ -30,9 +30,6 @@ class ValidatingTextField: NSTextField {
     }
     
     var inputValueType: ValueType = .String
-    
-    
-    
     var storedValue:Any?
     var newValue:Any?
     
@@ -40,6 +37,13 @@ class ValidatingTextField: NSTextField {
         super.draw(dirtyRect)
 
         // Drawing code here.
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.wantsLayer = true
+        self.layer?.borderWidth = 1.5
+        self.layer?.borderColor =  NSColor.clear.cgColor
     }
     
     override func textShouldBeginEditing(_ textObject: NSText) -> Bool {
@@ -111,18 +115,24 @@ class ValidatingTextField: NSTextField {
     }
     
     override func mouseEntered(with event: NSEvent) {
-//        self.isBordered = true
-        self.layer?.borderWidth = 1.5
-        self.layer?.borderColor = NSColor.unemphasizedSelectedTextBackgroundColor.cgColor
-        self.updateLayer()
+        super.mouseEntered(with: event)
+        animateBorderColor(to: NSColor.selectedTextBackgroundColor.cgColor, duration: 0.5)
+    }
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        animateBorderColor(to: NSColor.clear.cgColor, duration: 0.5)
     }
     
-    override func mouseExited(with event: NSEvent) {
-//        self.isBordered = false
-        self.layer?.borderWidth = 0
-        self.layer?.borderColor = nil
-        self.updateLayer()
+    
+    private func animateBorderColor(to color: CGColor?, duration: TimeInterval) {
+        let animation = CABasicAnimation(keyPath: "borderColor")
+        animation.fromValue = self.layer?.borderColor
+        animation.toValue = color
+        animation.duration = duration
+        self.layer?.add(animation, forKey: "borderColorAnimation")
+        self.layer?.borderColor =  color
     }
+    
     
     override func updateTrackingAreas() {
         print("Tarea")

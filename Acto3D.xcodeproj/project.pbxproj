@@ -14,6 +14,7 @@
 		B00518822A8D41BD00AE58CA /* ToneCurveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00518812A8D41BD00AE58CA /* ToneCurveView.swift */; };
 		B009959D2785DB3400E859B9 /* VC_toneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B009959C2785DB3400E859B9 /* VC_toneController.swift */; };
 		B00F7F9F27D5202A00ED00ED /* AnimateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F7F9E27D5202A00ED00ED /* AnimateView.swift */; };
+		B018E7652B8E57580041625C /* NSSliderWithRightClick.swift in Sources */ = {isa = PBXBuildFile; fileRef = B018E7642B8E57580041625C /* NSSliderWithRightClick.swift */; };
 		B01E3586276D821300EAF0CA /* windowProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E3585276D821300EAF0CA /* windowProtocol.swift */; };
 		B01E3588276D85AE00EAF0CA /* FileLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E3587276D85AE00EAF0CA /* FileLoad.swift */; };
 		B01E358A276D8E5900EAF0CA /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01E3589276D8E5900EAF0CA /* Logger.swift */; };
@@ -112,6 +113,7 @@
 		B00518812A8D41BD00AE58CA /* ToneCurveView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToneCurveView.swift; sourceTree = "<group>"; };
 		B009959C2785DB3400E859B9 /* VC_toneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_toneController.swift; sourceTree = "<group>"; };
 		B00F7F9E27D5202A00ED00ED /* AnimateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateView.swift; sourceTree = "<group>"; };
+		B018E7642B8E57580041625C /* NSSliderWithRightClick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSSliderWithRightClick.swift; sourceTree = "<group>"; };
 		B01E3585276D821300EAF0CA /* windowProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = windowProtocol.swift; sourceTree = "<group>"; };
 		B01E3587276D85AE00EAF0CA /* FileLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLoad.swift; sourceTree = "<group>"; };
 		B01E3589276D8E5900EAF0CA /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -392,6 +394,7 @@
 				B00518812A8D41BD00AE58CA /* ToneCurveView.swift */,
 				B09D4E0C2A8FAF88001C77E6 /* FlippedViewForScroll.swift */,
 				B0EA41C92B87833E00FAB19F /* NSTextFieldWithAction.swift */,
+				B018E7642B8E57580041625C /* NSSliderWithRightClick.swift */,
 			);
 			path = custom;
 			sourceTree = "<group>";
@@ -718,6 +721,7 @@
 				B092F60C2780732400247CD5 /* ModelView.swift in Sources */,
 				B0321D5B296670A400FA2507 /* SegmentRenderer.swift in Sources */,
 				B0F3C92E2795C46400925A30 /* DataHandler.swift in Sources */,
+				B018E7652B8E57580041625C /* NSSliderWithRightClick.swift in Sources */,
 				B04AD2412A4756340061E350 /* URL+relative.swift in Sources */,
 				B01E358A276D8E5900EAF0CA /* Logger.swift in Sources */,
 				B0EEEC8D27D5CF47006248AF /* MovieCreator.swift in Sources */,
