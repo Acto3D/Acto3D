@@ -1529,15 +1529,15 @@ extension ViewController: ValidatingTextFieldDelegate {
 
 extension ViewController: TCPServerDelegate{
     func startDataTransfer(sender: TCPServer) {
-        if let _ = renderer.mainTexture {
-            if !closeCurrentSession(){
-                sender.stop()
-                return
-            }else{
-                sender.sendVersionInfoToStartTransferSession()
-            }
-        }else{
-            sender.sendVersionInfoToStartTransferSession()
-        }
+        sender.sendVersionInfoToStartTransferSession()
+//        if let _ = renderer.mainTexture {
+//            if !closeCurrentSession(){
+//                sender.stop()
+//                return
+//            }else{
+//                sender.sendVersionInfoToStartTransferSession()
+//            }
+//        }else{
+//        }
     }
 }

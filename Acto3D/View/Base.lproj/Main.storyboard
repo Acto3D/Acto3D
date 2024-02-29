@@ -535,6 +535,12 @@ isotropic voxel size</string>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="tcn-Je-1kf"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Restart Session" identifier="reset_tcp" id="VxB-wG-TCS">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="Yn1-BA-X6p"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Change Port ()" identifier="change_port" id="yMO-1p-MbT">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>

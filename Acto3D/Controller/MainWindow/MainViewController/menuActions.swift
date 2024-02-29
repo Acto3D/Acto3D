@@ -287,7 +287,14 @@ extension ViewController{
             
         case "copy_template_shaders":
             copyTemplatesToShaderDirectory()
-        
+            
+        case "reset_tcp":
+            AppConfig.ACCEPT_TCP_CONNECTION = true
+            tcpServer?.stop()
+            Thread.sleep(forTimeInterval: 2)
+            tcpServer?.start()
+            
+                
         case "tori":
             // creation of tori model
             if let _ = renderer.mainTexture {

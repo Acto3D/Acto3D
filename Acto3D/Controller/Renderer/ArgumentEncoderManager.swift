@@ -231,8 +231,12 @@ class ArgumentEncoderManager {
         }
     }
     
+    var currentDrawingViewSize: Int = 0
+    
     func encodeOutputPixel(drawingViewSize: Int){
         let index = ArgumentIndex.outputBuffer.rawValue
+        
+        currentDrawingViewSize = drawingViewSize
         
         if(outputPxBuffer == nil){
             // create output pixel & buffer if not exist

@@ -300,6 +300,15 @@ class VoluemeRenderer{
         }
     }
     
+    public func getCurrentImageData() -> (data:Data?, viewSize:Int?){
+        guard let argumentManager = self.argumentManager,
+              let contents = argumentManager.outputPxBuffer?.contents() else {return (nil, nil)}
+        
+        let data = Data (bytes: contents,
+                       count: MemoryLayout<UInt8>.stride * argumentManager.currentPxByteSize)
+        return (data, argumentManager.currentDrawingViewSize)
+    }
+    
     public func rendering_minimum() -> NSImage?{
         guard let mainTexture = mainTexture else {return nil}
         

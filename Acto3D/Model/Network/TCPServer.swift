@@ -24,6 +24,11 @@ class TCPServer {
         case ZYX
         case LZYX
     }
+    enum ParameterMode{
+        case VOXEL
+        case SLICE
+        case SCALE
+    }
     
     weak var delegate:TCPServerDelegate?
     weak var vc:ViewController?
@@ -57,8 +62,10 @@ class TCPServer {
             
             switch state {
             case .ready:
-                Logger.logPrintAndWrite(message: "Acto3D is accepting data input from external software (Port: \(AppConfig.TCP_PORT))")
-                print("Server is ready at port \(self.port)")
+                Logger.logPrintAndWrite(message: "Acto3D is accepting data input (Port: \(AppConfig.TCP_PORT))")
+                print("TCP Server is ready at port \(self.port)")
+            case .setup:
+                print("Listerner setuped")
                 
             case .failed(let error):
                 print("Server failed with error: \(error)")
@@ -81,11 +88,12 @@ class TCPServer {
     private func handleConnection() {
         connection?.start(queue: .main)
         
-        // 1. データ通信の開始信号を待つ
         receiveStartSignal()
     }
     
     private func receiveStartSignal() {
+        receivedSlices = 0
+        
         connection?.receive(minimumIncompleteLength: 1, maximumLength: 5) { (data, _, _, error) in
             if let data = data, let signal = String(data: data, encoding: .utf8), signal == "START" {
                 print("Received start signal")
@@ -99,7 +107,7 @@ class TCPServer {
             }
         }
     }
-    // STARTシグナル受信後にバージョン情報を送信
+    
     public func sendVersionInfoToStartTransferSession() {
         let versionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
         let versionData = Data(versionString.utf8)
@@ -111,9 +119,39 @@ class TCPServer {
             }
             print("Version info sent successfully.")
             
-            // バージョン情報の送信後、画像情報の受信を待機
-            
             self.waitForClientResponse()
+        }))
+    }
+    
+    public func sendCurrentSliceData(){
+        let currentData = renderer.getCurrentImageData()
+        guard let imageData = currentData.data,
+              let imageSize = currentData.viewSize else{
+            return
+        }
+        
+        // 画像のサイズ（幅と高さ）をUInt32で送信
+        var width = UInt32(imageSize)
+        var height = UInt32(imageSize) // この例では幅と高さが同じと仮定
+        var imageSizeData = Data(bytes: &width, count: 4)
+        imageSizeData.append(Data(bytes: &height, count: 4))
+
+        connection?.send(content: imageSizeData, completion: .contentProcessed({ error in
+            if let error = error {
+                print("Failed to send size data:", error)
+                return
+            }
+            print("Send image size")
+            
+            self.connection?.send(content: imageData, completion: .contentProcessed({ error in
+                if let error = error {
+                    print("Failed to send image data:", error)
+                    return
+                }
+                print("Image data sent successfully.")
+                
+                self.receiveEndSignal()
+            }))
         }))
     }
     
@@ -122,19 +160,39 @@ class TCPServer {
         connection?.receive(minimumIncompleteLength: 5, maximumLength: 5) {(data, _, _, error) in
             guard let data = data, error == nil, let response = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters) else {
                 print("Error receiving client response or connection error: \(error?.localizedDescription ?? "Unknown error")")
-                self.stop(byError: true)
+                
+                
+                
                 return
             }
 
-            print(response)
             if (response == "ZCYX_"){
+                print("Data type would be ZCYX")
                 self.receiveImageInfo(mode: .ZCYX)
                 
             }else if(response == "ZYX__"){
+                print("Data type would be ZYX")
                 self.receiveImageInfo(mode: .ZYX)
                 
             }else if(response == "LZYX_"){
+                print("Data type would be LZYX")
                 self.receiveImageInfo(mode: .LZYX)
+                
+            }else if(response == "VOXEL"){
+                print("Set Voxel size")
+                self.setParameters(mode: .VOXEL)
+                
+            }else if(response == "SLICE"){
+                print("Set Slice")
+                self.setParameters(mode: .SLICE)
+                
+            }else if(response == "SCALE"){
+                print("Set Scale")
+                self.setParameters(mode: .SCALE)
+                
+            }else if(response == "CURIM"){
+                print("Send Current Image")
+                self.sendCurrentSliceData()
                 
             }else{
                 print("Received error code or incompatible version from client.")
@@ -142,9 +200,98 @@ class TCPServer {
             }
         }
     }
-
+    
+    private func setParameters(mode: ParameterMode) {
+        switch mode{
+        case .VOXEL:
+            connection?.receive(minimumIncompleteLength: 32, maximumLength: 32) { (data, _, _, error) in
+                if let data = data {
+                    let imageInfo = data.withUnsafeBytes {
+                        (pointer: UnsafeRawBufferPointer) -> (Float, Float, Float, String) in
+                        let resX = pointer.load(fromByteOffset: 0, as: Float.self)
+                        let resY = pointer.load(fromByteOffset: 4, as: Float.self)
+                        let resZ = pointer.load(fromByteOffset: 8, as: Float.self)
+                        let unitStr = String(data: data[12...31], encoding: .utf8)?.trimmingCharacters(in: .init(charactersIn: "\0")) ?? ""
+                        return (resX, resY, resZ, unitStr)
+                    }
+                    
+                    self.renderer.imageParams.scaleX = imageInfo.0
+                    self.renderer.imageParams.scaleY = imageInfo.1
+                    self.renderer.imageParams.scaleZ = imageInfo.2
+                    self.renderer.imageParams.unit = imageInfo.3
+                    
+                    self.vc?.xResolutionField.floatValue = imageInfo.0
+                    self.vc?.yResolutionField.floatValue = imageInfo.1
+                    self.vc?.zResolutionField.floatValue = imageInfo.2
+                    self.vc?.scaleUnitField.stringValue = imageInfo.3
+                    
+                    self.vc?.showIsortopicView(self)
+                    
+                    // Waiting for end signal
+                    self.receiveEndSignal()
+                    
+                } else if let error = error {
+                    print("Error receiving image info: \(error)")
+                    self.stop(byError: true)
+                }
+            }
+            
+        case .SCALE:
+            connection?.receive(minimumIncompleteLength: 4, maximumLength: 4) { (data, _, _, error) in
+                if let data = data {
+                    let scale = data.withUnsafeBytes {
+                        $0.load(as: Float.self)
+                    }
+                    
+                    self.renderer.renderParams.scale = scale
+                    self.vc?.scale_Slider.floatValue = scale
+                    self.vc?.scale_Label.floatValue = scale
+                    self.vc?.outputView.image = self.renderer.rendering()
+                    
+                    // Waiting for end signal
+                    self.receiveEndSignal()
+                    
+                } else if let error = error {
+                    print("Error receiving image info: \(error)")
+                    self.stop(byError: true)
+                }
+            }
+            
+        case .SLICE:
+            connection?.receive(minimumIncompleteLength: 4, maximumLength: 4) { (data, _, _, error) in
+                if let data = data {
+                    let sliceNo = data.withUnsafeBytes {
+                        $0.load(as: UInt32.self)
+                    }
+                    
+                    self.renderer.renderParams.sliceNo = sliceNo.toUInt16()
+                    self.vc?.slice_Slider.integerValue = sliceNo.toInt()
+                    self.vc?.slice_Label_current.integerValue = sliceNo.toInt()
+                    self.vc?.outputView.image = self.renderer.rendering()
+                    
+                    // Waiting for end signal
+                    self.receiveEndSignal()
+                    
+                } else if let error = error {
+                    print("Error receiving image info: \(error)")
+                    self.stop(byError: true)
+                }
+            }
+        default:
+            break
+        }
+    }
     
     private func receiveImageInfo(mode: ShapeMode) {
+        if let _ = self.renderer.mainTexture {
+            if let closeSession = self.vc?.closeCurrentSession(),
+               !closeSession{
+                return
+            }else{
+            }
+        }else{
+        }
+        
         switch mode{
         case .ZCYX:
             Logger.logPrintAndWrite(message: "Waiting for ZCYX images.")
@@ -154,12 +301,11 @@ class TCPServer {
                         (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32, UInt32, UInt32) in
                         let depth = pointer.load(fromByteOffset: 0, as: UInt32.self)
                         let channel = pointer.load(fromByteOffset: 4, as: UInt32.self)
-                        let width = pointer.load(fromByteOffset: 8, as: UInt32.self)
-                        let height = pointer.load(fromByteOffset: 12, as: UInt32.self)
+                        let height = pointer.load(fromByteOffset: 8, as: UInt32.self)
+                        let width = pointer.load(fromByteOffset: 12, as: UInt32.self)
                         return (depth, channel, height, width)
                     }
                     
-                    // 受信した画像情報を保存
                     self.imageWidth = imageInfo.3
                     self.imageHeight = imageInfo.2
                     self.imageDepth = imageInfo.0
@@ -167,7 +313,7 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    // 画像データの受信を開始
+                    
                     self.receiveSliceData(mode: .ZCYX)
                     
                 } else if let error = error {
@@ -183,12 +329,12 @@ class TCPServer {
                     let imageInfo = data.withUnsafeBytes {
                         (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32, UInt32) in
                         let depth = pointer.load(fromByteOffset: 0, as: UInt32.self)
-                        let width = pointer.load(fromByteOffset: 4, as: UInt32.self)
-                        let height = pointer.load(fromByteOffset: 8, as: UInt32.self)
+                        let height = pointer.load(fromByteOffset: 4, as: UInt32.self)
+                        let width = pointer.load(fromByteOffset: 8, as: UInt32.self)
                         return (depth, height, width)
                     }
                     
-                    // 受信した画像情報を保存
+                    
                     self.imageWidth = imageInfo.2
                     self.imageHeight = imageInfo.1
                     self.imageDepth = imageInfo.0
@@ -196,7 +342,7 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    // 画像データの受信を開始
+                    
                     self.receiveSliceData(mode: .ZYX)
                     
                 } else if let error = error {
@@ -218,7 +364,7 @@ class TCPServer {
                         return (channel, depth, height, width)
                     }
                     
-                    // 受信した画像情報を保存
+                    
                     self.imageWidth = imageInfo.3
                     self.imageHeight = imageInfo.2
                     self.imageDepth = imageInfo.1
@@ -226,7 +372,7 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    // 画像データの受信を開始
+                    
                     self.receiveSliceData(mode: .LZYX)
                     
                 } else if let error = error {
@@ -240,8 +386,9 @@ class TCPServer {
         }
     }
     
-    // スライスデータの受信処理を開始
+    
     private func receiveSliceData(mode: ShapeMode) {
+        print("Prepare for accepting data, and create texture base.")
         // initialize renderer params
         renderer.volumeData = VolumeData(outputImageWidth: imageWidth.toUInt16(),
                                          outputImageHeight: imageHeight.toUInt16(),
@@ -279,6 +426,7 @@ class TCPServer {
     }
     
     private func waitingSliceData(mode: ShapeMode){
+        print("Waiting for slice data")
         if receivedSlices >= imageDepth {
             vc?.zScale_Slider.floatValue = self.renderer.renderParams.zScale
             vc?.updateSliceAndScale(currentSliceToMax: true)
@@ -302,6 +450,8 @@ class TCPServer {
         let sliceSize = Int(imageWidth * imageHeight * imageChannel)
         
         connection?.receive(minimumIncompleteLength: sliceSize, maximumLength: sliceSize) { [self] (data, _, isComplete, error) in
+            print("slice", receivedSlices)
+            
             guard let data = data else {
                 if let error = error {
                     print("Error receiving slice data: \(error)")
@@ -351,7 +501,6 @@ class TCPServer {
                 
                 // Run Compute Shader to arrange pixel data
                 // Kernel Funciton
-                // 各画像，各チャンネルの値を読み込んで，display rangeで調整してテクスチャへ書き込んでいく
                 guard let arrangeCommandBuffer = renderer.cmdQueue.makeCommandBuffer(),
                       let computeEncoder = arrangeCommandBuffer.makeComputeCommandEncoder(),
                       let computeFunction = renderer.mtlLibrary.makeFunction(name: "createTextureFromCYX_8bit")
@@ -413,38 +562,23 @@ class TCPServer {
             
             self.receivedSlices += 1
 
-            // エラーがなければ、次のスライスデータの受信を試みる
+            // wait for next slice
             if !isComplete {
                 self.waitingSliceData(mode: mode)
             }
         }
     }
     
-    // 受信したスライスデータの処理
-    private func processSliceData(_ data: Data) {
-        print("Received slice data: \(data.count) bytes")
-        // ここでスライスデータを画像として処理するなど、実際の処理を行う
-        // DataオブジェクトをUInt8の配列に変換
-        let dataArray = [UInt8](data)
-        
-        // 配列の最初の5要素を安全に取得し、出力
-        let firstElements = dataArray.prefix(5)
-        print("First 5 elements of received slice data for \(receivedSlices): \(firstElements)")
-        
-        // ここで受信データを画像として処理するなど、実際の処理を行う
-    }
     
-    // 終了信号の受信処理
     private func receiveEndSignal() {
         connection?.receive(minimumIncompleteLength: 3, maximumLength: 3) { (data, _, isComplete, error) in
             if let data = data, let signal = String(data: data, encoding: .utf8), signal == "END" {
                 print("Received end signal. Data transmission completed successfully.")
-                // 通信を正常に終了
-                
+    
                 Logger.logPrintAndWrite(message: "Data transfer succeeded.", level: .info)
+ 
                 
-                self.stop()
-                
+                self.receiveStartSignal()
                 
             } else if let error = error {
                 print("Error receiving end signal: \(error)")
@@ -463,7 +597,6 @@ class TCPServer {
     
     
     deinit {
-        // リスナーを停止
         connection?.cancel()
         listener?.cancel()
         print("Server on port \(self.port) is stopped.")

@@ -135,7 +135,6 @@ class ValidatingTextField: NSTextField {
     
     
     override func updateTrackingAreas() {
-        print("Tarea")
         if !trackingAreas.isEmpty {
             for area in trackingAreas {
                 removeTrackingArea(area)
