@@ -260,40 +260,51 @@ extension ViewController{
     }
     
     func copySampleShadersToShaderDirectory(){
-        
-        let appURL = Bundle.main.bundleURL
-        let mainShadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("SampleShaders")
-        
-        // get custom shader dir
-        guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader").appendingPathComponent("SampleShaders") else {
-            Logger.logPrintAndWrite(message: "Could not obtein shader directory")
+        let srcURL = Bundle.main.bundleURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("SampleShaders")
+        guard let dstURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader").appendingPathComponent("SampleShaders") else{
+            Logger.logPrintAndWrite(message: "Could not obtein shader directory", level: .error)
             return
         }
+        copyFiles(from: srcURL, to: dstURL, pathExtension: "metal")
+    }
+    
+    func copyTemplatesToShaderDirectory(){
+        let srcURL = Bundle.main.bundleURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader").appendingPathComponent("Templates")
+        guard let dstURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader").appendingPathComponent("Templates") else{
+            Logger.logPrintAndWrite(message: "Could not obtein shader directory", level: .error)
+            return
+        }
+        copyFiles(from: srcURL, to: dstURL, pathExtension: "metal")
+    }
+    
+    func copyFiles(from srcURL:URL , to dstURL: URL, pathExtension:String){
         do {
-            try FileManager.default.createDirectory(at: customShadersURL, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: dstURL, withIntermediateDirectories: true, attributes: nil)
         } catch {
             Logger.logPrintAndWrite(message: "Error in creating custom shader directory", level: .error)
             return
         }
         
-        guard let mainShadersFiles = try? FileManager.default.contentsOfDirectory(at: mainShadersURL,
+        guard let srcFiles = try? FileManager.default.contentsOfDirectory(at: srcURL,
                                                                                   includingPropertiesForKeys: nil,
                                                                                   options: .skipsHiddenFiles)
         else{
-            Logger.logPrintAndWrite(message: "could not obtein files in: \(mainShadersURL.path)")
+            Logger.logPrintAndWrite(message: "could not obtein files in: \(srcURL.path)")
             return
         }
         
-        let metalFiles = mainShadersFiles.filter{$0.pathExtension == "metal"}
-        if(metalFiles.count == 0){
-            Logger.logPrintAndWrite(message: "no metal files in :\(mainShadersURL.path)")
+        let copyFiles = srcFiles.filter{$0.pathExtension == pathExtension}
+        
+        if(copyFiles.count == 0){
+            Logger.logPrintAndWrite(message: "no files in :\(srcURL.path)")
             return
         }
         
         var overwriteAll = false
+        var cancel = false
         
-        for fileURL in metalFiles {
-            let destinationURL = customShadersURL.appendingPathComponent(fileURL.lastPathComponent)
+        for fileURL in copyFiles {
+            let destinationURL = dstURL.appendingPathComponent(fileURL.lastPathComponent)
             if FileManager.default.fileExists(atPath: destinationURL.path){
                 if (overwriteAll){
                     // first, delete the existing file
@@ -311,6 +322,7 @@ extension ViewController{
                     alert.addButton(withTitle: "Overwrite")
                     alert.addButton(withTitle: "Skip")
                     alert.addButton(withTitle: "Overwrite All")
+                    alert.addButton(withTitle: "Cancel")
                     let response = alert.runModal()
                     
                     switch response {
@@ -336,6 +348,10 @@ extension ViewController{
                         }
                         
                     default:
+                        cancel = true
+                        break
+                    }
+                    if(cancel){
                         break
                     }
                 }
@@ -347,8 +363,8 @@ extension ViewController{
                 Logger.logPrintAndWrite(message: "error in handling file:\(destinationURL.path)")
             }
         }
-        NSWorkspace.shared.activateFileViewerSelecting([customShadersURL])
-        
+        NSWorkspace.shared.activateFileViewerSelecting([dstURL])
     }
         
 }
+

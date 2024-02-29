@@ -510,6 +510,12 @@ isotropic voxel size</string>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="cRY-Kc-pqi"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Copy Template Shaders" identifier="copy_template_shaders" id="gXs-vR-zev">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="ByD-T8-zne"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Re-Compile" identifier="re-compile" id="Fsd-u7-EdI">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>

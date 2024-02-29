@@ -93,12 +93,12 @@ kernel void simple_ftb(device RenderingArguments    &args       [[buffer(0)]],
     }
     
     // Maximum and minimum coordinates of the texture
-    float z_min = -depth * scale_Z / 2.0f;
     float z_max = depth * scale_Z / 2.0f;
-    float x_min = -width / 2.0f;
+    float z_min = -z_max;
     float x_max = width / 2.0f;
-    float y_min = -height / 2.0f;
+    float x_min = -x_max;
     float y_max = height / 2.0f;
+    float y_min = -y_max;
     
     // Compute intersections of rays with the texture boundaries.
     // If a result for vertex of the cube, there will be one intersection, but we will ignore it.
@@ -114,11 +114,7 @@ kernel void simple_ftb(device RenderingArguments    &args       [[buffer(0)]],
     float t_far = max(intersectionResult.t_1, intersectionResult.t_2);
     float t_near = min(intersectionResult.t_1, intersectionResult.t_2);
     
-    float3 channel_1 = modelParameter.color.ch1.rgb;
-    float3 channel_2 = modelParameter.color.ch2.rgb;
-    float3 channel_3 = modelParameter.color.ch3.rgb;
-    float3 channel_4 = modelParameter.color.ch4.rgb;
-    
+
     
     // Accumulated color (C) and opacity (A) for volume rendering.
     float4 Cin = 0;
@@ -168,14 +164,6 @@ kernel void simple_ftb(device RenderingArguments    &args       [[buffer(0)]],
                                        modelParameter.intensityRatio[3]);
         
         
-        /* Get opacity for the voxel */
-        /*
-        float4 alpha = float4(pow(args.tone1[int(Cvoxel.r * 2550.0h)] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(Cvoxel.g * 2550.0h)] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(Cvoxel.b * 2550.0h)] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(Cvoxel.a * 2550.0h)] ,modelParameter.alphaPower));
-        */
-        
         // Multiply the color by its intensity.
         Cvoxel *= intensityRatio;
         
@@ -188,17 +176,15 @@ kernel void simple_ftb(device RenderingArguments    &args       [[buffer(0)]],
         // When using the pixel value (C) that has considered the above intensity,
         // there are cases where the luminance value may exceed 2550, so it is clamped to 2550.
         // (No need to consider this if fetching opacity before multiplying pixel value with intensity.)
-        
-        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel.r * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone2[int(clamp(Cvoxel.g * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone3[int(clamp(Cvoxel.b * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
-                              pow(args.tone4[int(clamp(Cvoxel.a * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
-        
+        float4 alpha = float4(pow(args.tone1[int(clamp(Cvoxel[0] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone2[int(clamp(Cvoxel[1] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone3[int(clamp(Cvoxel[2] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower),
+                              pow(args.tone4[int(clamp(Cvoxel[3] * 2550.0f, 0.0f, 2550.0f))] ,modelParameter.alphaPower));
         
         // While different opacities are defined for the four channels,
         // applying the same transparency to a specific voxel ensures the depth is rendered accurately.
         // If you wish to apply distinct transparencies for each channel, the following section is unnecessary.
-        float4 alphaMax = max(max(alpha.r, alpha.g) , max(alpha.b, alpha.a));
+        float4 alphaMax = max(alpha);
       
         float4 light_intensity = modelParameter.light;
         
@@ -255,19 +241,18 @@ kernel void simple_ftb(device RenderingArguments    &args       [[buffer(0)]],
 
         
     }
+    float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
+    float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;
+    float3 lut_c3 = Cout[2] * modelParameter.color.ch3.rgb;
+    float3 lut_c4 = Cout[3] * modelParameter.color.ch4.rgb;
     
-    float3 lut_c1 = Cout.r * channel_1;
-    float3 lut_c2 = Cout.g * channel_2;
-    float3 lut_c3 = Cout.b * channel_3;
-    float3 lut_c4 = Cout.a * channel_4;
+    float cR = max(lut_c1.r, lut_c2.r, lut_c3.r, lut_c4.r);
+    float cG = max(lut_c1.g, lut_c2.g, lut_c3.g, lut_c4.g);
+    float cB = max(lut_c1.b, lut_c2.b, lut_c3.b, lut_c4.b);
     
-    float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r));
-    float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g));
-    float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b));
-    
-    args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 2] = uint8_t(clamp(cB, 0.0f, 1.0f) * 255.0);
+    args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 2] = uint8_t(clamp(cB * 255.0f, 0.0f, 255.0f));
     
     return;
     

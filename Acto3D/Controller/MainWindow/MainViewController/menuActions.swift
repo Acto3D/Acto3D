@@ -284,6 +284,9 @@ extension ViewController{
             
         case "copy_sample_shaders":
             copySampleShadersToShaderDirectory()
+            
+        case "copy_template_shaders":
+            copyTemplatesToShaderDirectory()
         
         case "tori":
             // creation of tori model
