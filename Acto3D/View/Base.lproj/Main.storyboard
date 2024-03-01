@@ -1277,9 +1277,9 @@ isotropic voxel size</string>
                                 </view>
                             </box>
                             <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TBZ-rH-xth">
-                                <rect key="frame" x="164" y="462" width="297" height="15"/>
+                                <rect key="frame" x="205" y="462" width="215" height="15"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="recessed" title="Hold ⌘ key and mouse: Set ROI,  Arrow: Move" bezelStyle="recessed" imagePosition="left" alignment="center" refusesFirstResponder="YES" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="6FO-i1-lMj">
+                                <buttonCell key="cell" type="recessed" title="Hold one: Set ROI,  Arrow: Move" bezelStyle="recessed" imagePosition="left" alignment="center" refusesFirstResponder="YES" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="6FO-i1-lMj">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
                                     <font key="font" metaFont="systemBold" size="12"/>
                                     <imageReference key="image" image="keyboard" catalog="system" symbolScale="medium"/>
@@ -2031,11 +2031,11 @@ isotropic voxel size</string>
                                             </textFieldCell>
                                         </textField>
                                         <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LRY-We-dtK">
-                                            <rect key="frame" x="444" y="745" width="283" height="15"/>
+                                            <rect key="frame" x="220" y="745" width="507" height="15"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="15" id="upD-fL-uZm"/>
                                             </constraints>
-                                            <buttonCell key="cell" type="recessed" title="Z: MPR, S: Snapshot, C: Copy, Arrow: Move" bezelStyle="recessed" imagePosition="leading" alignment="center" refusesFirstResponder="YES" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="Th5-NC-Oqg">
+                                            <buttonCell key="cell" type="recessed" title="Z: MPR, S: Snapshot, C: Copy, Arrow: Move, ⌘ + mouse: Rotate cropping section" bezelStyle="recessed" imagePosition="leading" alignment="center" refusesFirstResponder="YES" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="Th5-NC-Oqg">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
                                                 <font key="font" metaFont="systemBold" size="12"/>
                                                 <imageReference key="image" image="keyboard" catalog="system" symbolScale="medium"/>
@@ -4529,7 +4529,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="14" height="14"/>
+        <image name="link" catalog="system" width="17" height="17"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

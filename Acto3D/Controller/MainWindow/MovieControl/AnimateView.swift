@@ -259,6 +259,14 @@ extension ViewController{
             
             var savedFileUrls:[URL] = []
             
+            // Kernel will set to value of start params
+            if let shaderInfo = startParams.shaderInfo{
+                renderer.currentShader = shaderInfo
+            }else{
+                renderer.currentShader = ShaderManage.getPresetList()[1]
+            }
+            renderer.resetMetalFunctions()
+            
             for i in 0...range.toInt(){
                 if(movSeq.animateController.isCancelled == true){
                     

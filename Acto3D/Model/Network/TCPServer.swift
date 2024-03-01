@@ -1,6 +1,5 @@
 //
 //  TCPServer.swift
-//  tcptest
 //
 //  Created by Naoki Takeshita on 2024/02/20.
 //
@@ -11,13 +10,14 @@ import Cocoa
 
 
 protocol TCPServerDelegate: AnyObject {
-    func startDataTransfer(sender: TCPServer)
+    func startDataTransfer(sender: TCPServer, connectionID: Int)
 }
 
 class TCPServer {
     let port: NWEndpoint.Port
     var listener: NWListener?
-    var connection: NWConnection?
+    var connections: [Int: NWConnection] = [:]  // retain connection as dictionary
+    var nextConnectionID: Int = 0 // Unique ID
     
     enum ShapeMode{
         case ZCYX
@@ -56,16 +56,20 @@ class TCPServer {
             print("Unable to start listener: \(error.localizedDescription)")
             return
         }
+        guard let listener = listener else{
+            return
+        }
         
-        listener?.stateUpdateHandler = { state in
+        listener.stateUpdateHandler = { state in
             print("Listener state: \(state)")
             
             switch state {
             case .ready:
                 Logger.logPrintAndWrite(message: "Acto3D is accepting data input (Port: \(AppConfig.TCP_PORT))")
                 print("TCP Server is ready at port \(self.port)")
+                
             case .setup:
-                print("Listerner setuped")
+                break
                 
             case .failed(let error):
                 print("Server failed with error: \(error)")
@@ -76,226 +80,162 @@ class TCPServer {
             }
         }
         
-        listener?.newConnectionHandler = { newConnection in
-            self.connection = newConnection
-            self.handleConnection()
+        listener.newConnectionHandler = {[self] newConnection in
+            self.accept(connection: newConnection)
         }
         
-        listener?.start(queue: .main)
+        listener.start(queue: .main)
     }
     
-    
-    private func handleConnection() {
-        connection?.start(queue: .main)
-        
-        receiveStartSignal()
-    }
-    
-    private func receiveStartSignal() {
-        receivedSlices = 0
-        
-        connection?.receive(minimumIncompleteLength: 1, maximumLength: 5) { (data, _, _, error) in
-            if let data = data, let signal = String(data: data, encoding: .utf8), signal == "START" {
-                print("Received start signal")
+    private func accept(connection: NWConnection) {
+        let connectionID = nextConnectionID
+        nextConnectionID += 1
+
+        connections[connectionID] = connection
+
+        connection.stateUpdateHandler = { [self] state in
+            switch state {
+            case .ready:
+                print("Connection \(connectionID) is ready.")
+                self.receiveMessage(connectionID: connectionID)
                 
-                self.delegate?.startDataTransfer(sender: self)
+            case .failed(let error):
+                print("Connection \(connectionID) failed with error: \(error)")
+                self.connections.removeValue(forKey: connectionID)
+                
+            case .cancelled:
+                print("Connection \(connectionID) cancelled. Remove from collection.")
+                self.connections.removeValue(forKey: connectionID)
+                
+            default:
+                break
+            }
+        }
+
+        connection.start(queue: .main)
+    }
+
+    private func receiveMessage(connectionID: Int) {
+        guard let connection = connections[connectionID] else { return }
+
+        // Wait for START signal
+        connection.receive(minimumIncompleteLength: 5, maximumLength: 5) { [self] (data, _, isComplete, error) in
+            if let data = data,
+                let signal = String(data: data, encoding: .utf8),
+                signal == "START"
+            {
+                // Initialize slice count for new data input.
+                self.receivedSlices = 0
+                print("Received start signal, Connection \(connectionID)")
+                self.delegate?.startDataTransfer(sender: self, connectionID: connectionID)
+            }
+            
+            if isComplete {
+                print("Connection complete")
+                connection.cancel()
+                self.connections.removeValue(forKey: connectionID)
                 
             } else if let error = error {
-                print("Error receiving start signal: \(error)")
-                self.stop(byError: true)
+                print("Received error: \(error)")
+                connection.cancel()
+                self.connections.removeValue(forKey: connectionID)
                 
+            } else {
+                // Continue waiting for signals.
             }
         }
     }
     
-    public func sendVersionInfoToStartTransferSession() {
-        let versionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
-        let versionData = Data(versionString.utf8)
-        connection?.send(content: versionData, completion: .contentProcessed({ sendError in
-            if let sendError = sendError {
-                print("Failed to send version info: \(sendError)")
-                self.stop(byError: true)
-                return
-            }
-            print("Version info sent successfully.")
-            
-            self.waitForClientResponse()
-        }))
-    }
-    
-    public func sendCurrentSliceData(){
-        let currentData = renderer.getCurrentImageData()
-        guard let imageData = currentData.data,
-              let imageSize = currentData.viewSize else{
+    public func sendVersionInfoToStartTransferSession(connectionID: Int) {
+        // After recieved START signal, send Version information to client
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
             return
         }
         
-        // 画像のサイズ（幅と高さ）をUInt32で送信
-        var width = UInt32(imageSize)
-        var height = UInt32(imageSize) // この例では幅と高さが同じと仮定
-        var imageSizeData = Data(bytes: &width, count: 4)
-        imageSizeData.append(Data(bytes: &height, count: 4))
-
-        connection?.send(content: imageSizeData, completion: .contentProcessed({ error in
-            if let error = error {
-                print("Failed to send size data:", error)
+        let versionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
+        let versionData = Data(versionString.utf8)
+        connection.send(content: versionData, completion: .contentProcessed({[self] sendError in
+            if let sendError = sendError {
+                print("Failed to send version info: \(sendError)")
+                self.stopConnectionByID(connectionID)
                 return
             }
-            print("Send image size")
-            
-            self.connection?.send(content: imageData, completion: .contentProcessed({ error in
-                if let error = error {
-                    print("Failed to send image data:", error)
-                    return
-                }
-                print("Image data sent successfully.")
-                
-                self.receiveEndSignal()
-            }))
+            print("Version info sent successfully. \(versionString)")
+            self.waitForClientResponse(connectionID: connectionID)
         }))
     }
     
-    
-    private func waitForClientResponse() {
-        connection?.receive(minimumIncompleteLength: 5, maximumLength: 5) {(data, _, _, error) in
-            guard let data = data, error == nil, let response = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters) else {
-                print("Error receiving client response or connection error: \(error?.localizedDescription ?? "Unknown error")")
-                
-                
-                
+    private func waitForClientResponse(connectionID: Int) {
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
+        connection.receive(minimumIncompleteLength: 5, maximumLength: 5) {[self] (data, _, _, error) in
+            guard let data = data, error == nil,
+                    let response = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters)
+            else {
+                print("Error receiving client response (ID: \(connectionID): \(error?.localizedDescription ?? "Unknown error")")
+                self.stopConnectionByID(connectionID)
                 return
             }
 
             if (response == "ZCYX_"){
                 print("Data type would be ZCYX")
-                self.receiveImageInfo(mode: .ZCYX)
+                receiveImageInfo(mode: .ZCYX, connectionID: connectionID)
                 
             }else if(response == "ZYX__"){
                 print("Data type would be ZYX")
-                self.receiveImageInfo(mode: .ZYX)
+                receiveImageInfo(mode: .ZYX, connectionID: connectionID)
                 
             }else if(response == "LZYX_"){
                 print("Data type would be LZYX")
-                self.receiveImageInfo(mode: .LZYX)
+                receiveImageInfo(mode: .LZYX, connectionID: connectionID)
                 
             }else if(response == "VOXEL"){
                 print("Set Voxel size")
-                self.setParameters(mode: .VOXEL)
+                setParameters(mode: .VOXEL, connectionID: connectionID)
                 
             }else if(response == "SLICE"){
                 print("Set Slice")
-                self.setParameters(mode: .SLICE)
+                setParameters(mode: .SLICE, connectionID: connectionID)
                 
             }else if(response == "SCALE"){
                 print("Set Scale")
-                self.setParameters(mode: .SCALE)
+                setParameters(mode: .SCALE, connectionID: connectionID)
                 
             }else if(response == "CURIM"){
                 print("Send Current Image")
-                self.sendCurrentSliceData()
+                sendCurrentSliceData(connectionID: connectionID)
                 
             }else{
                 print("Received error code or incompatible version from client.")
-                self.stop(byError: true)
+                stopConnectionByID(connectionID)
             }
         }
     }
     
-    private func setParameters(mode: ParameterMode) {
-        switch mode{
-        case .VOXEL:
-            connection?.receive(minimumIncompleteLength: 32, maximumLength: 32) { (data, _, _, error) in
-                if let data = data {
-                    let imageInfo = data.withUnsafeBytes {
-                        (pointer: UnsafeRawBufferPointer) -> (Float, Float, Float, String) in
-                        let resX = pointer.load(fromByteOffset: 0, as: Float.self)
-                        let resY = pointer.load(fromByteOffset: 4, as: Float.self)
-                        let resZ = pointer.load(fromByteOffset: 8, as: Float.self)
-                        let unitStr = String(data: data[12...31], encoding: .utf8)?.trimmingCharacters(in: .init(charactersIn: "\0")) ?? ""
-                        return (resX, resY, resZ, unitStr)
-                    }
-                    
-                    self.renderer.imageParams.scaleX = imageInfo.0
-                    self.renderer.imageParams.scaleY = imageInfo.1
-                    self.renderer.imageParams.scaleZ = imageInfo.2
-                    self.renderer.imageParams.unit = imageInfo.3
-                    
-                    self.vc?.xResolutionField.floatValue = imageInfo.0
-                    self.vc?.yResolutionField.floatValue = imageInfo.1
-                    self.vc?.zResolutionField.floatValue = imageInfo.2
-                    self.vc?.scaleUnitField.stringValue = imageInfo.3
-                    
-                    self.vc?.showIsortopicView(self)
-                    
-                    // Waiting for end signal
-                    self.receiveEndSignal()
-                    
-                } else if let error = error {
-                    print("Error receiving image info: \(error)")
-                    self.stop(byError: true)
-                }
-            }
-            
-        case .SCALE:
-            connection?.receive(minimumIncompleteLength: 4, maximumLength: 4) { (data, _, _, error) in
-                if let data = data {
-                    let scale = data.withUnsafeBytes {
-                        $0.load(as: Float.self)
-                    }
-                    
-                    self.renderer.renderParams.scale = scale
-                    self.vc?.scale_Slider.floatValue = scale
-                    self.vc?.scale_Label.floatValue = scale
-                    self.vc?.outputView.image = self.renderer.rendering()
-                    
-                    // Waiting for end signal
-                    self.receiveEndSignal()
-                    
-                } else if let error = error {
-                    print("Error receiving image info: \(error)")
-                    self.stop(byError: true)
-                }
-            }
-            
-        case .SLICE:
-            connection?.receive(minimumIncompleteLength: 4, maximumLength: 4) { (data, _, _, error) in
-                if let data = data {
-                    let sliceNo = data.withUnsafeBytes {
-                        $0.load(as: UInt32.self)
-                    }
-                    
-                    self.renderer.renderParams.sliceNo = sliceNo.toUInt16()
-                    self.vc?.slice_Slider.integerValue = sliceNo.toInt()
-                    self.vc?.slice_Label_current.integerValue = sliceNo.toInt()
-                    self.vc?.outputView.image = self.renderer.rendering()
-                    
-                    // Waiting for end signal
-                    self.receiveEndSignal()
-                    
-                } else if let error = error {
-                    print("Error receiving image info: \(error)")
-                    self.stop(byError: true)
-                }
-            }
-        default:
-            break
+    private func receiveImageInfo(mode: ShapeMode, connectionID: Int) {
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
         }
-    }
-    
-    private func receiveImageInfo(mode: ShapeMode) {
-        if let _ = self.renderer.mainTexture {
-            if let closeSession = self.vc?.closeCurrentSession(),
-               !closeSession{
-                return
-            }else{
-            }
-        }else{
+        
+        // Close current session
+        if let _ = self.renderer.mainTexture,
+            let closeSession = self.vc?.closeCurrentSession(),
+           !closeSession{
+            // Selected cancel for the dialog.
+            print("Continue current session. Stop data interaction.")
+            self.stopConnectionByID(connectionID)
+            return
         }
         
         switch mode{
         case .ZCYX:
             Logger.logPrintAndWrite(message: "Waiting for ZCYX images.")
-            connection?.receive(minimumIncompleteLength: 16, maximumLength: 16) { (data, _, _, error) in
+            connection.receive(minimumIncompleteLength: 16, maximumLength: 16) {[self] (data, _, _, error) in
                 if let data = data {
                     let imageInfo = data.withUnsafeBytes {
                         (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32, UInt32, UInt32) in
@@ -313,18 +253,17 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    
-                    self.receiveSliceData(mode: .ZCYX)
+                    self.receiveSliceData(mode: .ZCYX, connectionID: connectionID)
                     
                 } else if let error = error {
                     print("Error receiving image info: \(error)")
-                    self.stop(byError: true)
+                    self.stopConnectionByID(connectionID)
                 }
             }
             
         case .ZYX:
             Logger.logPrintAndWrite(message: "Waiting for ZYX images.")
-            connection?.receive(minimumIncompleteLength: 12, maximumLength: 12) { (data, _, _, error) in
+            connection.receive(minimumIncompleteLength: 12, maximumLength: 12) {[self] (data, _, _, error) in
                 if let data = data {
                     let imageInfo = data.withUnsafeBytes {
                         (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32, UInt32) in
@@ -334,7 +273,6 @@ class TCPServer {
                         return (depth, height, width)
                     }
                     
-                    
                     self.imageWidth = imageInfo.2
                     self.imageHeight = imageInfo.1
                     self.imageDepth = imageInfo.0
@@ -342,18 +280,17 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    
-                    self.receiveSliceData(mode: .ZYX)
+                    self.receiveSliceData(mode: .ZYX, connectionID: connectionID)
                     
                 } else if let error = error {
                     print("Error receiving image info: \(error)")
-                    self.stop(byError: true)
+                    self.stopConnectionByID(connectionID)
                 }
             }
             
         case .LZYX:
             Logger.logPrintAndWrite(message: "Waiting for LZYX images.")
-            connection?.receive(minimumIncompleteLength: 16, maximumLength: 16) { (data, _, _, error) in
+            connection.receive(minimumIncompleteLength: 16, maximumLength: 16) {[self] (data, _, _, error) in
                 if let data = data {
                     let imageInfo = data.withUnsafeBytes {
                         (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32, UInt32, UInt32) in
@@ -364,7 +301,6 @@ class TCPServer {
                         return (channel, depth, height, width)
                     }
                     
-                    
                     self.imageWidth = imageInfo.3
                     self.imageHeight = imageInfo.2
                     self.imageDepth = imageInfo.1
@@ -372,23 +308,22 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    
-                    self.receiveSliceData(mode: .LZYX)
+                    self.receiveSliceData(mode: .LZYX, connectionID: connectionID)
                     
                 } else if let error = error {
                     print("Error receiving image info: \(error)")
-                    self.stop(byError: true)
+                    self.stopConnectionByID(connectionID)
                 }
             }
-            
-        default:
-            break
         }
     }
     
-    
-    private func receiveSliceData(mode: ShapeMode) {
-        print("Prepare for accepting data, and create texture base.")
+    private func receiveSliceData(mode: ShapeMode, connectionID: Int) {
+        guard let _ = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
         // initialize renderer params
         renderer.volumeData = VolumeData(outputImageWidth: imageWidth.toUInt16(),
                                          outputImageHeight: imageHeight.toUInt16(),
@@ -410,7 +345,7 @@ class TCPServer {
             CIFilter(name: "CIHueAdjust", parameters: ["inputAngle": NSNumber(value: 4)])!
         ]
         
-        // texture setting    // texture setting
+        // texture setting
         renderer.mainTexture = renderer.device.makeTexture(withChannelCount: self.renderer.imageParams.textureLoadChannel!,
                                                            width: self.renderer.volumeData.inputImageWidth.toInt(),
                                                            height: self.renderer.volumeData.inputImageHeight.toInt(),
@@ -422,11 +357,15 @@ class TCPServer {
             return
         }
         
-        self.waitingSliceData(mode: mode)
+        self.waitingSliceData(mode: mode, connectionID: connectionID)
     }
     
-    private func waitingSliceData(mode: ShapeMode){
-        print("Waiting for slice data")
+    private func waitingSliceData(mode: ShapeMode, connectionID: Int){
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
         if receivedSlices >= imageDepth {
             vc?.zScale_Slider.floatValue = self.renderer.renderParams.zScale
             vc?.updateSliceAndScale(currentSliceToMax: true)
@@ -441,7 +380,7 @@ class TCPServer {
             vc?.outputView.image = renderer.rendering()
             
             // Waiting for end signal
-            receiveEndSignal()
+            receiveEndSignal(connectionID: connectionID)
             
             return
         }
@@ -449,19 +388,17 @@ class TCPServer {
         // actual data size for 1 slice image (= byte in 8 bits image)
         let sliceSize = Int(imageWidth * imageHeight * imageChannel)
         
-        connection?.receive(minimumIncompleteLength: sliceSize, maximumLength: sliceSize) { [self] (data, _, isComplete, error) in
-            print("slice", receivedSlices)
-            
+        connection.receive(minimumIncompleteLength: sliceSize, maximumLength: sliceSize) {[self] (data, _, isComplete, error) in
             guard let data = data else {
                 if let error = error {
                     print("Error receiving slice data: \(error)")
-                    self.stop(byError: true)
+                    self.stopConnectionByID(connectionID)
                 }
                 return
             }
             
             if(self.receivedSlices % 10 == 0){
-                Logger.logPrintAndWrite(message: " Data transfer... (\(self.receivedSlices+1) / \(self.imageDepth))", level: .info)
+//                Logger.logPrintAndWrite(message: " Data transfer... (\(self.receivedSlices+1) / \(self.imageDepth))", level: .info)
             }
             
             // Allocate data memory region for 4 channels
@@ -476,6 +413,7 @@ class TCPServer {
                 guard let cpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: options),
                       let gpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: .storageModePrivate) else {
                     Logger.logPrintAndWrite(message: "  Error in creating CPU or GPU buffers", level: .error)
+                    self.stopConnectionByID(connectionID)
                     return
                 }
                 
@@ -486,6 +424,7 @@ class TCPServer {
                 
                 guard let commandBuffer = renderer.cmdQueue.makeCommandBuffer(),
                       let blitEncoder = commandBuffer.makeBlitCommandEncoder() else {
+                    self.stopConnectionByID(connectionID)
                     return
                 }
                 
@@ -564,40 +503,195 @@ class TCPServer {
 
             // wait for next slice
             if !isComplete {
-                self.waitingSliceData(mode: mode)
+                self.waitingSliceData(mode: mode, connectionID: connectionID)
             }
         }
     }
     
-    
-    private func receiveEndSignal() {
-        connection?.receive(minimumIncompleteLength: 3, maximumLength: 3) { (data, _, isComplete, error) in
+    private func receiveEndSignal(connectionID: Int) {
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
+        connection.receive(minimumIncompleteLength: 3, maximumLength: 3) {[self] (data, _, isComplete, error) in
             if let data = data, let signal = String(data: data, encoding: .utf8), signal == "END" {
                 print("Received end signal. Data transmission completed successfully.")
     
-                Logger.logPrintAndWrite(message: "Data transfer succeeded.", level: .info)
+//                Logger.logPrintAndWrite(message: "Data transfer succeeded.", level: .info)
  
-                
-                self.receiveStartSignal()
+                self.stopConnectionByID(connectionID)
                 
             } else if let error = error {
                 print("Error receiving end signal: \(error)")
-                self.stop(byError: true)
+                self.stopConnectionByID(connectionID)
             }
         }
     }
 
+//
+//
+//    private func handleConnection() {
+//        connection?.start(queue: .main)
+//
+//        receiveStartSignal()
+//    }
+//
+//    private func receiveStartSignal() {
+//        receivedSlices = 0
+//
+//        connection?.receive(minimumIncompleteLength: 1, maximumLength: 5) { (data, _, _, error) in
+//            if let data = data, let signal = String(data: data, encoding: .utf8), signal == "START" {
+//                print("Received start signal")
+//
+//                self.delegate?.startDataTransfer(sender: self, connectionID: 0)
+//
+//            } else if let error = error {
+//                print("Error receiving start signal: \(error)")
+//                self.stop(byError: true)
+//
+//            }
+//        }
+//    }
+//
+//
     
+    private func stopConnectionByID(_ connectionID: Int) {
+        if let connection = connections[connectionID] {
+            connection.cancel()
+            connections.removeValue(forKey: connectionID)
+            print("Connection \(connectionID) will stop.")
+        }
+    }
+    
+    public func sendCurrentSliceData(connectionID: Int){
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
+        let currentData = renderer.getCurrentImageData()
+        guard let imageData = currentData.data,
+              let imageSize = currentData.viewSize else{
+            return
+        }
+        
+        // 画像のサイズ（幅と高さ）をUInt32で送信
+        var width = UInt32(imageSize)
+        var height = UInt32(imageSize) // この例では幅と高さが同じと仮定
+        var imageSizeData = Data(bytes: &width, count: 4)
+        imageSizeData.append(Data(bytes: &height, count: 4))
+
+        connection.send(content: imageSizeData, completion: .contentProcessed({[self] error in
+            if let error = error {
+                print("Failed to send size data:", error)
+                return
+            }
+            print("Send image size")
+            
+            connection.send(content: imageData, completion: .contentProcessed({[self] error in
+                if let error = error {
+                    print("Failed to send image data:", error)
+                    return
+                }
+                print("Image data sent successfully.")
+                
+                self.receiveEndSignal(connectionID: connectionID)
+            }))
+        }))
+    }
+    
+    private func setParameters(mode: ParameterMode, connectionID: Int) {
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
+        switch mode{
+        case .VOXEL:
+            connection.receive(minimumIncompleteLength: 32, maximumLength: 32) {[self] (data, _, _, error) in
+                if let data = data {
+                    let imageInfo = data.withUnsafeBytes {
+                        (pointer: UnsafeRawBufferPointer) -> (Float, Float, Float, String) in
+                        let resX = pointer.load(fromByteOffset: 0, as: Float.self)
+                        let resY = pointer.load(fromByteOffset: 4, as: Float.self)
+                        let resZ = pointer.load(fromByteOffset: 8, as: Float.self)
+                        let unitStr = String(data: data[12...31], encoding: .utf8)?.trimmingCharacters(in: .init(charactersIn: "\0")) ?? ""
+                        return (resX, resY, resZ, unitStr)
+                    }
+                    
+                    self.renderer.imageParams.scaleX = imageInfo.0
+                    self.renderer.imageParams.scaleY = imageInfo.1
+                    self.renderer.imageParams.scaleZ = imageInfo.2
+                    self.renderer.imageParams.unit = imageInfo.3
+                    
+                    self.vc?.xResolutionField.floatValue = imageInfo.0
+                    self.vc?.yResolutionField.floatValue = imageInfo.1
+                    self.vc?.zResolutionField.floatValue = imageInfo.2
+                    self.vc?.scaleUnitField.stringValue = imageInfo.3
+                    
+                    self.vc?.showIsortopicView(self)
+                    
+                    // Waiting for end signal
+                    self.receiveEndSignal(connectionID: connectionID)
+                    
+                } else if let error = error {
+                    print("Error receiving image info: \(error)")
+                    self.stopConnectionByID(connectionID)
+                }
+            }
+            
+        case .SCALE:
+            connection.receive(minimumIncompleteLength: 4, maximumLength: 4) {[self] (data, _, _, error) in
+                if let data = data {
+                    let scale = data.withUnsafeBytes {
+                        $0.load(as: Float.self)
+                    }
+                    
+                    self.renderer.renderParams.scale = scale
+                    self.vc?.scale_Slider.floatValue = scale
+                    self.vc?.scale_Label.floatValue = scale
+                    self.vc?.outputView.image = self.renderer.rendering()
+                    
+                    // Waiting for end signal
+                    self.receiveEndSignal(connectionID: connectionID)
+                    
+                } else if let error = error {
+                    print("Error receiving image info: \(error)")
+                    self.stopConnectionByID(connectionID)
+                }
+            }
+            
+        case .SLICE:
+            connection.receive(minimumIncompleteLength: 4, maximumLength: 4) {[self] (data, _, _, error) in
+                if let data = data {
+                    let sliceNo = data.withUnsafeBytes {
+                        $0.load(as: UInt32.self)
+                    }
+                    
+                    self.renderer.renderParams.sliceNo = sliceNo.toUInt16()
+                    self.vc?.slice_Slider.integerValue = sliceNo.toInt()
+                    self.vc?.slice_Label_current.integerValue = sliceNo.toInt()
+                    self.vc?.outputView.image = self.renderer.rendering()
+                    
+                    // Waiting for end signal
+                    self.receiveEndSignal(connectionID: connectionID)
+                    
+                } else if let error = error {
+                    print("Error receiving image info: \(error)")
+                    self.stopConnectionByID(connectionID)
+                }
+            }
+        }
+    }
     
     func stop(byError:Bool=false) {
-        connection?.cancel()
         listener?.cancel()
         print("Server stopped")
     }
     
     
     deinit {
-        connection?.cancel()
         listener?.cancel()
         print("Server on port \(self.port) is stopped.")
     }

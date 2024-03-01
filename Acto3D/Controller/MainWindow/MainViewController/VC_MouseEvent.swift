@@ -88,7 +88,7 @@ extension ViewController: ModelViewProtocol{
 
         
     }
-    func modelViewMouseDragged(mouse startPoint: NSPoint, previousPoint: NSPoint, currentPoint: NSPoint){
+    func modelViewMouseDragged(with event: NSEvent, mouse startPoint: NSPoint, previousPoint: NSPoint, currentPoint: NSPoint){
         if(renderer.mainTexture == nil){
             return
         }
@@ -96,8 +96,26 @@ extension ViewController: ModelViewProtocol{
         let deltaH = Float( currentPoint.x - previousPoint.x)
         let deltaV = Float( currentPoint.y - previousPoint.y)
         
-        rotateModel(deltaAxisX: deltaV, deltaAxisY: deltaH, deltaAxisZ: 0, performRendering: false)
-        outputView.image = renderer.rendering(targetViewSize: AppConfig.PREVIEW_SIZE)
+        if(event.modifierFlags.contains(.command) == true){
+            // When mouse drags with combination of command key, rotate section plane.
+            let thetaAxisX = radians(fromDegrees: -deltaV )
+            let thetaAxisY = radians(fromDegrees: -deltaH )
+            let thetaAxisZ = radians(fromDegrees: 0 )
+            
+            let quat_X = simd_quatf(angle: thetaAxisX, axis: float3(1, 0, 0))
+            let quat_Y = simd_quatf(angle: thetaAxisY, axis: float3(0, 1, 0))
+            let quat_Z = simd_quatf(angle: thetaAxisZ, axis: float3(0, 0, 1))
+            
+            let quat = quat_Y *  quat_Z  * quat_X
+            
+            renderer.renderParams.cropLockQuaternions = quat * renderer.renderParams.cropLockQuaternions
+            outputView.image = renderer.rendering(targetViewSize: AppConfig.PREVIEW_SIZE)
+            
+        }else{
+            rotateModel(deltaAxisX: deltaV, deltaAxisY: deltaH, deltaAxisZ: 0, performRendering: false)
+            outputView.image = renderer.rendering(targetViewSize: AppConfig.PREVIEW_SIZE)
+        }
+        
     }
     
     func modelViewMouseUp(mouse startPoint: NSPoint, currentPoint: NSPoint){

@@ -12,7 +12,7 @@ import simd
 
 protocol ModelViewProtocol: AnyObject {
     func modelViewMouseMoved(with event: NSEvent, point: NSPoint)
-    func modelViewMouseDragged(mouse startPoint: NSPoint, previousPoint: NSPoint, currentPoint: NSPoint)
+    func modelViewMouseDragged(with event: NSEvent, mouse startPoint: NSPoint, previousPoint: NSPoint, currentPoint: NSPoint)
     func modelViewMouseUp(mouse startPoint: NSPoint, currentPoint: NSPoint)
     func modelViewMouseClicked(mouse point: NSPoint)
     func modelViewMouseWheeled(with event: NSEvent)
@@ -108,7 +108,7 @@ class ModelView: NSImageView {
         
         if isMouseOperating == true {
             mouseMovedDuringMouseDown = true
-            view?.modelViewMouseDragged(mouse: startMousePoint!, previousPoint: previousMousePoint!, currentPoint: currentMousePoint!)
+            view?.modelViewMouseDragged(with: event, mouse: startMousePoint!, previousPoint: previousMousePoint!, currentPoint: currentMousePoint!)
         }
         
     }
