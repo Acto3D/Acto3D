@@ -82,9 +82,9 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     float radius = modelParameter.sliceMax / 2.0;
     
     if (length(mappedPosition.xyz) > radius){
-        args.outputData[index + 0] = modelParameter.backgroundColor.r * 255.0;
-        args.outputData[index + 1] = modelParameter.backgroundColor.g * 255.0;
-        args.outputData[index + 2] = modelParameter.backgroundColor.b * 255.0;
+        args.outputData[index + 0] = uint8_t(modelParameter.backgroundColor[0] * 255.0);
+        args.outputData[index + 1] = uint8_t(modelParameter.backgroundColor[1] * 255.0);
+        args.outputData[index + 2] = uint8_t(modelParameter.backgroundColor[2] * 255.0);
         return;
     }
     
@@ -92,6 +92,26 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     // You can terminate the process here when displaying MPR.
     if(flags & (1 << MPR)){
         SHOW_MPR
+        
+        // ------------------------------------------------
+        // If, you want to show plot even in MPR view, use the following code.
+        float ballRadius = 15.0f;
+        for (uint8_t p=0; p<pointSetCount; p++){
+            float ts = radius - modelParameter.sliceNo ;
+            float4 currentPos = float4(mappedPosition.xyz + ts * directionVector_rotate.xyz, 1);
+            float4 coordinatePos = centeringToViewMatrix * currentPos;
+            float3 _vec = coordinatePos.xyz - pointSet[p];
+            
+            float _length = length(_vec);
+            
+            if(_length < ballRadius && _length > ballRadius - 3){
+                args.outputData[index + 0] = 255;
+                args.outputData[index + 1] = 255;
+                args.outputData[index + 2] = 255;
+            }
+        }
+        // ------------------------------------------------
+        
         return;
     }
     
@@ -108,9 +128,9 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     IntersectionResult intersectionResult = checkIntersection(mappedPosition, directionVector_rotate, x_min, x_max, y_min, y_max, z_min, z_max);
     
     if(intersectionResult.valid_intersection_count != 2){
-        args.outputData[index + 0] = modelParameter.backgroundColor.r * 255.0;
-        args.outputData[index + 1] = modelParameter.backgroundColor.g * 255.0;
-        args.outputData[index + 2] = modelParameter.backgroundColor.b * 255.0;
+        args.outputData[index + 0] = uint8_t(modelParameter.backgroundColor[0] * 255.0);
+        args.outputData[index + 1] = uint8_t(modelParameter.backgroundColor[1] * 255.0);
+        args.outputData[index + 2] = uint8_t(modelParameter.backgroundColor[2] * 255.0);
         return;
     }
     
@@ -131,7 +151,7 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
     // The sampling coordinates along the ray direction are at the behind, inside, or in front of the volume.
     uint8_t state = BEHIND_VOLUME;
     
-    // Accumulated color (C) and opacity (A) for volume rendering.
+    // Accumulated color (C) for volume rendering.
     float4 Cin = float4(modelParameter.backgroundColor, 0);
     float4 Cout = float4(modelParameter.backgroundColor, 0);
     
@@ -389,14 +409,14 @@ kernel void preset_BTF(device RenderingArguments    &args       [[buffer(0)]],
         }
     }
     
-    float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
-    float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;
-    float3 lut_c3 = Cout[2] * modelParameter.color.ch3.rgb;
-    float3 lut_c4 = Cout[3] * modelParameter.color.ch4.rgb;
+    float3 lut_c0 = Cout[0] * modelParameter.color.ch1.rgb;
+    float3 lut_c1 = Cout[1] * modelParameter.color.ch2.rgb;
+    float3 lut_c2 = Cout[2] * modelParameter.color.ch3.rgb;
+    float3 lut_c3 = Cout[3] * modelParameter.color.ch4.rgb;
     
-    float cR = max(lut_c1.r, lut_c2.r, lut_c3.r, lut_c4.r);
-    float cG = max(lut_c1.g, lut_c2.g, lut_c3.g, lut_c4.g);
-    float cB = max(lut_c1.b, lut_c2.b, lut_c3.b, lut_c4.b);
+    float cR = max(lut_c0.r, lut_c1.r, lut_c2.r, lut_c3.r);
+    float cG = max(lut_c0.g, lut_c1.g, lut_c2.g, lut_c3.g);
+    float cB = max(lut_c0.b, lut_c1.b, lut_c2.b, lut_c3.b);
     
     args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f));
     args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f));

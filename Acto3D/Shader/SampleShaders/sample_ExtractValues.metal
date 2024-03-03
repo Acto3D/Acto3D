@@ -77,9 +77,9 @@ kernel void SAMPLE_EXTRACT_VALUES(device RenderingArguments    &args       [[buf
     float radius = modelParameter.sliceMax / 2.0;
     
     if (length(mappedPosition.xyz) > radius){
-        args.outputData[index + 0] = modelParameter.backgroundColor.r * 255.0;
-        args.outputData[index + 1] = modelParameter.backgroundColor.g * 255.0;
-        args.outputData[index + 2] = modelParameter.backgroundColor.b * 255.0;
+        args.outputData[index + 0] = uint8_t(modelParameter.backgroundColor[0] * 255.0);
+        args.outputData[index + 1] = uint8_t(modelParameter.backgroundColor[1] * 255.0);
+        args.outputData[index + 2] = uint8_t(modelParameter.backgroundColor[2] * 255.0);
         return;
     }
     
@@ -91,21 +91,21 @@ kernel void SAMPLE_EXTRACT_VALUES(device RenderingArguments    &args       [[buf
     }
     
     // Maximum and minimum coordinates of the texture
-    float z_min = -depth * scale_Z / 2.0f;
     float z_max = depth * scale_Z / 2.0f;
-    float x_min = -width / 2.0f;
+    float z_min = -z_max;
     float x_max = width / 2.0f;
-    float y_min = -height / 2.0f;
+    float x_min = -x_max;
     float y_max = height / 2.0f;
+    float y_min = -y_max;
     
     // Compute intersections of rays with the texture boundaries.
     // If a result for vertex of the cube, there will be one intersection, but we will ignore it.
     IntersectionResult intersectionResult = checkIntersection(mappedPosition, directionVector_rotate, x_min, x_max, y_min, y_max, z_min, z_max);
     
     if(intersectionResult.valid_intersection_count != 2){
-        args.outputData[index + 0] = modelParameter.backgroundColor.r * 255.0;
-        args.outputData[index + 1] = modelParameter.backgroundColor.g * 255.0;
-        args.outputData[index + 2] = modelParameter.backgroundColor.b * 255.0;
+        args.outputData[index + 0] = uint8_t(modelParameter.backgroundColor[0] * 255.0);
+        args.outputData[index + 1] = uint8_t(modelParameter.backgroundColor[1] * 255.0);
+        args.outputData[index + 2] = uint8_t(modelParameter.backgroundColor[2] * 255.0);
         return;
     }
     
@@ -119,12 +119,6 @@ kernel void SAMPLE_EXTRACT_VALUES(device RenderingArguments    &args       [[buf
     if(flags & (1 << ADAPTIVE)){
         renderingStepAdditionalRatio *= scaleRatio;
     }
-    
-
-    float3 channel_1 = modelParameter.color.ch1.rgb;
-    float3 channel_2 = modelParameter.color.ch2.rgb;
-    float3 channel_3 = modelParameter.color.ch3.rgb;
-    float3 channel_4 = modelParameter.color.ch4.rgb;
     
     
     // Accumulated color (C) and opacity (A) for volume rendering.
@@ -420,18 +414,18 @@ kernel void SAMPLE_EXTRACT_VALUES(device RenderingArguments    &args       [[buf
         
     }
     
-    float3 lut_c1 = Cout.r * channel_1;
-    float3 lut_c2 = Cout.g * channel_2;
-    float3 lut_c3 = Cout.b * channel_3;
-    float3 lut_c4 = Cout.a * channel_4;
+    float3 lut_c0 = Cout[0] * modelParameter.color.ch1.rgb;
+    float3 lut_c1 = Cout[1] * modelParameter.color.ch2.rgb;
+    float3 lut_c2 = Cout[2] * modelParameter.color.ch3.rgb;
+    float3 lut_c3 = Cout[3] * modelParameter.color.ch4.rgb;
     
-    float cR = max(max(lut_c1.r, lut_c2.r), max(lut_c3.r, lut_c4.r));
-    float cG = max(max(lut_c1.g, lut_c2.g), max(lut_c3.g, lut_c4.g));
-    float cB = max(max(lut_c1.b, lut_c2.b), max(lut_c3.b, lut_c4.b));
+    float cR = max(lut_c0.r, lut_c1.r, lut_c2.r, lut_c3.r);
+    float cG = max(lut_c0.g, lut_c1.g, lut_c2.g, lut_c3.g);
+    float cB = max(lut_c0.b, lut_c1.b, lut_c2.b, lut_c3.b);
     
-    args.outputData[index + 0] = uint8_t(clamp(cR, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 1] = uint8_t(clamp(cG, 0.0f, 1.0f) * 255.0);
-    args.outputData[index + 2] = uint8_t(clamp(cB, 0.0f, 1.0f) * 255.0);
+    args.outputData[index + 0] = uint8_t(clamp(cR * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 1] = uint8_t(clamp(cG * 255.0f, 0.0f, 255.0f));
+    args.outputData[index + 2] = uint8_t(clamp(cB * 255.0f, 0.0f, 255.0f));
     
     return;
     

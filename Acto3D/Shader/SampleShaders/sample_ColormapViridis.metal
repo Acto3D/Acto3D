@@ -116,10 +116,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
     
     if (length(mappedPosition.xyz) > radius){
         for(int c=0; c<3; c++){
-            args.outputData[index_0 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_1 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_2 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_3 + c] =  modelParameter.backgroundColor[c] * 255.0;
+            args.outputData[index_0 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_1 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_2 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_3 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
         }
         return;
     }
@@ -148,10 +148,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
             texCoordinate.y < modelParameter.trimY_min || texCoordinate.y > modelParameter.trimY_max ||
             texCoordinate.z < modelParameter.trimZ_min || texCoordinate.z > modelParameter.trimZ_max){
             for(int c=0; c<3; c++){
-                args.outputData[index_0 + c] =  modelParameter.backgroundColor[c] * 255.0;
-                args.outputData[index_1 + c] =  modelParameter.backgroundColor[c] * 255.0;
-                args.outputData[index_2 + c] =  modelParameter.backgroundColor[c] * 255.0;
-                args.outputData[index_3 + c] =  modelParameter.backgroundColor[c] * 255.0;
+                args.outputData[index_0 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
+                args.outputData[index_1 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
+                args.outputData[index_2 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
+                args.outputData[index_3 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
             }
         }else{
             Cvoxel = (float4)args.tex.sample(args.smp, texCoordinate);
@@ -182,12 +182,12 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
     }
     
     // Maximum and minimum coordinates of the texture
-    float z_min = -depth * scale_Z / 2.0f;
     float z_max = depth * scale_Z / 2.0f;
-    float x_min = -width / 2.0f;
+    float z_min = -z_max;
     float x_max = width / 2.0f;
-    float y_min = -height / 2.0f;
+    float x_min = -x_max;
     float y_max = height / 2.0f;
+    float y_min = -y_max;
     
     // Compute intersections of rays with the texture boundaries.
     // If a result for vertex of the cube, there will be one intersection, but we will ignore it.
@@ -195,10 +195,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
     
     if(intersectionResult.valid_intersection_count != 2){
         for(int c=0; c<3; c++){
-            args.outputData[index_0 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_1 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_2 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_3 + c] =  modelParameter.backgroundColor[c] * 255.0;
+            args.outputData[index_0 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_1 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_2 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_3 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
         }
         
         return;
@@ -214,12 +214,6 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
     if(flags & (1 << ADAPTIVE)){
         renderingStepAdditionalRatio *= scaleRatio;
     }
-    
-    
-    float3 channel_1 = modelParameter.color.ch1.rgb;
-    float3 channel_2 = modelParameter.color.ch2.rgb;
-    float3 channel_3 = modelParameter.color.ch3.rgb;
-    float3 channel_4 = modelParameter.color.ch4.rgb;
     
     
     // Accumulated color (C) and opacity (A) for volume rendering.
@@ -462,20 +456,18 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
         
     }
     
-    float3 lut_c1 = interpolateColors(Cout[0]);
-    float3 lut_c2 = interpolateColors(Cout[1]);
-    float3 lut_c3 = interpolateColors(Cout[2]);
-    float3 lut_c4 = interpolateColors(Cout[3]);
+    float3 lut_c0 = interpolateColors(Cout[0]);
+    float3 lut_c1 = interpolateColors(Cout[1]);
+    float3 lut_c2 = interpolateColors(Cout[2]);
+    float3 lut_c3 = interpolateColors(Cout[3]);
     
     for(int c=0; c<3; c++){
-        args.outputData[index_0 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
-        args.outputData[index_1 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
-        args.outputData[index_2 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
-        args.outputData[index_3 + c] = uint8_t(clamp(lut_c4[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_0 + c] = uint8_t(clamp(lut_c0[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_1 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_2 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_3 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
     }
     
-    
     return;
-    
 }
 

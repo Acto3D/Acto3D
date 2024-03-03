@@ -94,10 +94,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
     
     if (length(mappedPosition.xyz) > radius){
         for(int c=0; c<3; c++){
-            args.outputData[index_0 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_1 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_2 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_3 + c] =  modelParameter.backgroundColor[c] * 255.0;
+            args.outputData[index_0 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_1 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_2 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_3 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
         }
         return;
     }
@@ -126,10 +126,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
             texCoordinate.y < modelParameter.trimY_min || texCoordinate.y > modelParameter.trimY_max ||
             texCoordinate.z < modelParameter.trimZ_min || texCoordinate.z > modelParameter.trimZ_max){
             for(int c=0; c<3; c++){
-                args.outputData[index_0 + c] =  modelParameter.backgroundColor[c] * 255.0;
-                args.outputData[index_1 + c] =  modelParameter.backgroundColor[c] * 255.0;
-                args.outputData[index_2 + c] =  modelParameter.backgroundColor[c] * 255.0;
-                args.outputData[index_3 + c] =  modelParameter.backgroundColor[c] * 255.0;
+                args.outputData[index_0 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
+                args.outputData[index_1 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
+                args.outputData[index_2 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
+                args.outputData[index_3 + c] = uint8_t(modelParameter.backgroundColor[c] * 255.0);
             }
         }else{
             Cvoxel = (float4)args.tex.sample(args.smp, texCoordinate);
@@ -139,10 +139,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
                              modelParameter.intensityRatio[3]);
             
             
-            float3 lut_c1 = Cvoxel[0] * modelParameter.color.ch1.rgb;
-            float3 lut_c2 = Cvoxel[1] * modelParameter.color.ch2.rgb;
-            float3 lut_c3 = Cvoxel[2] * modelParameter.color.ch3.rgb;
-            float3 lut_c4 = Cvoxel[3] * modelParameter.color.ch4.rgb;
+            float3 lut_c1 = interpolateColors(Cvoxel[0]);
+            float3 lut_c2 = interpolateColors(Cvoxel[1]);
+            float3 lut_c3 = interpolateColors(Cvoxel[2]);
+            float3 lut_c4 = interpolateColors(Cvoxel[3]);
             
             for(int c=0; c<3; c++){
                 args.outputData[index_0 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
@@ -171,10 +171,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
     
     if(intersectionResult.valid_intersection_count != 2){
         for(int c=0; c<3; c++){
-            args.outputData[index_0 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_1 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_2 + c] =  modelParameter.backgroundColor[c] * 255.0;
-            args.outputData[index_3 + c] =  modelParameter.backgroundColor[c] * 255.0;
+            args.outputData[index_0 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_1 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_2 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
+            args.outputData[index_3 + c] =  uint8_t(modelParameter.backgroundColor[c] * 255.0);
         }
         
         return;
@@ -438,20 +438,18 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
         
     }
     
-    float3 lut_c1 = Cout[0] * modelParameter.color.ch1.rgb;
-    float3 lut_c2 = Cout[1] * modelParameter.color.ch2.rgb;
-    float3 lut_c3 = Cout[2] * modelParameter.color.ch3.rgb;
-    float3 lut_c4 = Cout[3] * modelParameter.color.ch4.rgb;
+    float3 lut_c0 = interpolateColors(Cout[0]);
+    float3 lut_c1 = interpolateColors(Cout[1]);
+    float3 lut_c2 = interpolateColors(Cout[2]);
+    float3 lut_c3 = interpolateColors(Cout[3]);
     
     for(int c=0; c<3; c++){
-        args.outputData[index_0 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
-        args.outputData[index_1 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
-        args.outputData[index_2 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
-        args.outputData[index_3 + c] = uint8_t(clamp(lut_c4[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_0 + c] = uint8_t(clamp(lut_c0[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_1 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_2 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
+        args.outputData[index_3 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
     }
     
-    
     return;
-    
 }
 
