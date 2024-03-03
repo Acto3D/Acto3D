@@ -22,7 +22,8 @@ extension ViewController{
                 return ["Z": false,
                         "A": false,
                         "S": false,
-                        "C": false]
+                        "C": false,
+                        "49": false,]
             }
             return key
         }
@@ -217,6 +218,8 @@ extension ViewController{
             outputView.image = renderer.rendering()
             break
             
+        case 49: // Space
+                keyboard["49"] =  true
             
         default:
             print("View Key Down :\(event.keyCode)")
@@ -254,6 +257,9 @@ extension ViewController{
                 print("C up")
                 keyboard["C"] = false
             }
+        case 49: // Space
+            keyboard["49"] =  false
+            
         case 53:  // ESC key
             self.view.window?.makeFirstResponder(self)
             

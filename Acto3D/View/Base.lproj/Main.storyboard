@@ -2030,19 +2030,6 @@ isotropic voxel size</string>
                                                 <color key="backgroundColor" name="findHighlightColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LRY-We-dtK">
-                                            <rect key="frame" x="220" y="745" width="507" height="15"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="15" id="upD-fL-uZm"/>
-                                            </constraints>
-                                            <buttonCell key="cell" type="recessed" title="Z: MPR, S: Snapshot, C: Copy, Arrow: Move, ⌘ + mouse: Rotate cropping section" bezelStyle="recessed" imagePosition="leading" alignment="center" refusesFirstResponder="YES" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="Th5-NC-Oqg">
-                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                <font key="font" metaFont="systemBold" size="12"/>
-                                                <imageReference key="image" image="keyboard" catalog="system" symbolScale="medium"/>
-                                            </buttonCell>
-                                            <color key="bezelColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="contentTintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        </button>
                                         <visualEffectView hidden="YES" fixedFrame="YES" alphaValue="0.69999999999999996" blendingMode="withinWindow" material="appearanceBased" state="followsWindowActiveState" translatesAutoresizingMaskIntoConstraints="NO" id="hQf-zQ-J87">
                                             <rect key="frame" x="174" y="214" width="362" height="362"/>
                                             <autoresizingMask key="autoresizingMask"/>
@@ -2055,6 +2042,18 @@ isotropic voxel size</string>
                                                 </ciFilter>
                                             </backgroundFilters>
                                         </visualEffectView>
+                                        <button focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LRY-We-dtK">
+                                            <rect key="frame" x="304" y="727" width="424" height="34"/>
+                                            <buttonCell key="cell" type="squareTextured" bezelStyle="texturedSquare" imagePosition="leading" alignment="center" refusesFirstResponder="YES" borderStyle="border" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="Th5-NC-Oqg">
+                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                <string key="title">Z: MPR, S: Snapshot, C: Copy, Arrow (or Space + Mouse): Move, 
+⌘ + Mouse: Rotate cropping section</string>
+                                                <font key="font" metaFont="systemBold" size="12"/>
+                                                <imageReference key="image" image="keyboard" catalog="system" symbolScale="medium"/>
+                                            </buttonCell>
+                                            <color key="bezelColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="contentTintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </button>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="Nyw-z7-nI1" firstAttribute="leading" secondItem="eNV-IP-0hn" secondAttribute="leading" id="1UX-Ta-Qpb"/>
@@ -2905,8 +2904,11 @@ DQ
                                                                                         <action selector="showIsortopicView:" target="XfG-lQ-9wD" id="YuP-OR-GBM"/>
                                                                                     </connections>
                                                                                 </button>
-                                                                                <slider verticalHuggingPriority="750" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ih4-9D-A3t">
-                                                                                    <rect key="frame" x="100" y="38" width="158" height="28"/>
+                                                                                <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ih4-9D-A3t">
+                                                                                    <rect key="frame" x="98" y="38" width="164" height="28"/>
+                                                                                    <constraints>
+                                                                                        <constraint firstAttribute="width" constant="160" id="O2i-52-TJf"/>
+                                                                                    </constraints>
                                                                                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="above" sliderType="linear" id="wcK-0J-IiM"/>
                                                                                     <connections>
                                                                                         <action selector="scaleFontSizeSliderChanged:" target="XfG-lQ-9wD" id="Yzo-xB-dLm"/>
@@ -2953,6 +2955,7 @@ DQ
                                                                                 <constraint firstItem="Jzq-0B-pYW" firstAttribute="centerY" secondItem="aHH-I1-kj7" secondAttribute="centerY" id="mzX-9n-rea"/>
                                                                                 <constraint firstItem="qRJ-S1-DKL" firstAttribute="leading" secondItem="aHH-I1-kj7" secondAttribute="leading" id="nqC-9Q-nyv"/>
                                                                                 <constraint firstItem="sOY-Oo-3KU" firstAttribute="centerY" secondItem="aHH-I1-kj7" secondAttribute="centerY" id="rGj-oF-6gT"/>
+                                                                                <constraint firstItem="ih4-9D-A3t" firstAttribute="leading" secondItem="9G4-qW-IwE" secondAttribute="leading" id="rXZ-Da-aqn"/>
                                                                                 <constraint firstItem="Yci-oQ-AgY" firstAttribute="leading" secondItem="LbZ-Gu-1h4" secondAttribute="leading" id="twY-Hd-usn"/>
                                                                                 <constraint firstItem="hoC-nN-Lla" firstAttribute="centerY" secondItem="qRJ-S1-DKL" secondAttribute="centerY" id="uzQ-Hs-Zxy"/>
                                                                                 <constraint firstItem="cDl-8T-JcO" firstAttribute="centerY" secondItem="FN5-Ux-7v0" secondAttribute="centerY" id="ycn-gK-R73"/>
@@ -4529,7 +4532,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="17" height="17"/>
+        <image name="link" catalog="system" width="14" height="14"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

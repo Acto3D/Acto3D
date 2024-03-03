@@ -96,6 +96,13 @@ extension ViewController: ModelViewProtocol{
         let deltaH = Float( currentPoint.x - previousPoint.x)
         let deltaV = Float( currentPoint.y - previousPoint.y)
         
+        if(keyboard["49"] == true){
+            renderer.renderParams.translationX -= deltaH
+            renderer.renderParams.translationY += deltaV
+            outputView.image = renderer.rendering(targetViewSize: AppConfig.PREVIEW_SIZE)
+            return
+        }
+        
         if(event.modifierFlags.contains(.command) == true){
             // When mouse drags with combination of command key, rotate section plane.
             let thetaAxisX = radians(fromDegrees: -deltaV )
