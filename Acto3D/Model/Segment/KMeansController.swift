@@ -48,10 +48,8 @@ class KMeansController{
     ///   - initialCenters: The initial center values (optional). If not provided, k-means++ is used to determine them.
     /// - Returns: The results of the k-means clustering in a `KMeansResult` format. Returns nil if the clustering fails.
     func calculateKmeans(inputImage:CGImage, n_cluster:Int, initialCenters:[Float]?) -> KMeansResult?{
-        
         var n_cluster:UInt8 = n_cluster.toUInt8()
         
-        // input imageの情報を収集
         let w = Int(inputImage.size.width.rounded())
         let h = Int(inputImage.size.height.rounded())
         let totalBytes = w * h * 1 // * 1 for 8 bit
@@ -61,7 +59,8 @@ class KMeansController{
         // get the unique intensity array
         let uniqueIntensity = Array(Set(intensities))
         
-        let maxInter_cluster = 20
+        let maxInter_cluster = 30
+        let maxTrial_cluster = 10
         let eps:Float = 0.5
         let maxInter_kmeans = 20
         
@@ -71,68 +70,77 @@ class KMeansController{
             return nil
         }
         
-        
         var centers = [Float](repeating: 0, count: n_cluster.toInt())
         
         // if previous cluster centroids are available, use them as initial centers of this k-means itteration
         // if not, select the new cluster centers with k-means++
-        
         if (initialCenters != nil){
             centers = initialCenters!
             n_cluster = centers.count.toUInt8()
             
         }else{
-            // 1つめのクラスタ中心に使用する値はランダムに作成
-            centers[0] = intensities[Int.random(in: 0..<totalBytes)].toFloat()
-            
-            var c = 1
-            var trial = 0
-            while (c < n_cluster){
-                trial += 1
-                if(trial > maxInter_cluster){
-                    Dialog.showDialog(message: "Failed to select the adequate initial cluster centers")
+            var clusterTrialIterates = 0
+            while (clusterTrialIterates <= maxTrial_cluster){
+                print("Initial clustering; trial: \(clusterTrialIterates)")
+                if(clusterTrialIterates == maxTrial_cluster){
+                    Dialog.showDialog(message: "Failed to select the initial cluster centers")
+                    print("centers:", centers)
                     return nil
                 }
                 
-                // 中心点から各ピクセル値までの距離を算出
-                // calculate the distance between center value and pixel value
-                let distances = intensities.map{(val) -> Float in
-                    return (val.toFloat() - centers[c-1]) * (val.toFloat() - centers[c-1])
+                //The first center value is at random
+                centers = [Float](repeating: -1, count: n_cluster.toInt())// avoid same cluster
+                centers[0] = intensities[Int.random(in: 0..<totalBytes)].toFloat()
+                print(" The center for cluster 0 was selected at random: \(centers[0])")
+                
+                var c = 1
+                
+                while (c < n_cluster){
+                    print(" * Cluster\(c) selection started")
+    
+                    // calculate the distance between center value and pixel value
+                    let distances = intensities.map{(val) -> Float in
+                        return (val.toFloat() - centers[c-1]) * (val.toFloat() - centers[c-1])
+                    }
                     
-                    // if use UInt8
-//                    if(val >= centers[c-1]){
-//                        return Int(val - centers[c-1]) * Int(val - centers[c-1])
-//                    }else{
-//                        return Int(centers[c-1] - val) * Int(centers[c-1] - val)
-//                    }
-                }
-                
-                // weighed probability
-                let sumOfDistances = distances.reduce(0, +)
-                let probabilities = distances.map { $0.toDouble() / sumOfDistances.toDouble() }
-                var cumulativeProbability = 0.0
-                var nextCenter:Int?
-                
-                while nextCenter == nil {
-                    let randomProbability = Double.random(in: 0...1)
-                    for (i, probability) in probabilities.enumerated() {
-                        cumulativeProbability += probability
-                        if cumulativeProbability >= randomProbability {
-                            nextCenter = i
-                            break
+                    // weighed probability
+                    let sumOfDistances = distances.reduce(0, +)
+                    let probabilities = distances.map { $0.toDouble() / sumOfDistances.toDouble() }
+                    var cumulativeProbability = 0.0
+                    var nextCenter:Int?
+                    
+                    while nextCenter == nil {
+                        let randomProbability = Double.random(in: 0...1)
+                        for (i, probability) in probabilities.enumerated() {
+                            cumulativeProbability += probability
+                            if cumulativeProbability >= randomProbability {
+                                nextCenter = i
+                                break
+                            }
                         }
+                    }
+                    print("   Cluster\(c): center=\(intensities[nextCenter!])")
+                    if(centers.contains(intensities[nextCenter!].toFloat())){
+                        print("   Same center occured. \(centers)")
+                        break
+                    }else{
+                        centers[c] = intensities[nextCenter!].toFloat()
+                        c += 1
                     }
                 }
                 
-                if(centers.contains(intensities[nextCenter!].toFloat())){
+                print("Loop finished.")
+                if(centers.contains(-1)){
+                    print("Error in selecting centers. retry.")
+                    clusterTrialIterates += 1
                     continue
                 }else{
-                    centers[c] = intensities[nextCenter!].toFloat()
-                    c += 1
+                    print("Success: \(centers)")
+                    break
                 }
-                
             }
         }
+        print("Calculated centers: \(centers.sorted())")
         
         /// 各ピクセルが所属するクラスタ番号を格納
         /// cluster index for each pixel
@@ -142,7 +150,7 @@ class KMeansController{
         /// mapped cluster index to 0-255
         var clusterImageArray = [UInt8](repeating: 0, count: totalBytes)
         
-        let initialCenters = centers
+        let initialCenters = centers.sorted()
         var calculatedClusterCentroids = initialCenters
         
         guard let computeFunction = lib.makeFunction(name: "calcKmeansCluster") else {
