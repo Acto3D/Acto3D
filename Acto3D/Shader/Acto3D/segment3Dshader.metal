@@ -19,8 +19,8 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
                                 constant uint8_t                  &channel [[buffer(5)]],
                                 constant uint8_t                  &useMaskTexture [[buffer(6)]],
                                 constant float                  &maskAlpha [[buffer(7)]],
-                                texture3d<half, access::sample> tex [[texture(0)]],
-                                texture3d<half, access::sample> maskTexture [[texture(1)]],
+                                texture3d<float, access::sample> tex [[texture(0)]],
+                                texture3d<float, access::sample> maskTexture [[texture(1)]],
                                 sampler smp                     [[sampler(0)]],
                                 //                    texture3d<half, access::read_write> tex [[texture(0)]],
                                 uint2                           position [[thread_position_in_grid]]){
@@ -124,34 +124,36 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
         return;
         
     }else{
-        half4 Cvoxel = tex.sample(smp, samplerPostion);
-    
-        half4 CvoxelMask;
+        float4 Cvoxel = tex.sample(smp, samplerPostion);
         
+        float4 CvoxelMask;
+        
+        // Areas to be reliably masked
         float3 c1 = float3(230, 159, 0) / 255.0f;
+        
+        // Boundary area
         float3 c2 = float3(86, 180, 233) / 255.0f;
-//        float3 c2 = float3(240, 228, 66) / 255.0f;
         
         if(useMaskTexture == 1){
             // if Mask Texture is set, obtein mask for the coordinates from the mask texture
             CvoxelMask = maskTexture.sample(smp, samplerPostion);
             
             if(CvoxelMask.r > 0.8){
-                // show mask image in Green color
-                outputData[index + 0] = uint8_t(Cvoxel[channel] * (1.0 - maskAlpha) + c1[0] * (maskAlpha) * 255);
-                outputData[index + 1] = uint8_t(Cvoxel[channel] * (1.0 - maskAlpha) + c1[1] * (maskAlpha) * 255);
-                outputData[index + 2] = uint8_t(Cvoxel[channel] * (1.0 - maskAlpha) + c1[2] * (maskAlpha) * 255);
+                // Areas to be reliably masked
+                outputData[index + 0] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c1[0] * (maskAlpha)) * 255.0f);
+                outputData[index + 1] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c1[1] * (maskAlpha)) * 255.0f);
+                outputData[index + 2] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c1[2] * (maskAlpha)) * 255.0f);
                 
                 outputDataBaseCh[indexInGray] = uint8_t(Cvoxel[channel] * 255.0);
-
+                
             }else if(CvoxelMask.r > 0){
-                // show mask image in Green color
-                    outputData[index + 0] = uint8_t(Cvoxel[channel] * (1.0 - maskAlpha) + c2[0] * (maskAlpha) * 255);
-                    outputData[index + 1] = uint8_t(Cvoxel[channel] * (1.0 - maskAlpha) + c2[1] * (maskAlpha) * 255);
-                    outputData[index + 2] = uint8_t(Cvoxel[channel] * (1.0 - maskAlpha) + c2[2] * (maskAlpha) * 255);
+                // Boundary area
+                outputData[index + 0] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c2[0] * (maskAlpha)) * 255.0f);
+                outputData[index + 1] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c2[1] * (maskAlpha)) * 255.0f);
+                outputData[index + 2] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c2[2] * (maskAlpha)) * 255.0f);
                 
                 outputDataBaseCh[indexInGray] = uint8_t(Cvoxel[channel] * 255.0);
-
+                
             }else{
                 outputData[index + 0] = uint8_t( Cvoxel[channel] * 255.0 );
                 outputData[index + 1] = uint8_t( Cvoxel[channel] * 255.0 );
@@ -264,24 +266,24 @@ kernel void createMaskTexture3D(constant VolumeData            &meta [[buffer(0)
         half4 maskIntensity = maskTexture_in.sample(smp, float3(position.x / (inputWidth),
                                                                 position.y / (inputHeight),
                                                                 position.z / (inputDepth)));
-//        maskIntensity = maskTexture_in.read(position);
-
+        //        maskIntensity = maskTexture_in.read(position);
+        
         
         ushort3 out_coord = ushort3((samplerPostion.x * (maskTexture_out.get_width())),
                                     (samplerPostion.y * (maskTexture_out.get_height())),
                                     (samplerPostion.z * (maskTexture_out.get_depth())));
-
+        
         
         if(maskIntensity.r != 0){
             maskTexture_out.write(half4(1.0,0,0,0), out_coord);
             
-//            for(int l = -1; l == 1; l++){
-//                for(int m = -1; m == 1; m++){
-//                    for(int n = -1; n == 1; n++){
-//                        maskTexture_out.write(half4(1.0,0,0,0), out_coord + ushort3(l,m,n));
-//                    }
-//                }
-//            }
+            //            for(int l = -1; l == 1; l++){
+            //                for(int m = -1; m == 1; m++){
+            //                    for(int n = -1; n == 1; n++){
+            //                        maskTexture_out.write(half4(1.0,0,0,0), out_coord + ushort3(l,m,n));
+            //                    }
+            //                }
+            //            }
         }
     }
     
@@ -339,18 +341,153 @@ kernel void calcKmeansCluster(constant uint8_t             *inputPixel [[buffer(
 }
 
 
+kernel void copySliceImageToTexture(texture3d<float, access::sample>        texIn [[texture(0)]],
+                                texture3d<float, access::read_write>    texOut [[texture(1)]],
+                                constant VolumeData                     &meta [[buffer(0)]],
+                                constant RenderingParameters            &modelParameter [[buffer(1)]],
+                                constant float4                         &quaternions [[buffer(2)]],
+                                constant uint8_t                        &channel [[buffer(3)]],
+                                constant bool                           &binary [[buffer(4)]],
+                                constant bool                           &countPixel [[buffer(5)]],
+                                device atomic_uint                      &counter [[buffer(6)]],
+                                sampler                                 smp [[ sampler(0) ]],
+                                ushort3                                 position [[thread_position_in_grid]]){
+    
+    if (position.x >= meta.inputImageWidth || position.y >= meta.inputImageHeight || position.z >= meta.inputImageDepth){
+        return;
+    }
+    
+    // index for linear position
+//    uint index = (position.y * meta.outputImageWidth + position.x) * 3;
+//    uint indexInGray = position.y * meta.outputImageWidth + position.x;
+    
+    float4 curPos = float4(position.x, position.y, 0, 1);
+    
+    float scaleMatRatio = 1.0;
+    float scale_Z = modelParameter.zScale;
+    
+    
+    float4x4 matrix_centering = float4x4(1, 0, 0, 0,
+                                         0, 1, 0, 0,
+                                         0, 0, 1, 0,
+                                         -(meta.inputImageWidth) / 2.0, -(meta.inputImageHeight) / 2.0, 0, 1);
+    
+    float4x4 scaleMat = float4x4(scaleMatRatio, 0, 0, 0,
+                                 0, scaleMatRatio, 0, 0,
+                                 0, 0, 1.0, 0,
+                                 0, 0, 0, 1.0);
+    
+    float4x4 matrix_centering_toView = float4x4(1, 0, 0, 0,
+                                                0, 1, 0, 0,
+                                                0, 0, 1, 0,
+                                                (meta.inputImageWidth) / 2.0,
+                                                (meta.inputImageHeight) / 2.0,
+                                                (meta.inputImageDepth) * scale_Z / 2.0, 1);
+    
+    float4x4 transferMat = float4x4(1, 0, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 1.0, 0,
+                                    modelParameter.translationX, modelParameter.translationY, 0, 1.0);
+    
+    float4 directionVector = float4(0,0,1,0);
+    float4 directionVector_rotate = float4(quatMul(quaternions, directionVector.xyz), 0);
+    
+    float3 pos = (transferMat * scaleMat * matrix_centering * curPos).xyz;
+    
+    float4 mappedXYZt = float4(quatMul(quaternions,  pos), 1);
+    
+    float radius = modelParameter.sliceMax / 2.0;
+    
+    if (length(mappedXYZt.xyz) > radius){
+//        outputData[index + 0] = 0;
+//        outputData[index + 1] = 0;
+//        outputData[index + 2] = 0;
+        return;
+    }
+    
+    
+    float z_min = -meta.inputImageDepth * scale_Z / 2.0;
+    float z_max = meta.inputImageDepth * scale_Z / 2.0;
+    
+    float t_far = (z_max - mappedXYZt.z) / directionVector_rotate.z;
+    float t_near = (z_min - mappedXYZt.z) / directionVector_rotate.z;
+    
+    float x_far = mappedXYZt.x + t_far * directionVector_rotate.x;
+    float x_near = mappedXYZt.x + t_near * directionVector_rotate.x;
+    
+    float y_far = mappedXYZt.y + t_far * directionVector_rotate.y;
+    float y_near = mappedXYZt.y + t_near * directionVector_rotate.y;
+    
+    if ((x_far < -meta.inputImageWidth/2.0 && x_near < -meta.inputImageWidth/2.0) ||
+        (x_far > meta.inputImageWidth/2.0 && x_near > meta.inputImageWidth/2.0) ||
+        (y_far < -meta.inputImageHeight/2.0 && y_near < -meta.inputImageHeight/2.0) ||
+        (y_far > meta.inputImageHeight/2.0 && y_near > meta.inputImageHeight/2.0) ){
+        
+//        outputData[index + 0] = 0;
+//        outputData[index + 1] = 0;
+//        outputData[index + 2] = 0;
+        return;
+    }
+    
+    float ts = radius - modelParameter.sliceMax/2.0f - (float(meta.inputImageDepth) - position.z * 2.0f) * scale_Z / 2.0f;
+    
+    float3 current_mapped_pos = mappedXYZt.xyz + ts * directionVector_rotate.xyz;
+    float4 currentPos = float4(current_mapped_pos, 1);
+    float4 coordinatePos = matrix_centering_toView * currentPos;
+    
+    //TODO: consider FLIP
+    float3 samplerPostion = float3(coordinatePos.x / (float(meta.inputImageWidth)),
+                                   coordinatePos.y / (float(meta.inputImageHeight)),
+                                   coordinatePos.z / ((meta.inputImageDepth) * scale_Z)) ;
+    
+    if (samplerPostion.x < modelParameter.trimX_min || samplerPostion.x > modelParameter.trimX_max ||
+        samplerPostion.y < modelParameter.trimY_min || samplerPostion.y > modelParameter.trimY_max ||
+        samplerPostion.z < modelParameter.trimZ_min || samplerPostion.z > modelParameter.trimZ_max){
+        
+//        outputData[index + 0] = 0;
+//        outputData[index + 1] = 0;
+//        outputData[index + 2] = 0;
+//        outputDataBaseCh[indexInGray] = 0;
+        
+        return;
+        
+    }else{
+//        float4 Cvoxel = tex.sample(smp, samplerPostion);
+        
+        float4 outputColor = texOut.read(position);
+        
+        float4 CvoxelMask = texIn.sample(smp, samplerPostion);
+        
+        if(CvoxelMask.r > 0.5){
+            outputColor[channel] = 1.0;
+            // Areas to be reliably masked
+            if(countPixel == true){
+                atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
+            }
+            
+            
+        }
+        
+        
+        texOut.write(outputColor, position);
+        return;
+    }
+    
+    
+}
 
-kernel void mapTextureToTexture(texture3d<half, access::sample>       texIn [[texture(0)]],
-                                texture3d<half, access::read_write>   texOut [[texture(1)]],
-                                constant VolumeData            &meta [[buffer(0)]],
-                                constant RenderingParameters   &modelParameter [[buffer(1)]],
-                                constant float4                 &quaternions [[buffer(2)]],
-                                constant uint8_t  &channel [[buffer(3)]],
-                                constant bool     &binary [[buffer(4)]],
-                                constant bool     &countPixel [[buffer(5)]],
-                                device atomic_uint &counter [[buffer(6)]],
-                                sampler           smp [[ sampler(0) ]],
-                                ushort3           position [[thread_position_in_grid]]){
+
+kernel void mapTextureToTexture(texture3d<float, access::sample>        texIn [[texture(0)]],
+                                texture3d<float, access::read_write>    texOut [[texture(1)]],
+                                constant VolumeData                     &meta [[buffer(0)]],
+                                constant RenderingParameters            &modelParameter [[buffer(1)]],
+                                constant float4                         &quaternions [[buffer(2)]],
+                                constant uint8_t                        &channel [[buffer(3)]],
+                                constant bool                           &binary [[buffer(4)]],
+                                constant bool                           &countPixel [[buffer(5)]],
+                                device atomic_uint                      &counter [[buffer(6)]],
+                                sampler                                 smp [[ sampler(0) ]],
+                                ushort3                                 position [[thread_position_in_grid]]){
     
     if (position.x >= meta.outputImageWidth || position.y >= meta.outputImageHeight){
         return;
@@ -386,7 +523,7 @@ kernel void mapTextureToTexture(texture3d<half, access::sample>       texIn [[te
     
     float4x4 transferMat = float4x4(1, 0, 0, 0,
                                     0, 1, 0, 0,
-                                    0, 0, 1.0, 0,
+                                    0, 0, 1, 0,
                                     modelParameter.translationX, modelParameter.translationY, 0, 1.0);
     
     float4 directionVector = float4(0,0,1,0);
@@ -433,34 +570,32 @@ kernel void mapTextureToTexture(texture3d<half, access::sample>       texIn [[te
                                    coordinatePos.z / ((meta.inputImageDepth) * scale_Z)) ;
     
     
-    half4 CvoxelMask = texIn.sample(smp, samplerPostion);
+    float4 CvoxelMask = texIn.sample(smp, samplerPostion);
     
     ushort3 writingPosition = ushort3(samplerPostion * float3(dstTexWidth ,
                                                               dstTexHeight,
                                                               dstTexDepth));
-
-    half4 outputColor = texOut.read(writingPosition);
     
-    if(outputColor[channel] == 0){
+    float4 outputColor = texOut.read(writingPosition);
+    
+    // texIn: mask, texOut: outputTex
+    
+    if(outputColor[channel] != 1.0){
         if(binary == true){
-            if(CvoxelMask.r > 0){
+            if(CvoxelMask.r > 0.5){
                 outputColor[channel] = 1.0;
                 if(countPixel == true){
                     atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
                 }
-                
-//                for(int l = -1; l == 1; l++){
-//                    for(int m = -1; m == 1; m++){
-//                        for(int n = -1; n == 1; n++){
-//                            texOut.write(outputColor, writingPosition + ushort3(l,m,n));
-//                        }
-//                    }
+//            }else if (CvoxelMask.r > 0.5){
+//                outputColor[channel] = 1.0;
+//                if(countPixel == true){
+//                    atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
 //                }
-                
             }else{
                 outputColor[channel] = 0;
             }
-                
+            
         }else{
             outputColor[channel] = CvoxelMask.r;
         }
@@ -553,7 +688,7 @@ kernel void transferTextureToTexture(texture3d<half, access::read>       texIn [
     
     half inValue = texIn.read(position)[channelIn];
     half4 outValue = texOut.read(position);
-
+    
     outValue[channelOut] = inValue;
     
     texOut.write(outValue, position);
@@ -563,7 +698,7 @@ kernel void transferTextureToTexture(texture3d<half, access::read>       texIn [
 kernel void transferChannelToMask(texture3d<half, access::read> texIn [[texture(0)]],
                                   texture3d<half, access::write> texOut [[texture(1)]],
                                   constant  uint8_t &channel [[buffer(0)]],
-//                                  sampler   smp [[ sampler(0) ]],
+                                  //                                  sampler   smp [[ sampler(0) ]],
                                   ushort3   position [[thread_position_in_grid]]){
     float imageWidth = texIn.get_width();
     float imageHeight = texIn.get_height();

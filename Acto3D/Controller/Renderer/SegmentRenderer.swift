@@ -304,11 +304,14 @@ class SegmentRenderer{
             // Transfer the new texture to main texture
             // In this code, target channel of the main texture is used as temporary buffer texture to save memory.
             
-            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
-            shrinkMask(texIn: mainTexture, texOut: maskTexture, channelIn: destChannel, channelOut: 0, expansionSize: expansionSize)
-            transferTextureToTexture(texIn: maskTexture, texOut: mainTexture, channelIn: 0, channelOut: destChannel)
+            let px = copySliceImageToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true, countPixel: true)
+            print("PX", px)
+//            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
             
-            self.maskTexture = nil
+//            shrinkMask(texIn: mainTexture, texOut: maskTexture, channelIn: destChannel, channelOut: 0, expansionSize: expansionSize)
+//            transferTextureToTexture(texIn: maskTexture, texOut: mainTexture, channelIn: 0, channelOut: destChannel)
+//            
+//            self.maskTexture = nil
             
         }else{
             mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
@@ -335,6 +338,94 @@ class SegmentRenderer{
     
     }
     
+    @discardableResult
+    func copySliceImageToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool, countPixel:Bool = false) -> UInt32{
+        guard let computeFunction = mtlLib.makeFunction(name: "copySliceImageToTexture") else {
+            print("error make function")
+            return 0
+        }
+        var renderPipeline: MTLComputePipelineState!
+        
+        renderPipeline = try? self.device.makeComputePipelineState(function: computeFunction)
+        
+        let cmdBuf = cmdQueue.makeCommandBuffer(label: "Map Texture To Texture")!
+        let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
+        computeSliceEncoder.setComputePipelineState(renderPipeline)
+        
+        // Sampler Set
+        var sampler: MTLSamplerState!
+        let samplerDescriptor = MTLSamplerDescriptor()
+        samplerDescriptor.sAddressMode = .clampToZero
+        samplerDescriptor.tAddressMode = .clampToZero
+        samplerDescriptor.minFilter = .linear
+        samplerDescriptor.magFilter = .linear
+        sampler = device.makeSamplerState(descriptor: samplerDescriptor)
+        
+        // Variables
+        var quaternion_front = simd_quatf(float4x4(1))
+        
+        // Buffer set
+        computeSliceEncoder.setTexture(texIn, index: 0)
+        computeSliceEncoder.setTexture(texOut, index: 1)
+        computeSliceEncoder.setSamplerState(sampler, index: 0)
+        
+        computeSliceEncoder.setBytes(&imageParams, length: MemoryLayout<VolumeData>.stride, index: 0)
+        computeSliceEncoder.setBytes(&renderModelParams, length: MemoryLayout<RenderingParameters>.stride, index: 1)
+        computeSliceEncoder.setBytes(&quaternion_front, length: MemoryLayout<simd_quatf>.stride, index: 2)
+        
+        
+        var channel:UInt8 = channel
+        computeSliceEncoder.setBytes(&channel, length: MemoryLayout<UInt8>.stride, index: 3)
+        
+        var binary:Bool = binary
+        computeSliceEncoder.setBytes(&binary, length: MemoryLayout<Bool>.stride, index: 4)
+        
+        var countPixel:Bool = countPixel
+        computeSliceEncoder.setBytes(&countPixel, length: MemoryLayout<Bool>.stride, index: 5)
+        
+        let counterBuffer = device.makeBuffer(length: MemoryLayout<UInt32>.stride, options: [.storageModeShared, .cpuCacheModeWriteCombined])
+        counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1).pointee = 0
+        computeSliceEncoder.setBuffer(counterBuffer, offset: 0, index: 6)
+        
+        
+        // Compute optimization
+//        let xCount = imageParams.outputImageWidth.toInt()
+//        let yCount = imageParams.outputImageHeight.toInt()
+//        let zCount2 = renderModelParams.sliceMax.toInt()
+        let xCount = imageParams.inputImageWidth.toInt()
+        let yCount = imageParams.inputImageHeight.toInt()
+        let zCount = texOut.depth
+        print(xCount, yCount,  zCount, imageParams.inputImageDepth.toInt())
+        
+        let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = renderPipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
+        let height = 8
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
+        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+                                          height: (yCount + height - 1) / height,
+                                          depth: (zCount + depth - 1) / depth)
+        
+        
+        // Metal Dispatch
+        computeSliceEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        computeSliceEncoder.endEncoding()
+        
+        cmdBuf.commit()
+        cmdBuf.waitUntilCompleted()
+        
+        // retrive masked pixels
+        if let data = counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1) {
+            let counterValue = data.pointee
+            return counterValue
+        }
+        
+        return 0
+        
+    }
+    
+    
     /// The function moves pixels from MTLTexture to MTLTexture, but rewrites the pixel values while sampling to account for rotation angle and magnification. The resulting texture tends to be slightly larger.
     /// - Parameters:
     ///   - countPixel: If set to true, this function will caluculate the pixel count for masked area
@@ -349,7 +440,7 @@ class SegmentRenderer{
         
         renderPipeline = try? self.device.makeComputePipelineState(function: computeFunction)
         
-        let cmdBuf = cmdQueue.makeCommandBuffer()!
+        let cmdBuf = cmdQueue.makeCommandBuffer(label: "Map Texture To Texture")!
         let computeSliceEncoder = cmdBuf.makeComputeCommandEncoder()!
         computeSliceEncoder.setComputePipelineState(renderPipeline)
         
@@ -362,17 +453,13 @@ class SegmentRenderer{
         samplerDescriptor.magFilter = .linear
         sampler = device.makeSamplerState(descriptor: samplerDescriptor)
         
-        
         // Variables
         var quaternion_front = simd_quatf(float4x4(1))
-        
-        print("** Start to Transfer Mask to Main Texture **")
         
         // Buffer set
         computeSliceEncoder.setTexture(texIn, index: 0)
         computeSliceEncoder.setTexture(texOut, index: 1)
         computeSliceEncoder.setSamplerState(sampler, index: 0)
-        
         
         computeSliceEncoder.setBytes(&imageParams, length: MemoryLayout<VolumeData>.stride, index: 0)
         computeSliceEncoder.setBytes(&renderModelParams, length: MemoryLayout<RenderingParameters>.stride, index: 1)
@@ -397,6 +484,7 @@ class SegmentRenderer{
         let xCount = imageParams.outputImageWidth.toInt()
         let yCount = imageParams.outputImageHeight.toInt()
         let zCount = renderModelParams.sliceMax.toInt()
+        print(xCount, yCount, zCount)
         
         let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup
         let threadExecutionWidth          = renderPipeline.threadExecutionWidth
@@ -416,7 +504,7 @@ class SegmentRenderer{
         cmdBuf.commit()
         cmdBuf.waitUntilCompleted()
         
-        // counterBufferからカウンター値を取得します
+        // retrive masked pixels
         if let data = counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1) {
             let counterValue = data.pointee
             return counterValue
