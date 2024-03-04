@@ -1548,7 +1548,7 @@ class Segment3DController: NSViewController {
         
         let volume = Double(pixelCount) * voxelSize.toDouble() * voxelSize.toDouble() * originalResolutionZ.toDouble()
         var messageStr = "Volume: \(volume) \(voxelUnit)^3\n"
-        messageStr += "Pixel Count: \(pixelCount) px\n\n"
+        messageStr += "Pixel Count: \(pixelCount) px"
         messageStr += "\n\n ---- Used Parameters --- \n"
         messageStr += "  XY resolution: \(voxelSize) \(voxelUnit) / px\n"
         messageStr += "  Z resolution: \(originalResolutionZ) \(voxelUnit) / px"

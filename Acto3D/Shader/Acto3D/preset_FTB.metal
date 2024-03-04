@@ -367,7 +367,6 @@ kernel void preset_FTB(device RenderingArguments    &args       [[buffer(0)]],
                                      max(0.0f, light_intensity[3] - diffuse3)
                                      );
             
-            Cvoxel *= light_intensity;
             
         }
         
