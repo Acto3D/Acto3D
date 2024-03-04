@@ -1470,6 +1470,7 @@ extension ViewController: ImageOptionViewProtocol, Segment3DProtocol{
                 segmentView.originalResolutionZ = renderer.imageParams.scaleZ
 
                 
+                
             }
             
         }else{

@@ -202,6 +202,23 @@ extension ViewController{
         case "accept_tcp":
             AppConfig.ACCEPT_TCP_CONNECTION = !AppConfig.ACCEPT_TCP_CONNECTION
             
+        case "windowsize_adjust":
+            if let window = self.view.window{
+                let currentFrame = window.frame
+                
+                let currentCenterX = currentFrame.origin.x + (currentFrame.width / 2)
+                let currentCenterY = currentFrame.origin.y + (currentFrame.height / 2)
+
+                let newSize = NSMakeSize(1440, 960)
+
+                let newCenterX = currentCenterX - (newSize.width / 2)
+                let newCenterY = currentCenterY - (newSize.height / 2)
+
+                let newFrame = NSRect(x: newCenterX, y: newCenterY, width: newSize.width, height: newSize.height)
+
+                window.setFrame(newFrame, display: true, animate: true)
+            }
+            
         case "create_mp4":
             let dialog = NSOpenPanel();
             dialog.title                   = "Choose Images";

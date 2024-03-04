@@ -747,6 +747,12 @@ isotropic voxel size</string>
                                                 </items>
                                             </menu>
                                         </menuItem>
+                                        <menuItem title="Window size adjust" identifier="windowsize_adjust" id="Vfv-Km-Xhv">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="WQT-lr-fPZ"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -891,7 +897,7 @@ isotropic voxel size</string>
                                 </connections>
                             </slider>
                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5dh-9y-pQQ">
-                                <rect key="frame" x="86" y="482" width="268" height="28"/>
+                                <rect key="frame" x="48" y="482" width="128" height="28"/>
                                 <sliderCell key="cell" continuous="YES" alignment="left" maxValue="1" doubleValue="0.80000000000000004" tickMarkPosition="above" sliderType="linear" id="bvX-7p-t5d"/>
                                 <connections>
                                     <action selector="sliderAlphaChanged:" target="2Jc-51-6dz" id="fM0-Px-WqG"/>
@@ -921,7 +927,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bRX-Wj-ug3">
-                                <rect key="frame" x="415" y="501" width="186" height="32"/>
+                                <rect key="frame" x="445" y="501" width="186" height="32"/>
                                 <buttonCell key="cell" type="push" title="Same angle as main view" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="IQZ-eC-pYm">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -931,7 +937,7 @@ isotropic voxel size</string>
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tEU-t9-0uF">
-                                <rect key="frame" x="639" y="529" width="103" height="32"/>
+                                <rect key="frame" x="669" y="529" width="103" height="32"/>
                                 <buttonCell key="cell" type="push" title="Preprocess" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="50N-TA-eHC">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1096,8 +1102,8 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4q1-ZY-ZVh">
-                                <rect key="frame" x="7" y="490" width="75" height="16"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Mask Alpha" id="Pu7-3M-tpU">
+                                <rect key="frame" x="7" y="490" width="37" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Mask" id="Pu7-3M-tpU">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1142,7 +1148,7 @@ isotropic voxel size</string>
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yCq-pw-7ru">
-                                <rect key="frame" x="420" y="538" width="112" height="16"/>
+                                <rect key="frame" x="450" y="538" width="112" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Channel selection" id="ZVl-hf-AfN">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -1150,7 +1156,7 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zTa-Wd-TQh">
-                                <rect key="frame" x="535" y="532" width="107" height="25"/>
+                                <rect key="frame" x="565" y="532" width="107" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="t1l-Dv-30R"/>
                                 </constraints>
@@ -1340,9 +1346,9 @@ isotropic voxel size</string>
                                 </textFieldCell>
                             </textField>
                             <box title="Mask" translatesAutoresizingMaskIntoConstraints="NO" id="Ri4-zl-LSt">
-                                <rect key="frame" x="1049" y="4" width="362" height="170"/>
+                                <rect key="frame" x="1049" y="4" width="362" height="122"/>
                                 <view key="contentView" id="cgC-wk-dnl">
-                                    <rect key="frame" x="3" y="3" width="356" height="152"/>
+                                    <rect key="frame" x="3" y="3" width="356" height="104"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yiE-7C-pTD">
@@ -1365,34 +1371,8 @@ isotropic voxel size</string>
                                                 <action selector="checkVolumeForSelectedNodes:" target="2Jc-51-6dz" id="lfL-L1-IYX"/>
                                             </connections>
                                         </button>
-                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QsJ-Iv-h9r">
-                                            <rect key="frame" x="6" y="100" width="115" height="16"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Volume Expansion" id="cZL-KE-1ax">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
-                                        <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xbc-F0-EfD">
-                                            <rect key="frame" x="18" y="66" width="300" height="28"/>
-                                            <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="25" tickMarkPosition="above" numberOfTickMarks="14" allowsTickMarkValuesOnly="YES" sliderType="linear" id="5gg-fG-liX"/>
-                                            <connections>
-                                                <action selector="changeVolumeExpansionSlider:" target="2Jc-51-6dz" id="a4W-eg-ia4"/>
-                                            </connections>
-                                        </slider>
-                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="g5o-Aj-7Jc">
-                                            <rect key="frame" x="322" y="74" width="28" height="16"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="24" id="lyf-TL-uKc"/>
-                                            </constraints>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="0" id="7OG-5i-28f">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
                                         <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="esn-io-FqE">
-                                            <rect key="frame" x="1" y="117" width="92" height="32"/>
+                                            <rect key="frame" x="1" y="69" width="92" height="32"/>
                                             <buttonCell key="cell" type="push" title="Merge All" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xLB-nb-HTt">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
@@ -1402,7 +1382,7 @@ isotropic voxel size</string>
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Bch-cp-GIN">
-                                            <rect key="frame" x="87" y="117" width="140" height="32"/>
+                                            <rect key="frame" x="87" y="69" width="140" height="32"/>
                                             <buttonCell key="cell" type="push" title="Remove Selected" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xAO-Pn-Hla">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
@@ -1412,7 +1392,7 @@ isotropic voxel size</string>
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HlL-Rq-MIb">
-                                            <rect key="frame" x="289" y="117" width="66" height="32"/>
+                                            <rect key="frame" x="289" y="69" width="66" height="32"/>
                                             <buttonCell key="cell" type="push" title="Clear" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Jky-cS-YGD">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
@@ -1422,8 +1402,8 @@ isotropic voxel size</string>
                                             </connections>
                                         </button>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CMt-7P-J9r">
-                                            <rect key="frame" x="139" y="46" width="172" height="16"/>
-                                            <textFieldCell key="cell" lineBreakMode="clipping" title="This will overwrite the mask" id="c8l-03-WeR">
+                                            <rect key="frame" x="139" y="46" width="206" height="16"/>
+                                            <textFieldCell key="cell" lineBreakMode="clipping" title="Calculate current merged volume" id="c8l-03-WeR">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1431,24 +1411,17 @@ isotropic voxel size</string>
                                         </textField>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="xbc-F0-EfD" firstAttribute="top" secondItem="QsJ-Iv-h9r" secondAttribute="bottom" constant="8" id="3PM-bL-xEO"/>
                                         <constraint firstItem="yiE-7C-pTD" firstAttribute="top" secondItem="jxJ-Yh-zyb" secondAttribute="bottom" constant="16" id="43e-EI-IkL"/>
                                         <constraint firstAttribute="bottom" secondItem="yiE-7C-pTD" secondAttribute="bottom" constant="8" id="5j0-dW-6Ga"/>
-                                        <constraint firstItem="jxJ-Yh-zyb" firstAttribute="top" secondItem="xbc-F0-EfD" secondAttribute="bottom" constant="8" id="6WX-1b-sCK"/>
-                                        <constraint firstItem="QsJ-Iv-h9r" firstAttribute="leading" secondItem="cgC-wk-dnl" secondAttribute="leading" constant="8" id="7G2-hM-3Kj"/>
                                         <constraint firstItem="yiE-7C-pTD" firstAttribute="leading" secondItem="cgC-wk-dnl" secondAttribute="leading" constant="8" id="9Dj-Kf-4iZ"/>
                                         <constraint firstItem="esn-io-FqE" firstAttribute="leading" secondItem="cgC-wk-dnl" secondAttribute="leading" constant="8" id="BI6-LL-2zb"/>
                                         <constraint firstItem="CMt-7P-J9r" firstAttribute="leading" secondItem="jxJ-Yh-zyb" secondAttribute="trailing" constant="8" symbolic="YES" id="DCs-pM-w9U"/>
-                                        <constraint firstItem="g5o-Aj-7Jc" firstAttribute="leading" secondItem="xbc-F0-EfD" secondAttribute="trailing" constant="8" id="FDh-Ek-kP7"/>
                                         <constraint firstItem="jxJ-Yh-zyb" firstAttribute="leading" secondItem="cgC-wk-dnl" secondAttribute="leading" constant="8" id="Mb6-Nn-zno"/>
-                                        <constraint firstItem="QsJ-Iv-h9r" firstAttribute="top" secondItem="esn-io-FqE" secondAttribute="bottom" constant="8" id="Mcd-Wb-Qd0"/>
+                                        <constraint firstItem="jxJ-Yh-zyb" firstAttribute="top" secondItem="esn-io-FqE" secondAttribute="bottom" constant="12" symbolic="YES" id="Mp8-dA-uTR"/>
                                         <constraint firstAttribute="trailing" secondItem="yiE-7C-pTD" secondAttribute="trailing" constant="8" id="PBG-R7-ppI"/>
                                         <constraint firstAttribute="trailing" secondItem="HlL-Rq-MIb" secondAttribute="trailing" constant="8" id="Rd4-F0-jOy"/>
-                                        <constraint firstAttribute="trailing" secondItem="g5o-Aj-7Jc" secondAttribute="trailing" constant="8" id="X6x-as-EdS"/>
                                         <constraint firstItem="esn-io-FqE" firstAttribute="top" secondItem="cgC-wk-dnl" secondAttribute="top" constant="8" id="gOd-ne-0a6"/>
                                         <constraint firstItem="CMt-7P-J9r" firstAttribute="centerY" secondItem="jxJ-Yh-zyb" secondAttribute="centerY" id="hbM-Ij-x5K"/>
-                                        <constraint firstItem="xbc-F0-EfD" firstAttribute="leading" secondItem="cgC-wk-dnl" secondAttribute="leading" constant="20" symbolic="YES" id="jES-VW-Ln7"/>
-                                        <constraint firstItem="g5o-Aj-7Jc" firstAttribute="centerY" secondItem="xbc-F0-EfD" secondAttribute="centerY" id="k0h-hh-gDJ"/>
                                         <constraint firstItem="HlL-Rq-MIb" firstAttribute="centerY" secondItem="esn-io-FqE" secondAttribute="centerY" id="qJv-2x-Aqs"/>
                                         <constraint firstItem="Bch-cp-GIN" firstAttribute="leading" secondItem="esn-io-FqE" secondAttribute="trailing" constant="8" id="qt0-xa-ivT"/>
                                         <constraint firstItem="Bch-cp-GIN" firstAttribute="centerY" secondItem="esn-io-FqE" secondAttribute="centerY" id="t96-9j-jBB"/>
@@ -1459,13 +1432,13 @@ isotropic voxel size</string>
                                 <rect key="frame" x="1039" y="8" width="5" height="547"/>
                             </box>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MyM-4s-Pa4">
-                                <rect key="frame" x="1052" y="182" width="356" height="291"/>
+                                <rect key="frame" x="1052" y="134" width="356" height="339"/>
                                 <clipView key="contentView" id="H2E-QH-AK0">
-                                    <rect key="frame" x="1" y="1" width="354" height="289"/>
+                                    <rect key="frame" x="1" y="1" width="354" height="337"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" headerView="u9X-o8-9iO" viewBased="YES" id="RCp-X1-E21">
-                                            <rect key="frame" x="0.0" y="0.0" width="354" height="261"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="354" height="309"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1628,6 +1601,31 @@ isotropic voxel size</string>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jEU-3n-y1L">
+                                <rect key="frame" x="187" y="490" width="35" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Edge" id="uZR-PG-Oub">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BzE-VC-sLT">
+                                <rect key="frame" x="226" y="482" width="128" height="28"/>
+                                <sliderCell key="cell" continuous="YES" alignment="left" minValue="0.01" maxValue="1" doubleValue="0.29999999999999999" tickMarkPosition="above" sliderType="linear" id="uzR-xG-mrp"/>
+                                <connections>
+                                    <action selector="sliderEdgeThresholdChanged:" target="2Jc-51-6dz" id="fbr-Fj-Z5b"/>
+                                </connections>
+                            </slider>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Ue6-3r-UQf">
+                                <rect key="frame" x="351" y="481" width="78" height="32"/>
+                                <buttonCell key="cell" type="push" title="Default" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QSq-mg-WKu">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="setDefaultEdgeThreshold:" target="2Jc-51-6dz" id="PX5-Re-iAf"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="inY-rO-7Zf" firstAttribute="leading" secondItem="IQV-Jv-APZ" secondAttribute="leading" id="0Hd-GL-rpk"/>
@@ -1636,6 +1634,7 @@ isotropic voxel size</string>
                             <constraint firstItem="cKd-my-8hA" firstAttribute="leading" secondItem="zt1-XI-6Lp" secondAttribute="leading" id="1lD-E5-mKh"/>
                             <constraint firstItem="xfM-2E-VOe" firstAttribute="centerY" secondItem="IQV-Jv-APZ" secondAttribute="centerY" id="1ug-2V-KpB"/>
                             <constraint firstItem="MyM-4s-Pa4" firstAttribute="top" secondItem="Ef1-XR-DkR" secondAttribute="bottom" constant="8" id="1zE-m4-6jF"/>
+                            <constraint firstItem="Ue6-3r-UQf" firstAttribute="centerY" secondItem="BzE-VC-sLT" secondAttribute="centerY" id="24n-dC-4je"/>
                             <constraint firstItem="xfM-2E-VOe" firstAttribute="leading" secondItem="IQV-Jv-APZ" secondAttribute="trailing" constant="8" symbolic="YES" id="2F2-Sp-PjL"/>
                             <constraint firstItem="h2i-fr-w9G" firstAttribute="centerY" secondItem="hVt-HB-XDc" secondAttribute="centerY" id="2Zv-gt-b14"/>
                             <constraint firstItem="kP8-KB-Dka" firstAttribute="leading" secondItem="MyM-4s-Pa4" secondAttribute="leading" id="2k6-ub-hZl"/>
@@ -1651,10 +1650,12 @@ isotropic voxel size</string>
                             <constraint firstItem="3tI-8n-ull" firstAttribute="width" secondItem="5Nh-M8-5h4" secondAttribute="width" id="7bB-ly-dHa"/>
                             <constraint firstItem="Y99-5N-5GL" firstAttribute="width" secondItem="zt1-XI-6Lp" secondAttribute="width" id="7cM-Gr-9DL"/>
                             <constraint firstItem="gyV-GL-Er6" firstAttribute="centerY" secondItem="Ef1-XR-DkR" secondAttribute="centerY" id="8HC-8Y-eyR"/>
+                            <constraint firstItem="BzE-VC-sLT" firstAttribute="trailing" secondItem="rDb-6T-0n6" secondAttribute="trailing" id="9JN-DH-EA4"/>
                             <constraint firstItem="xfM-2E-VOe" firstAttribute="leading" secondItem="gmp-Lq-vc1" secondAttribute="leading" id="9NI-ME-Me8"/>
                             <constraint firstItem="3tI-8n-ull" firstAttribute="leading" secondItem="5Vg-KO-jpA" secondAttribute="leading" id="9Qx-sK-gOr"/>
                             <constraint firstItem="WgB-by-QsP" firstAttribute="top" secondItem="Jpu-Bg-ooR" secondAttribute="top" constant="8" id="9Sb-QD-JdC"/>
                             <constraint firstItem="onn-2w-RMs" firstAttribute="leading" secondItem="2Bc-NR-bU4" secondAttribute="leading" id="Aho-XW-Lu9"/>
+                            <constraint firstItem="jEU-3n-y1L" firstAttribute="leading" secondItem="5dh-9y-pQQ" secondAttribute="trailing" constant="15" id="Boc-iS-ZfJ"/>
                             <constraint firstItem="vTt-mf-Sw8" firstAttribute="centerY" secondItem="2Bc-NR-bU4" secondAttribute="centerY" id="Bqf-v7-3xJ"/>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="bottom" secondItem="B6N-yH-dpp" secondAttribute="bottom" id="DNe-Wv-JLV"/>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="width" secondItem="onn-2w-RMs" secondAttribute="width" id="DVC-XD-PZZ"/>
@@ -1674,10 +1675,11 @@ isotropic voxel size</string>
                             <constraint firstItem="gg2-ga-NK0" firstAttribute="top" secondItem="Jpu-Bg-ooR" secondAttribute="top" constant="9" id="LQY-rr-OF1"/>
                             <constraint firstItem="h2i-fr-w9G" firstAttribute="leading" secondItem="hVt-HB-XDc" secondAttribute="trailing" constant="8" symbolic="YES" id="M2h-Vf-yyh"/>
                             <constraint firstItem="MyM-4s-Pa4" firstAttribute="leading" secondItem="WgB-by-QsP" secondAttribute="trailing" constant="10" id="M5X-kH-iPx"/>
-                            <constraint firstItem="yCq-pw-7ru" firstAttribute="leading" secondItem="hVt-HB-XDc" secondAttribute="trailing" constant="70" id="MMM-oa-Rhl"/>
+                            <constraint firstItem="yCq-pw-7ru" firstAttribute="leading" secondItem="hVt-HB-XDc" secondAttribute="trailing" constant="100" id="MMM-oa-Rhl"/>
                             <constraint firstItem="dpL-es-XZA" firstAttribute="top" secondItem="aKh-6U-1M8" secondAttribute="bottom" constant="8" symbolic="YES" id="MX8-fS-AIP"/>
                             <constraint firstItem="vTt-mf-Sw8" firstAttribute="leading" secondItem="2Bc-NR-bU4" secondAttribute="trailing" constant="8" symbolic="YES" id="Noa-pf-Ddf"/>
                             <constraint firstItem="FGd-yf-LhC" firstAttribute="centerY" secondItem="vTt-mf-Sw8" secondAttribute="centerY" id="O7e-eU-YXy"/>
+                            <constraint firstItem="BzE-VC-sLT" firstAttribute="centerY" secondItem="5dh-9y-pQQ" secondAttribute="centerY" id="OhK-0m-FCD"/>
                             <constraint firstItem="onn-2w-RMs" firstAttribute="top" secondItem="vTt-mf-Sw8" secondAttribute="bottom" constant="10" id="Opt-84-Myn"/>
                             <constraint firstItem="yCq-pw-7ru" firstAttribute="centerY" secondItem="h2i-fr-w9G" secondAttribute="centerY" id="QOU-pa-zbH"/>
                             <constraint firstItem="bRX-Wj-ug3" firstAttribute="top" secondItem="zTa-Wd-TQh" secondAttribute="bottom" constant="8" symbolic="YES" id="RSP-lN-wNF"/>
@@ -1690,6 +1692,7 @@ isotropic voxel size</string>
                             <constraint firstItem="5Nh-M8-5h4" firstAttribute="leading" secondItem="aKh-6U-1M8" secondAttribute="leading" constant="-10" id="Sw4-Mj-JcQ"/>
                             <constraint firstItem="5Nh-M8-5h4" firstAttribute="height" secondItem="S4e-9C-6jo" secondAttribute="height" id="TGV-bd-pfi"/>
                             <constraint firstItem="tIj-RM-nmS" firstAttribute="top" secondItem="gg2-ga-NK0" secondAttribute="bottom" constant="8" symbolic="YES" id="U8i-oP-vne"/>
+                            <constraint firstItem="BzE-VC-sLT" firstAttribute="leading" secondItem="jEU-3n-y1L" secondAttribute="trailing" constant="8" symbolic="YES" id="UMc-9P-Ksw"/>
                             <constraint firstItem="3tI-8n-ull" firstAttribute="leading" secondItem="5Nh-M8-5h4" secondAttribute="trailing" constant="8" symbolic="YES" id="UWX-OI-rMD"/>
                             <constraint firstItem="0Tm-C3-jkU" firstAttribute="leading" secondItem="onn-2w-RMs" secondAttribute="trailing" constant="8" symbolic="YES" id="Uwc-JN-d9Q"/>
                             <constraint firstItem="3tI-8n-ull" firstAttribute="top" secondItem="5Vg-KO-jpA" secondAttribute="bottom" constant="8" symbolic="YES" id="VCC-bC-d8v"/>
@@ -1700,6 +1703,8 @@ isotropic voxel size</string>
                             <constraint firstItem="gyV-GL-Er6" firstAttribute="leading" secondItem="Ef1-XR-DkR" secondAttribute="trailing" constant="12" symbolic="YES" id="XO4-FC-5cc"/>
                             <constraint firstItem="4q1-ZY-ZVh" firstAttribute="top" secondItem="tIj-RM-nmS" secondAttribute="bottom" constant="8" symbolic="YES" id="Xw2-aj-nYL"/>
                             <constraint firstItem="Ri4-zl-LSt" firstAttribute="top" secondItem="MyM-4s-Pa4" secondAttribute="bottom" constant="8" symbolic="YES" id="YqZ-UW-g4O"/>
+                            <constraint firstItem="jEU-3n-y1L" firstAttribute="centerY" secondItem="4q1-ZY-ZVh" secondAttribute="centerY" id="Zaf-AY-cHF"/>
+                            <constraint firstItem="BzE-VC-sLT" firstAttribute="width" secondItem="5dh-9y-pQQ" secondAttribute="width" id="Zww-4q-lKk"/>
                             <constraint firstItem="zt1-XI-6Lp" firstAttribute="leading" secondItem="onn-2w-RMs" secondAttribute="leading" id="aWI-iR-OBm"/>
                             <constraint firstItem="0Tm-C3-jkU" firstAttribute="width" secondItem="onn-2w-RMs" secondAttribute="width" id="acE-b7-JPO"/>
                             <constraint firstAttribute="bottom" secondItem="WgB-by-QsP" secondAttribute="bottom" constant="8" id="bfL-SO-KlY"/>
@@ -1711,6 +1716,7 @@ isotropic voxel size</string>
                             <constraint firstItem="2Z0-Q5-mG0" firstAttribute="centerY" secondItem="dpL-es-XZA" secondAttribute="centerY" id="flO-Sn-4vf"/>
                             <constraint firstItem="5dh-9y-pQQ" firstAttribute="leading" secondItem="4q1-ZY-ZVh" secondAttribute="trailing" constant="8" symbolic="YES" id="fqh-aW-fTl"/>
                             <constraint firstItem="cKd-my-8hA" firstAttribute="top" secondItem="xa8-tx-2kI" secondAttribute="bottom" constant="10" id="g0G-QU-8FJ"/>
+                            <constraint firstItem="BzE-VC-sLT" firstAttribute="leading" secondItem="jEU-3n-y1L" secondAttribute="trailing" constant="8" symbolic="YES" id="gGE-c7-XVZ"/>
                             <constraint firstItem="Y99-5N-5GL" firstAttribute="centerY" secondItem="zt1-XI-6Lp" secondAttribute="centerY" id="gY6-dW-NdA"/>
                             <constraint firstItem="wfA-ns-GMg" firstAttribute="centerY" secondItem="zt1-XI-6Lp" secondAttribute="centerY" id="gfd-se-4MI"/>
                             <constraint firstItem="kP8-KB-Dka" firstAttribute="centerY" secondItem="yCq-pw-7ru" secondAttribute="centerY" id="hfW-yp-6rl"/>
@@ -1718,12 +1724,12 @@ isotropic voxel size</string>
                             <constraint firstItem="S4e-9C-6jo" firstAttribute="leading" secondItem="B6N-yH-dpp" secondAttribute="trailing" constant="15" id="jQR-Tq-WRA"/>
                             <constraint firstItem="aLu-ep-EcD" firstAttribute="centerY" secondItem="inY-rO-7Zf" secondAttribute="centerY" id="juT-Nt-iGH"/>
                             <constraint firstItem="dpL-es-XZA" firstAttribute="leading" secondItem="cKd-my-8hA" secondAttribute="trailing" constant="30" id="kpK-m2-4P1"/>
-                            <constraint firstItem="5dh-9y-pQQ" firstAttribute="trailing" secondItem="rDb-6T-0n6" secondAttribute="trailing" id="lfg-4W-SHC"/>
                             <constraint firstItem="rDb-6T-0n6" firstAttribute="leading" secondItem="tIj-RM-nmS" secondAttribute="trailing" constant="8" symbolic="YES" id="nu0-B1-uJv"/>
                             <constraint firstItem="rDb-6T-0n6" firstAttribute="leading" secondItem="hVt-HB-XDc" secondAttribute="leading" id="nus-FK-wap"/>
                             <constraint firstItem="wfA-ns-GMg" firstAttribute="leading" secondItem="zt1-XI-6Lp" secondAttribute="trailing" constant="5" id="p4c-l2-fiU"/>
                             <constraint firstItem="2gw-aW-CEh" firstAttribute="centerY" secondItem="vTt-mf-Sw8" secondAttribute="centerY" id="pb8-gl-OvL"/>
                             <constraint firstItem="7Kk-vC-hFf" firstAttribute="top" secondItem="kP8-KB-Dka" secondAttribute="bottom" constant="8" symbolic="YES" id="qe1-9q-lVr"/>
+                            <constraint firstItem="Ue6-3r-UQf" firstAttribute="leading" secondItem="BzE-VC-sLT" secondAttribute="trailing" constant="6" id="qpp-hi-Dd1"/>
                             <constraint firstItem="aLu-ep-EcD" firstAttribute="leading" secondItem="gmp-Lq-vc1" secondAttribute="trailing" constant="8" symbolic="YES" id="r4R-JE-gv9"/>
                             <constraint firstItem="Ri4-zl-LSt" firstAttribute="trailing" secondItem="MyM-4s-Pa4" secondAttribute="trailing" id="r6P-eg-hp7"/>
                             <constraint firstAttribute="bottom" secondItem="B6N-yH-dpp" secondAttribute="bottom" constant="20" symbolic="YES" id="rZI-Uz-lqn"/>
@@ -1752,16 +1758,15 @@ isotropic voxel size</string>
                         <outlet property="cropView2" destination="0Tm-C3-jkU" id="LqD-WP-UKK"/>
                         <outlet property="cropViewForCluster" destination="S4e-9C-6jo" id="F6J-fU-vsY"/>
                         <outlet property="labelSlice" destination="h2i-fr-w9G" id="i4F-0l-NVW"/>
-                        <outlet property="labelVolumeExpansionValue" destination="g5o-Aj-7Jc" id="njh-lM-MQg"/>
                         <outlet property="labelZoom" destination="OOe-0L-vqT" id="qwc-aV-nEO"/>
                         <outlet property="maskViewForCluster" destination="3tI-8n-ull" id="gQM-dV-N1T"/>
                         <outlet property="nodeTable" destination="RCp-X1-E21" id="h6R-jl-Jmm"/>
                         <outlet property="outputView" destination="B6N-yH-dpp" id="kqc-l1-i9X"/>
                         <outlet property="segmentFileName" destination="7Kk-vC-hFf" id="NJi-Yi-IOV"/>
                         <outlet property="sliderAlpha" destination="5dh-9y-pQQ" id="Ba7-n9-Viy"/>
+                        <outlet property="sliderEdge" destination="BzE-VC-sLT" id="9v1-A0-xFW"/>
                         <outlet property="sliderSegmentSlice" destination="cKd-my-8hA" id="qkZ-F0-yGC"/>
                         <outlet property="sliderSlice" destination="hVt-HB-XDc" id="cBC-MQ-LSt"/>
-                        <outlet property="sliderVolumeExpansion" destination="xbc-F0-EfD" id="RF7-Qk-IdJ"/>
                         <outlet property="sliderZoom" destination="rDb-6T-0n6" id="8I0-q6-qLQ"/>
                         <outlet property="stepperCluster" destination="2Z0-Q5-mG0" id="gHF-f2-opD"/>
                         <outlet property="voxelSizeField" destination="xfM-2E-VOe" id="Cyk-9J-fkX"/>
@@ -4532,7 +4537,7 @@ will be loaded. If you have sufficient memory,
         <image name="arrow.turn.right.down" catalog="system" width="13" height="14"/>
         <image name="chevron.down" catalog="system" width="12" height="7"/>
         <image name="keyboard" catalog="system" width="19" height="13"/>
-        <image name="link" catalog="system" width="14" height="14"/>
+        <image name="link" catalog="system" width="17" height="17"/>
         <image name="plus.viewfinder" catalog="system" width="16" height="15"/>
     </resources>
 </document>

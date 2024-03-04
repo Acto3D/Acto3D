@@ -19,6 +19,7 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
                                 constant uint8_t                  &channel [[buffer(5)]],
                                 constant uint8_t                  &useMaskTexture [[buffer(6)]],
                                 constant float                  &maskAlpha [[buffer(7)]],
+                                constant float                  &edgeThreshold [[buffer(8)]],
                                 texture3d<float, access::sample> tex [[texture(0)]],
                                 texture3d<float, access::sample> maskTexture [[texture(1)]],
                                 sampler smp                     [[sampler(0)]],
@@ -138,7 +139,7 @@ kernel void createMprForSegment(device uint8_t                  *outputData [[bu
             // if Mask Texture is set, obtein mask for the coordinates from the mask texture
             CvoxelMask = maskTexture.sample(smp, samplerPostion);
             
-            if(CvoxelMask.r > 0.8){
+            if(CvoxelMask.r > (1.0f - edgeThreshold)){
                 // Areas to be reliably masked
                 outputData[index + 0] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c1[0] * (maskAlpha)) * 255.0f);
                 outputData[index + 1] = uint8_t((Cvoxel[channel] * (1.0 - maskAlpha) + c1[1] * (maskAlpha)) * 255.0f);
@@ -350,6 +351,7 @@ kernel void copySliceImageToTexture(texture3d<float, access::sample>        texI
                                 constant bool                           &binary [[buffer(4)]],
                                 constant bool                           &countPixel [[buffer(5)]],
                                 device atomic_uint                      &counter [[buffer(6)]],
+                                    constant float                  &edgeThreshold [[buffer(7)]],
                                 sampler                                 smp [[ sampler(0) ]],
                                 ushort3                                 position [[thread_position_in_grid]]){
     
@@ -458,14 +460,12 @@ kernel void copySliceImageToTexture(texture3d<float, access::sample>        texI
         
         float4 CvoxelMask = texIn.sample(smp, samplerPostion);
         
-        if(CvoxelMask.r > 0.5){
+        if(CvoxelMask.r > (1.0f - edgeThreshold)){
             outputColor[channel] = 1.0;
             // Areas to be reliably masked
             if(countPixel == true){
                 atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
             }
-            
-            
         }
         
         

@@ -46,6 +46,7 @@ class SegmentRenderer{
     var normals = Normals()
     
     var maskAlpha:Float = 0.8
+    var edgeThreshold:Float = 0.3
     
     init(device:MTLDevice, cmdQueue:MTLCommandQueue, mtlLib: MTLLibrary) {
         self.device = device
@@ -138,6 +139,7 @@ class SegmentRenderer{
         
         
         cmdEncoder.setBytes(&maskAlpha, length: MemoryLayout<Float>.stride, index: 7)
+        cmdEncoder.setBytes(&edgeThreshold, length: MemoryLayout<Float>.stride, index: 8)
         
         let width = renderPipeline.threadExecutionWidth
         let threads_in_group = renderPipeline.maxTotalThreadsPerThreadgroup
@@ -287,7 +289,8 @@ class SegmentRenderer{
 
     }
     
-    public func transferMaskToMainTexture(destChannel: UInt8, smooth:Bool, expansionSize:UInt8){
+    //MARK: - Mask to Main Texture
+    public func transferMaskToMainTexture(destChannel: UInt8, smooth:Bool){
         guard let maskTexture = maskTexture,
               let mainTexture = mainTexture else {
             Dialog.showDialog(message: "No mask image")
@@ -314,13 +317,19 @@ class SegmentRenderer{
 //            self.maskTexture = nil
             
         }else{
-            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
-            shrinkMask(texIn: mainTexture, texOut: maskTexture, channelIn: destChannel, channelOut: 0, expansionSize: expansionSize)
+            guard let tempTexture = maskTexture.createNewTextureWithSameSize(pixelFormat: maskTexture.pixelFormat) else{
+                Dialog.showDialog(message: "Failed in creating new texture.")
+                return
+            }
+            let px = copySliceImageToTexture(texIn: maskTexture, texOut: tempTexture, channel: 0, binary: true, countPixel: true, maximizeEdge: true)
+            
+//            mapTextureToTexture(texIn: maskTexture, texOut: mainTexture, channel: destChannel, binary: true)
+//            shrinkMask(texIn: mainTexture, texOut: maskTexture, channelIn: destChannel, channelOut: 0, expansionSize: expansionSize)
             
             let semaphore = DispatchSemaphore(value: 0)
             
             let processor = ImageProcessor(device: self.device, cmdQueue: self.cmdQueue, lib: self.mtlLib)
-            processor.applyFilter_Gaussian3D(inTexture: maskTexture, k_size: 5, channel: 0){ result in
+            processor.applyFilter_Gaussian3D(inTexture: tempTexture, k_size: 5, channel: 0){ result in
              
                 self.maskTexture = result
                 semaphore.signal()
@@ -331,7 +340,7 @@ class SegmentRenderer{
         
             transferTextureToTexture(texIn: self.maskTexture!, texOut: mainTexture, channelIn: 0, channelOut: destChannel)
             
-            self.maskTexture = nil
+//            self.maskTexture = nil
         }
         
         
@@ -339,7 +348,7 @@ class SegmentRenderer{
     }
     
     @discardableResult
-    func copySliceImageToTexture(texIn:MTLTexture, texOut:MTLTexture, channel:UInt8, binary:Bool, countPixel:Bool = false) -> UInt32{
+    func copySliceImageToTexture(texIn:MTLTexture, texOut:MTLTexture?, channel:UInt8, binary:Bool, countPixel:Bool = false, maximizeEdge:Bool = false) -> UInt32{
         guard let computeFunction = mtlLib.makeFunction(name: "copySliceImageToTexture") else {
             print("error make function")
             return 0
@@ -387,6 +396,17 @@ class SegmentRenderer{
         counterBuffer?.contents().bindMemory(to: UInt32.self, capacity: 1).pointee = 0
         computeSliceEncoder.setBuffer(counterBuffer, offset: 0, index: 6)
         
+        if(maximizeEdge == true){
+            // When creating blured mask for visualization,
+            // set edge threshold to max
+            var tempThreshold:Float = 1.0
+            computeSliceEncoder.setBytes(&tempThreshold, length: MemoryLayout<Float>.stride, index: 7)
+            
+        }else{
+            // Use user specified threshold as default.
+            computeSliceEncoder.setBytes(&edgeThreshold, length: MemoryLayout<Float>.stride, index: 7)
+        }
+        
         
         // Compute optimization
 //        let xCount = imageParams.outputImageWidth.toInt()
@@ -394,8 +414,8 @@ class SegmentRenderer{
 //        let zCount2 = renderModelParams.sliceMax.toInt()
         let xCount = imageParams.inputImageWidth.toInt()
         let yCount = imageParams.inputImageHeight.toInt()
-        let zCount = texOut.depth
-        print(xCount, yCount,  zCount, imageParams.inputImageDepth.toInt())
+        let zCount = imageParams.inputImageDepth.toInt()
+        
         
         let maxTotalThreadsPerThreadgroup = renderPipeline.maxTotalThreadsPerThreadgroup
         let threadExecutionWidth          = renderPipeline.threadExecutionWidth

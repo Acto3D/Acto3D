@@ -31,7 +31,7 @@ class Segment3DController: NSViewController {
     
     var kmeansController:KMeansController!
     
-    var isCalculateVolume = false
+//    var isCalculateVolume = false
     
     
     
@@ -46,6 +46,7 @@ class Segment3DController: NSViewController {
     @IBOutlet weak var sliderZoom: NSSlider!
     @IBOutlet weak var labelZoom: NSTextField!
     @IBOutlet weak var sliderAlpha: NSSlider!
+    @IBOutlet weak var sliderEdge: NSSlider!
     
     @IBOutlet weak var outputView: SegmentRenderView!
     
@@ -66,8 +67,8 @@ class Segment3DController: NSViewController {
     @IBOutlet weak var segmentFileName: NSTextField!
     @IBOutlet weak var channelSelectionPopup : NSPopUpButton!
     
-    @IBOutlet weak var sliderVolumeExpansion: NSSlider!
-    @IBOutlet weak var labelVolumeExpansionValue: NSTextField!
+//    @IBOutlet weak var sliderVolumeExpansion: NSSlider!
+//    @IBOutlet weak var labelVolumeExpansionValue: NSTextField!
     
     
     var workingDir:URL!
@@ -180,6 +181,17 @@ class Segment3DController: NSViewController {
         outputView.image = renderer?.renderSlice()
     }
     
+    /// Change edge threshold value
+    @IBAction func sliderEdgeThresholdChanged(_ sender: NSSlider) {
+        renderer.edgeThreshold = sender.floatValue
+        outputView.image = renderer?.renderSlice()
+    }
+    
+    @IBAction func setDefaultEdgeThreshold(_ sender: Any) {
+        renderer.edgeThreshold = 0.3
+        sliderEdge.floatValue = 0.3
+        outputView.image = renderer?.renderSlice()
+    }
     
     @IBAction func setSameQuatAsMain(_ sender: Any) {
         renderer.rotateModelTo(quaternion: mainView!.renderer.quaternion)
@@ -1339,19 +1351,11 @@ class Segment3DController: NSViewController {
     
     /// Export mask as binary image
     @IBAction func exportMaskTexture(_ sender: Any) {
-        
         guard let maskTexture = renderer.maskTexture else {
             Dialog.showDialog(message: "No mask texture")
             return
             
         }
-        
-        // if apply gaussian
-        // let maskTexture_gaussian = renderer.apply_gaussianBlur3D(input: maskTexture, channel: 0)!
-        
-        // This code is necessary to fill small holes within the image.
-        renderer.mapTextureToTexture(texIn: maskTexture, texOut: maskTexture, channel: 0, binary: true)
-        
         
         // create output directory
         guard let filePackage = filePackage,
@@ -1389,11 +1393,14 @@ class Segment3DController: NSViewController {
 
         let acceccableTexture = self.device.makeTexture(descriptor: textureDescriptor)!
         
-        let cmdBuf = cmdQueue.makeCommandBuffer()!
-        let encoder = cmdBuf.makeBlitCommandEncoder()!
-        encoder.copy(from: maskTexture, to: acceccableTexture)
-        encoder.endEncoding()
-        cmdBuf.commit()
+        renderer.copySliceImageToTexture(texIn: maskTexture, texOut: acceccableTexture, channel: 0, binary: true)
+        
+//        let cmdBuf = cmdQueue.makeCommandBuffer()!
+//        let encoder = cmdBuf.makeBlitCommandEncoder()!
+//
+//        encoder.copy(from: maskTexture, to: acceccableTexture)
+//        encoder.endEncoding()
+//        cmdBuf.commit()
         
         for slice in 0..<depth {
             autoreleasepool{
@@ -1454,13 +1461,13 @@ class Segment3DController: NSViewController {
     @IBAction func transferToMainTexture(_ sender: NSButton) {
         let destChannelMenu = NSMenu()
         
-        if(isCalculateVolume == true){
-            destChannelMenu.addItem(NSMenuItem(title: "⚠️ When calculating the volume for the mask image, ", action: nil, keyEquivalent: ""))
-            destChannelMenu.addItem(NSMenuItem(title: "the original mask is overwritten during pixel computation.", action: nil, keyEquivalent: ""))
-            destChannelMenu.addItem(NSMenuItem(title: "Therefore, you must clear and reload the segments", action: nil, keyEquivalent: ""))
-            destChannelMenu.addItem(NSMenuItem(title: "to restore the mask before applying it to the main texture.", action: nil, keyEquivalent: ""))
-            destChannelMenu.addItem(NSMenuItem.separator())
-        }
+//        if(isCalculateVolume == true){
+//            destChannelMenu.addItem(NSMenuItem(title: "⚠️ When calculating the volume for the mask image, ", action: nil, keyEquivalent: ""))
+//            destChannelMenu.addItem(NSMenuItem(title: "the original mask is overwritten during pixel computation.", action: nil, keyEquivalent: ""))
+//            destChannelMenu.addItem(NSMenuItem(title: "Therefore, you must clear and reload the segments", action: nil, keyEquivalent: ""))
+//            destChannelMenu.addItem(NSMenuItem(title: "to restore the mask before applying it to the main texture.", action: nil, keyEquivalent: ""))
+//            destChannelMenu.addItem(NSMenuItem.separator())
+//        }
         
         destChannelMenu.addItem(NSMenuItem(title: "Apply Mask to Main Texture", action: nil, keyEquivalent: ""))
         for i in 0...3{
@@ -1484,11 +1491,11 @@ class Segment3DController: NSViewController {
     }
     
     @objc func applyMaskToMainTexture(_ sender:NSMenuItem){
-        renderer.transferMaskToMainTexture(destChannel: sender.tag.toUInt8(), smooth: false, expansionSize: sliderVolumeExpansion.integerValue.toUInt8())
+        renderer.transferMaskToMainTexture(destChannel: sender.tag.toUInt8(), smooth: false)
         Dialog.showDialog(message: "Completed", title: "", style: .informational)
     }
     @objc func applySmoothedMaskToMainTexture(_ sender:NSMenuItem){
-        renderer.transferMaskToMainTexture(destChannel: sender.tag.toUInt8(), smooth: true, expansionSize: sliderVolumeExpansion.integerValue.toUInt8())
+        renderer.transferMaskToMainTexture(destChannel: sender.tag.toUInt8(), smooth: true)
         Dialog.showDialog(message: "Completed", title: "", style: .informational)
     }
     
@@ -1501,7 +1508,7 @@ class Segment3DController: NSViewController {
     @IBAction func clearMaskImage(_ sender: Any) {
         renderer.maskTexture = nil
         outputView.image = renderer.renderSlice()
-        isCalculateVolume = false
+//        isCalculateVolume = false
     }
     
     @IBAction func checkVolumeForSelectedNodes(_ sender: Any){
@@ -1529,25 +1536,26 @@ class Segment3DController: NSViewController {
         renderer.renderModelParams.translationX = 0
         renderer.renderModelParams.translationY = 0
         
-        let tmpTexture = maskTexture.createNewTextureWithSameSize(pixelFormat: maskTexture.pixelFormat)!
-        let vol1 = renderer.mapTextureToTexture(texIn: maskTexture, texOut: tmpTexture, channel: 0, binary: true, countPixel: true)
-        print(vol1)
-        let pixelCount = renderer.shrinkMask(texIn: tmpTexture, texOut: maskTexture,
-                                      channelIn: 0, channelOut: 0,
-                                      expansionSize: sliderVolumeExpansion.integerValue.toUInt8(), countPixel: true)
+        let pixelCount = renderer.copySliceImageToTexture(texIn: maskTexture, texOut: nil, channel: 0, binary: true, countPixel: true)
+        
+//        let tmpTexture = maskTexture.createNewTextureWithSameSize(pixelFormat: maskTexture.pixelFormat)!
+//        let vol1 = renderer.mapTextureToTexture(texIn: maskTexture, texOut: tmpTexture, channel: 0, binary: true, countPixel: true)
+//        print(vol1)
+//        let pixelCount = renderer.shrinkMask(texIn: tmpTexture, texOut: maskTexture,
+//                                      channelIn: 0, channelOut: 0,
+//                                      expansionSize: sliderVolumeExpansion.integerValue.toUInt8(), countPixel: true)
         
         
         let volume = Double(pixelCount) * voxelSize.toDouble() * voxelSize.toDouble() * originalResolutionZ.toDouble()
-        var messageStr = "Volume: \(volume) \(voxelUnit)^3"
+        var messageStr = "Volume: \(volume) \(voxelUnit)^3\n"
+        messageStr += "Pixel Count: \(pixelCount) px\n\n"
         messageStr += "\n\n ---- Used Parameters --- \n"
         messageStr += "  XY resolution: \(voxelSize) \(voxelUnit) / px\n"
         messageStr += "  Z resolution: \(originalResolutionZ) \(voxelUnit) / px"
         
         let alert = NSAlert()
         alert.messageText = "Volume Calculation Result"
-        alert.informativeText = "⚠️ After verifying the volume, please clear the mask image and recreate it."
         
-        // 選択可能なテキストビューの作成
         let scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: 300, height: 100))
         scrollView.hasVerticalScroller = true
         scrollView.borderType = .grooveBorder
@@ -1555,7 +1563,6 @@ class Segment3DController: NSViewController {
         let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 290, height: 90))
         textView.isEditable = false
         textView.isSelectable = true
-        
         
         textView.string = messageStr
         
@@ -1568,14 +1575,14 @@ class Segment3DController: NSViewController {
         
         outputView.image = renderer.renderSlice()
         
-        isCalculateVolume = true
+//        isCalculateVolume = true
         
     }
     
-    @IBAction func changeVolumeExpansionSlider(_ sender: Any) {
-        labelVolumeExpansionValue.integerValue = sliderVolumeExpansion.integerValue
-    }
-    
+//    @IBAction func changeVolumeExpansionSlider(_ sender: Any) {
+//        labelVolumeExpansionValue.integerValue = sliderVolumeExpansion.integerValue
+//    }
+//
 }
 
 //MARK: - SegmentRenderViewProtocol
