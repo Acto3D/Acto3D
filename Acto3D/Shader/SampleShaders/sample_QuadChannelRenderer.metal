@@ -139,17 +139,19 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
                              modelParameter.intensityRatio[3]);
             
             
-            float3 lut_c1 = interpolateColors(Cvoxel[0]);
-            float3 lut_c2 = interpolateColors(Cvoxel[1]);
-            float3 lut_c3 = interpolateColors(Cvoxel[2]);
-            float3 lut_c4 = interpolateColors(Cvoxel[3]);
+            
+            float3 lut_c0 = Cvoxel[0] * modelParameter.color.ch1.rgb;
+            float3 lut_c1 = Cvoxel[1] * modelParameter.color.ch2.rgb;
+            float3 lut_c2 = Cvoxel[2] * modelParameter.color.ch3.rgb;
+            float3 lut_c3 = Cvoxel[3] * modelParameter.color.ch4.rgb;
             
             for(int c=0; c<3; c++){
-                args.outputData[index_0 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
-                args.outputData[index_1 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
-                args.outputData[index_2 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
-                args.outputData[index_3 + c] = uint8_t(clamp(lut_c4[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_0 + c] = uint8_t(clamp(lut_c0[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_1 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_2 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_3 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
             }
+            
             
         }
         
@@ -190,12 +192,6 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
     if(flags & (1 << ADAPTIVE)){
         renderingStepAdditionalRatio *= scaleRatio;
     }
-    
-    
-    float3 channel_1 = modelParameter.color.ch1.rgb;
-    float3 channel_2 = modelParameter.color.ch2.rgb;
-    float3 channel_3 = modelParameter.color.ch3.rgb;
-    float3 channel_4 = modelParameter.color.ch4.rgb;
     
     
     // Accumulated color (C) and opacity (A) for volume rendering.
@@ -438,10 +434,10 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER(device RenderingArguments    &args  [[buf
         
     }
     
-    float3 lut_c0 = interpolateColors(Cout[0]);
-    float3 lut_c1 = interpolateColors(Cout[1]);
-    float3 lut_c2 = interpolateColors(Cout[2]);
-    float3 lut_c3 = interpolateColors(Cout[3]);
+    float3 lut_c0 = Cout[0] * modelParameter.color.ch1.rgb;
+    float3 lut_c1 = Cout[1] * modelParameter.color.ch2.rgb;
+    float3 lut_c2 = Cout[2] * modelParameter.color.ch3.rgb;
+    float3 lut_c3 = Cout[3] * modelParameter.color.ch4.rgb;
     
     for(int c=0; c<3; c++){
         args.outputData[index_0 + c] = uint8_t(clamp(lut_c0[c] * 255.0f, 0.0f, 255.0f));

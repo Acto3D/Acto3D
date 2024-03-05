@@ -306,10 +306,22 @@ extension ViewController{
             copyTemplatesToShaderDirectory()
             
         case "reset_tcp":
-            AppConfig.ACCEPT_TCP_CONNECTION = true
-            tcpServer?.stop()
-            Thread.sleep(forTimeInterval: 2)
-            tcpServer?.start()
+            if let tcpServer = tcpServer{
+                tcpServer.stop()
+                Thread.sleep(forTimeInterval: 2)
+                tcpServer.start()
+            }else{
+                AppConfig.ACCEPT_TCP_CONNECTION = true
+                if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
+                    self.tcpServer = tcpServer
+                    self.tcpServer?.delegate = self
+                    self.tcpServer?.renderer = renderer
+                    self.tcpServer?.vc = self
+                    self.tcpServer?.start()
+                }else{
+                    Logger.logPrintAndWrite(message: "Failed in creating TCP connection.", level: .error)
+                }
+            }
             
                 
         case "tori":
@@ -387,7 +399,7 @@ extension ViewController{
             renderer.renderParams.renderingStep = 1.0
             renderer.renderParams.scale = 0.8
             
-            renderer.renderParams.intensityRatio = float4(0.2, 1, 0, 0)
+            renderer.renderParams.intensityRatio = float4(0.2, 1, 1, 1)
             
             updateSliceAndScaleFromParams(params: renderer.renderParams)
             

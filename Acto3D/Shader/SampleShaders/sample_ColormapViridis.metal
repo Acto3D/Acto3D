@@ -162,16 +162,16 @@ kernel void SAMPLE_QUAD_CHANNEL_RENDER_VIRIDIS_CM(device RenderingArguments    &
             
             
             
-            float3 lut_c1 = interpolateColors(Cvoxel[0]);
-            float3 lut_c2 = interpolateColors(Cvoxel[1]);
-            float3 lut_c3 = interpolateColors(Cvoxel[2]);
-            float3 lut_c4 = interpolateColors(Cvoxel[3]);
+            float3 lut_c0 = interpolateColors(Cvoxel[0]);
+            float3 lut_c1 = interpolateColors(Cvoxel[1]);
+            float3 lut_c2 = interpolateColors(Cvoxel[2]);
+            float3 lut_c3 = interpolateColors(Cvoxel[3]);
             
             for(int c=0; c<3; c++){
-                args.outputData[index_0 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
-                args.outputData[index_1 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
-                args.outputData[index_2 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
-                args.outputData[index_3 + c] = uint8_t(clamp(lut_c4[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_0 + c] = uint8_t(clamp(lut_c0[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_1 + c] = uint8_t(clamp(lut_c1[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_2 + c] = uint8_t(clamp(lut_c2[c] * 255.0f, 0.0f, 255.0f));
+                args.outputData[index_3 + c] = uint8_t(clamp(lut_c3[c] * 255.0f, 0.0f, 255.0f));
             }
             
             

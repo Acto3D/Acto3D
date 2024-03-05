@@ -167,6 +167,7 @@ class ViewController: NSViewController{
     
     var shaderList:[ShaderManage] = ShaderManage.getPresetList()
     
+    /// TCP management
     var tcpServer:TCPServer?
     
     //MARK: - Initialize
@@ -254,27 +255,31 @@ class ViewController: NSViewController{
         light_Slider_current.validationDelegate = self
         
         
-         intensityRatio_slider_1.onRightClick = {[weak self] event in
+        intensityRatio_slider_1.onRightClick = {[weak self] event in
             self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_1)
         }
         intensityRatio_slider_2.onRightClick = {[weak self] event in
-           self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_2)
-       }
+            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_2)
+        }
         intensityRatio_slider_3.onRightClick = {[weak self] event in
-           self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_3)
-       }
+            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_3)
+        }
         intensityRatio_slider_4.onRightClick = {[weak self] event in
-           self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_4)
-       }
+            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_4)
+        }
         
-        
-        if AppConfig.ACCEPT_TCP_CONNECTION == true,
-           let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
-            self.tcpServer = tcpServer
-            self.tcpServer?.delegate = self
-            self.tcpServer?.renderer = renderer
-            self.tcpServer?.vc = self
-            self.tcpServer?.start()
+        if AppConfig.ACCEPT_TCP_CONNECTION == true{
+            DispatchQueue.global(qos: .default).async {[self] in
+                if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
+                    self.tcpServer = tcpServer
+                    self.tcpServer?.delegate = self
+                    self.tcpServer?.renderer = renderer
+                    self.tcpServer?.vc = self
+                    self.tcpServer?.start()
+                }else{
+                    Logger.logPrintAndWrite(message: "Failed in creating TCP connection.", level: .error)
+                }
+            }
         }
     }
     
@@ -967,9 +972,7 @@ class ViewController: NSViewController{
     }
     
     @IBAction func intensityRatioSliderChanged(_ sender: NSSlider){
-//        renderer.intensityRatio[sender.tag] = sender.floatValue
         renderer.renderParams.intensityRatio[sender.tag] = sender.floatValue
-        print(renderer.renderParams.intensityRatio)
         renderer.argumentManager?.markAsNeedsUpdate(argumentIndex: .renderParams)
         outputView.image = renderer.rendering()
     }

@@ -9,6 +9,8 @@ import Foundation
 import Cocoa
 import Metal
 
+
+/// Create 3D models for validation used in the original article.
 class DemoModel{
     var device:MTLDevice!
     var lib:MTLLibrary!
