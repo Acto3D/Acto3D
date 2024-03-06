@@ -114,6 +114,7 @@
 		B009959C2785DB3400E859B9 /* VC_toneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_toneController.swift; sourceTree = "<group>"; };
 		B00F7F9E27D5202A00ED00ED /* AnimateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateView.swift; sourceTree = "<group>"; };
 		B018E7642B8E57580041625C /* NSSliderWithRightClick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSSliderWithRightClick.swift; sourceTree = "<group>"; };
+		B01B2E892B98590200AE12A9 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		B01E3585276D821300EAF0CA /* windowProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = windowProtocol.swift; sourceTree = "<group>"; };
 		B01E3587276D85AE00EAF0CA /* FileLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLoad.swift; sourceTree = "<group>"; };
 		B01E3589276D8E5900EAF0CA /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -140,9 +141,11 @@
 		B04AD2402A4756340061E350 /* URL+relative.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+relative.swift"; sourceTree = "<group>"; };
 		B04AD2422A477AEB0061E350 /* preset_BTF.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_BTF.metal; sourceTree = "<group>"; };
 		B04CC42F2B8B2513003888A2 /* TCPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCPServer.swift; sourceTree = "<group>"; };
-		B04E1AD72A8AFAD500DE7EDA /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
 		B05243D62A4A720800EBAA5C /* preset_FTB.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = preset_FTB.metal; sourceTree = "<group>"; };
 		B056CDC52A8D5089001809C3 /* macros.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = macros.metal; sourceTree = "<group>"; };
+		B059551A2B98781700B5D1E9 /* instruction.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = instruction.pdf; sourceTree = SOURCE_ROOT; };
+		B059551D2B98D3BB00B5D1E9 /* tori_model.ipynb */ = {isa = PBXFileReference; lastKnownFileType = text; path = tori_model.ipynb; sourceTree = "<group>"; };
+		B059551E2B98D3BB00B5D1E9 /* sphere_in_cube_model.ipynb */ = {isa = PBXFileReference; lastKnownFileType = text; path = sphere_in_cube_model.ipynb; sourceTree = "<group>"; };
 		B05B03582B0B572000E4C39E /* VC_ControlPoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VC_ControlPoints.swift; sourceTree = "<group>"; };
 		B066B210276EED690072F4A6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B0693FC527B02ADC00A778CE /* FocusCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusCircle.swift; sourceTree = "<group>"; };
@@ -378,14 +381,6 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
-		B04E1AD62A8AFA6900DE7EDA /* ShaderTemplates */ = {
-			isa = PBXGroup;
-			children = (
-				B04E1AD72A8AFAD500DE7EDA /* preset_FTB.metal */,
-			);
-			path = ShaderTemplates;
-			sourceTree = "<group>";
-		};
 		B056CDC02A8D44F0001809C3 /* custom */ = {
 			isa = PBXGroup;
 			children = (
@@ -397,6 +392,15 @@
 				B018E7642B8E57580041625C /* NSSliderWithRightClick.swift */,
 			);
 			path = custom;
+			sourceTree = "<group>";
+		};
+		B059551C2B98D3BB00B5D1E9 /* python_codes */ = {
+			isa = PBXGroup;
+			children = (
+				B059551D2B98D3BB00B5D1E9 /* tori_model.ipynb */,
+				B059551E2B98D3BB00B5D1E9 /* sphere_in_cube_model.ipynb */,
+			);
+			path = python_codes;
 			sourceTree = "<group>";
 		};
 		B06FE5C52B837033009592D5 /* DemoModel */ = {
@@ -429,14 +433,16 @@
 			isa = PBXGroup;
 			children = (
 				B0768FDE2A962DDC00291474 /* LICENSE */,
+				B059551A2B98781700B5D1E9 /* instruction.pdf */,
+				B01B2E892B98590200AE12A9 /* img */,
 				B0768FE02A962DE300291474 /* docs */,
 				B0A8CE002A3AB98B0071EB1E /* Shader */,
+				B059551C2B98D3BB00B5D1E9 /* python_codes */,
 				B0B75E5F276D733400CCAF6B /* Assets.xcassets */,
 				B066B210276EED690072F4A6 /* README.md */,
 				B0B75E5A276D733400CCAF6B /* Acto3D */,
 				B0B75E6C276D733400CCAF6B /* Acto3DTests */,
 				B0B75E76276D733400CCAF6B /* Acto3DUITests */,
-				B04E1AD62A8AFA6900DE7EDA /* ShaderTemplates */,
 				B0B75E59276D733400CCAF6B /* Products */,
 			);
 			sourceTree = "<group>";

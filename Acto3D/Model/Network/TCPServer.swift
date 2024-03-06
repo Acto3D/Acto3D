@@ -581,9 +581,9 @@ class TCPServer {
             return
         }
         
-        // 画像のサイズ（幅と高さ）をUInt32で送信
+        // Send image size info (currently, width = height)
         var width = UInt32(imageSize)
-        var height = UInt32(imageSize) // この例では幅と高さが同じと仮定
+        var height = UInt32(imageSize)
         var imageSizeData = Data(bytes: &width, count: 4)
         imageSizeData.append(Data(bytes: &height, count: 4))
 
@@ -718,7 +718,7 @@ class TCPServer {
                                           nil, socklen_t(0), NI_NUMERICHOST) == 0
                 if success {
                     let currentAddress = String(cString: hostname)
-                    if interface.ifa_flags & UInt32(IFF_LOOPBACK) == 0 { // 127.0.0.1 を除外
+                    if interface.ifa_flags & UInt32(IFF_LOOPBACK) == 0 { // exclude 127.0.0.1
                         address = currentAddress
                         break
                     }
@@ -726,7 +726,6 @@ class TCPServer {
             }
         }
         freeifaddrs(ifaddr)
-
         return address
     }
 }

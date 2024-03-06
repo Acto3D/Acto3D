@@ -203,7 +203,6 @@ kernel void SAMPLE_HIGHLIGHT_CROP_BOUNDARIES(device RenderingArguments    &args 
                 {
                     if(abs(t_crop) <= threshold_plane_thickness){
                         // Draw the boundary if the current texture coordinates are located on any face of the volume.
-                        // 断面に境界線を描画する
                         Cin = Cout;
                         Ain = Aout;
                         

@@ -7,6 +7,9 @@ Please [cite the paper](#how-to-cite) if you are using this software or code in 
 
 ## Overview
 Acto3D is a software that enables researchers to easily display and observe multi-channel images taken with a fluorescent microscope in 3D with very simple operations. You can adjust the color tone and opacity in detail for each channel, enabling advanced 3D displays. It is also possible to create sections from any angle and set animations. *Furthermore, for expert users, it is possible to apply any transfer function by changing the transfer function in the [template shader files](https://github.com/Acto3D/Acto3D/tree/main/ShaderTemplates)*.
+<center>
+<img src="./img/Overview.png" width=500>
+</center>
 
 ***Limitations***  
 According to the original paper, Acto3D is designed to expand entire images into a contiguous memory region that can be accessed from the GPU.
@@ -19,6 +22,8 @@ According to the original paper, Acto3D is designed to expand entire images into
 - The maximum number of fluorescent channels is limited to 4.
 
 ### Download
+Please refer **[this instruction manual](./instruction.pdf)** for instructions.   
+
 Please download the binary file from [here](https://github.com/Acto3D/Acto3D/releases).<br>
 For the sample data, please refer [here](#sample-data).
 
@@ -27,10 +32,13 @@ Acto3D recommends the use of multi-page TIFF files created by Fiji. While it's p
 ### Compatible formats
 |                                     | 16 bits / channel        | 8 bits / channel                                                           |
 | ----------------------------------- | ----------------------- | ------------------------------------------------------------------------- |
-| Multipage TIFF<br>converted by Fiji | 1 - 4 channels          | 1 - 4 channels                                                            |
+| **- Recommend -**<br>Multipage TIFF<br>converted by Fiji<br>(Meta data available) | 1 - 4 channels          | 1 - 4 channels                                                            |
 | TIFF stacks                         | 16 bits Grayscale images | 32 bits RGBA images (*)<br>24 bits RGB images<br>8 bits Gray scale images |
 | PNG stacks                          |                         | 32 bits RGBA images (*)<br>24 bits RGB images<br>8 bits Gray scale images |
 | JPG stacks                          |                         | 32 bits RGBA images (*)<br>24 bits RGB images<br>8 bits Gray scale images |
+|Binary Data | Via TCP| Via TCP  |
+
+For binary data transfer, please follow [Acto3D_py instruction](https://github.com/Acto3D/Acto3D_py).
 
 (*): Normally, the "A" in a 32-bit image refers to the opacity channel, but in Acto3D, the "A" can be used as the data for the fourth channel by storing the data of each fluorescent channel in R, G, B, and A.
 
@@ -78,6 +86,17 @@ Imaging Specifications:
     - The display range was adjusted.
     - It was then converted to 8 bits.
 
+#### Demo Model
+Some demo models are available in [File] > [Demo Model]
+###### Demo model 1: Tori model
+<img src="./img/Tori.png" width=200>
+
+###### Demo model 2: Sphere in cube model
+<img src="./img/Sphere1.png" width=200>
+<img src="./img/Sphere2.png" width=200>
+
+###### Demo model 3: Thin lumen model
+<img src="./img/Lumen.png" width=200>
 
 ### Create a custom shader
 In Acto3D, we designed it to allow the use of custom shaders in addition to the built-in shaders, for users who want even finer rendering through a more flexible transfer function.

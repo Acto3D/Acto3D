@@ -2,7 +2,7 @@
 // Author: Naoki Takeshita
 // Description: Template for standard front to back rendering
 kernel void TEMPLATE_FTB(device RenderingArguments    &args       [[buffer(0)]],
-                       uint2                        position    [[thread_position_in_grid]]){
+                         uint2                        position    [[thread_position_in_grid]]){
     // output view size
     uint16_t viewSize = args.targetViewSize;
     
