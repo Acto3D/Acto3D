@@ -58,12 +58,17 @@ class AppConfig {
     @CachedUserDefault(key: "CLIPBOARD_WHEN_SNAPSHOT", defaultValue: true) static var CLIPBOARD_WHEN_SNAPSHOT: Bool
     
     /// This constant represents whether.
-    @CachedUserDefault(key: "ACCEPT_TCP_CONNECTION", defaultValue: true) static var ACCEPT_TCP_CONNECTION: Bool
+    @CachedUserDefault(key: "ACCEPT_TCP_CONNECTION", defaultValue: false) static var ACCEPT_TCP_CONNECTION: Bool
     
     /// This constant represents TCP port.
     @CachedUserDefault(key: "TCP_PORT", defaultValue: 54847) static var TCP_PORT: UInt16
 
     private init() {
+    }
+    
+    static func reset(_ key: String) {
+        // When reset the cached value, use as self._TCP_PORT.defaultValue.
+        UserDefaults.standard.removeObject(forKey: key)
     }
 }
 

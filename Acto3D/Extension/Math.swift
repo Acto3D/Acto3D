@@ -34,8 +34,6 @@ func quatToEulerAngles(_ quat: simd_quatf) -> SIMD3<Float>{
     var angles = SIMD3<Float>()
     let qfloat = quat.vector
     
-    // heading = x, attitude = y, bank = z
-    
     let test = qfloat.x * qfloat.y + qfloat.z * qfloat.w;
     
     if (test > 0.499) { // singularity at north pole
@@ -95,9 +93,6 @@ extension float3x3{
          )
         //return matrix_float3x3(columns)
     }
-    
-    
-    
     
     init (rotationMatrix_RodoriguesWith_dx dx:Float, dy:Float, dz:Float, theta:Float){
         self.init()

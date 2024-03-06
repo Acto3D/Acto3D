@@ -96,7 +96,6 @@ public class CXEImagesToVideo: NSObject{
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         self.assetWriter = try! AVAssetWriter(url: url, fileType: AVFileType.mov)
         
-//        self.videoSettings = videoSettings
         self.writeInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings)
         assert(self.assetWriter.canAdd(self.writeInput), "add failed")
         
@@ -104,7 +103,7 @@ public class CXEImagesToVideo: NSObject{
         let bufferAttributes:[String: Any] = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB)]
         self.bufferAdapter = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: self.writeInput, sourcePixelBufferAttributes: bufferAttributes)
         self.frameTime = CMTimeMake(value: 1, timescale: Int32(fps))
-        print("file EXP")
+
         
     }
     
@@ -122,7 +121,6 @@ public class CXEImagesToVideo: NSObject{
         self.fileURL = URL(fileURLWithPath: tempPath)
         self.assetWriter = try! AVAssetWriter(url: self.fileURL, fileType: AVFileType.mov)
         
-//        self.videoSettings = videoSettings
         self.writeInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings)
         assert(self.assetWriter.canAdd(self.writeInput), "add failed")
         
@@ -130,7 +128,6 @@ public class CXEImagesToVideo: NSObject{
         let bufferAttributes:[String: Any] = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB)]
         self.bufferAdapter = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: self.writeInput, sourcePixelBufferAttributes: bufferAttributes)
         self.frameTime = CMTimeMake(value: 1, timescale: Int32(fps))
-        print("file EXP")
         
     }
     
@@ -219,15 +216,11 @@ public class CXEImagesToVideo: NSObject{
 private extension NSImage {
     var cgImage: CGImage {
         var imageRect = NSRect(x: 0, y: 0, width: size.width, height: size.height)
-#if swift(>=3.0)
+
         guard let image =  cgImage(forProposedRect: &imageRect, context: nil, hints: nil) else {
             abort()
         }
-#else
-        guard let image = CGImageForProposedRect(&imageRect, context: nil, hints: nil) else {
-            abort()
-        }
-#endif
+        
         return image
     }
 }

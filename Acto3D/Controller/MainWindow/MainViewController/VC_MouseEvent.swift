@@ -96,7 +96,7 @@ extension ViewController: ModelViewProtocol{
         let deltaH = Float( currentPoint.x - previousPoint.x)
         let deltaV = Float( currentPoint.y - previousPoint.y)
         
-        if(keyboard["49"] == true){
+        if(keyboard["49"] == true){ // Space
             renderer.renderParams.translationX -= deltaH
             renderer.renderParams.translationY += deltaV
             outputView.image = renderer.rendering(targetViewSize: AppConfig.PREVIEW_SIZE)
@@ -124,6 +124,60 @@ extension ViewController: ModelViewProtocol{
         }
         
     }
+    
+    
+    
+    func modelViewMouseWheeled(with event: NSEvent){
+        if(renderer.mainTexture == nil){
+            return
+        }
+        
+        // Change slice no according to the delta value of mouse wheel
+        let direction = event.deltaY > 0 ? 1 : -1
+        
+        if(event.modifierFlags.contains(.command)){
+            if(abs(event.deltaY) > 3){
+                crop_Slider.integerValue += 5 * direction
+            }else if(abs(event.deltaY) > 2){
+                crop_Slider.integerValue += 3 * direction
+            }else if(abs(event.deltaY) > 1){
+                crop_Slider.integerValue += 2 * direction
+            }else if(abs(event.deltaY) > 0.5){
+                crop_Slider.integerValue += 1 * direction
+            }else{
+                return
+            }
+            
+            renderer.renderParams.cropSliceNo = crop_Slider.integerValue.toUInt16()
+            crop_Label.integerValue = crop_Slider.integerValue
+            
+        }else{
+            if(abs(event.deltaY) > 3){
+                slice_Slider.integerValue += 5 * direction
+            }else if(abs(event.deltaY) > 2){
+                slice_Slider.integerValue += 3 * direction
+            }else if(abs(event.deltaY) > 1){
+                slice_Slider.integerValue += 2 * direction
+            }else if(abs(event.deltaY) > 0.5){
+                slice_Slider.integerValue += 1 * direction
+            }else{
+                return
+            }
+            
+            renderer.renderParams.sliceNo = slice_Slider.integerValue.toUInt16()
+            slice_Label_current.integerValue = slice_Slider.integerValue
+        }
+        
+        outputView.image = renderer.rendering(targetViewSize: AppConfig.PREVIEW_SIZE)
+        
+        if let timer = scrollEndTimer{
+            timer.invalidate()
+        }
+        self.scrollEndTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false, block: { timer in
+            self.outputView.image = self.renderer.rendering()
+        })
+    }
+    
     
     func modelViewMouseUp(mouse startPoint: NSPoint, currentPoint: NSPoint){
         if(renderer.mainTexture == nil){
@@ -236,11 +290,4 @@ extension ViewController: ModelViewProtocol{
     
     
     
-    
-    func modelViewMouseWheeled(with event: NSEvent){
-        if(renderer.mainTexture == nil){
-            return
-        }
-        
-    }
 }

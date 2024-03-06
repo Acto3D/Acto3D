@@ -58,7 +58,8 @@ extension MovieSequence:SequenceCellManageProtocol, SequenceCellRotationManagePr
 
 extension MovieSequence{
     func collectionView(_ collectionView: NSCollectionView, willDisplay item: NSCollectionViewItem, forRepresentedObjectAt indexPath: IndexPath) {
-        print("display!!")
+
+        
     }
     
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {

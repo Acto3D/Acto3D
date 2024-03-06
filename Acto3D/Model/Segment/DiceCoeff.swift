@@ -5,14 +5,9 @@
 //  Created by Naoki Takeshita on 2023/05/16.
 //
 
-/*
- Description:
-  This function calculates the DICE error.
 
-  Main Features:
-  - Computes the DICE coefficient, which measures the similarity between two sets.
-  - Returns a value between 0 (no overlap) and 1 (perfect overlap).
-*/
+//  This function calculates the DICE error.
+//  Computes the DICE coefficient, which measures the similarity between two sets.
 
 import Foundation
 

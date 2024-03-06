@@ -26,7 +26,6 @@ class EXButton: NSButton, NSPopoverDelegate  {
         super.awakeFromNib()
         configure()
         
-        print("POP OVER")
         popover = NSPopover()
         popover.behavior = .transient
         popover.delegate = self

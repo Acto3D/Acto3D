@@ -187,7 +187,6 @@ class ToneCurveView: NSView {
         roundrRectangle.addClip()
         
         if let histogramData = histogram {
-            // パーセンタイルでスケーリング
             let sortedHistogramData = histogramData.sorted()
             let lowerIndex = Int(Double(sortedHistogramData.count) * 0.02)
             let upperIndex = Int(Double(sortedHistogramData.count) * 0.98)
@@ -195,16 +194,13 @@ class ToneCurveView: NSView {
             let upperBound = Double(sortedHistogramData[upperIndex])
             let clippedHistogramData = histogramData.map { min(max(Double($0), lowerBound), upperBound) }
 
-            // ヒストグラムのバーの幅を設定
             let barWidth = Double(graphSize.width) / Double(histogramData.count)
-            // ヒストグラムデータの平滑化
             let smoothedHistogramData = gaussianKernelSmoothing(data: clippedHistogramData, kernelBandwidth: 3.0)
             
-            // グラフのスケールを設定
             let maxValue = smoothedHistogramData.max() ?? 0
             if (maxValue != 0){
                 let scaleFactor = Double(graphSize.height) / maxValue * 0.9
-                // ヒストグラムの描画
+
                 let histogramPath = NSBezierPath()
                 histogramPath.lineWidth = 1.0
                 NSColor.darkGray.setStroke()
@@ -254,7 +250,6 @@ class ToneCurveView: NSView {
 
         pathSp.stroke()
         pathSp.fill()
-        
         
         
         // draw knobs
@@ -532,20 +527,17 @@ class ToneCurveView: NSView {
     @objc func pasteControlPoints(_ sender: NSMenuItem) {
         let pasteboard = NSPasteboard.general
 
-        // Check if the clipboard contains string data
         guard let stringData = pasteboard.string(forType: .string) else {
             return
         }
         
-        // Each line represents a pair of control points
         let lines = stringData.split(separator: "\n")
-        
-        // Check if there is at least one line (the header)
         guard !lines.isEmpty else {
             return
         }
         
-        // Check if the header is "X\tY"
+        // Teble type: value must be X\tY (tab separation)
+        //
         if lines[0] != "X\tY" {
             return
         }
@@ -568,7 +560,6 @@ class ToneCurveView: NSView {
             controlPoints.append([v1, v2])
         }
         
-        // If all lines are successfully converted, the format is valid
         self.setControlPoint(array: controlPoints)
 
 

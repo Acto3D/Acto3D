@@ -31,9 +31,6 @@ class Segment3DController: NSViewController {
     
     var kmeansController:KMeansController!
     
-//    var isCalculateVolume = false
-    
-    
     
     @IBOutlet weak var voxelSizeField: NSTextField!
     @IBOutlet weak var voxelUnitField: NSTextField!

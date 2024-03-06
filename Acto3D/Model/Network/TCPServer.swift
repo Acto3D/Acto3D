@@ -11,6 +11,8 @@ import Cocoa
 
 protocol TCPServerDelegate: AnyObject {
     func startDataTransfer(sender: TCPServer, connectionID: Int)
+    func portInUse(sender: TCPServer, port: UInt16)
+    func listenerInReady(sender: TCPServer, port: UInt16)
 }
 
 class TCPServer {
@@ -65,8 +67,7 @@ class TCPServer {
             
             switch state {
             case .ready:
-                Logger.logPrintAndWrite(message: "Acto3D is accepting data input (Port: \(AppConfig.TCP_PORT))")
-                print("TCP Server is ready at port \(self.port)")
+                self.delegate?.listenerInReady(sender: self, port: self.port.rawValue)
                 
             case .setup:
                 break
@@ -74,6 +75,10 @@ class TCPServer {
             case .failed(let error):
                 print("Server failed with error: \(error)")
                 self.stop(byError: true)
+                
+                if error == NWError.posix(.EADDRINUSE){
+                    self.delegate?.portInUse(sender: self, port: self.port.rawValue)
+                }
                 
             default:
                 break

@@ -170,6 +170,9 @@ class ViewController: NSViewController{
     /// TCP management
     var tcpServer:TCPServer?
     
+    /// Timer for detect wheel stop
+    var scrollEndTimer: Timer?
+    
     //MARK: - Initialize
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -256,21 +259,21 @@ class ViewController: NSViewController{
         
         
         intensityRatio_slider_1.onRightClick = {[weak self] event in
-            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_1)
+            self?.intensitySliderContextMenu(event, slider: self!.intensityRatio_slider_1)
         }
         intensityRatio_slider_2.onRightClick = {[weak self] event in
-            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_2)
+            self?.intensitySliderContextMenu(event, slider: self!.intensityRatio_slider_2)
         }
         intensityRatio_slider_3.onRightClick = {[weak self] event in
-            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_3)
+            self?.intensitySliderContextMenu(event, slider: self!.intensityRatio_slider_3)
         }
         intensityRatio_slider_4.onRightClick = {[weak self] event in
-            self?.commonOnRightClick(event, slider: self!.intensityRatio_slider_4)
+            self?.intensitySliderContextMenu(event, slider: self!.intensityRatio_slider_4)
         }
         
         if AppConfig.ACCEPT_TCP_CONNECTION == true{
             DispatchQueue.global(qos: .default).async {[self] in
-                if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
+                if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){ // 6258 for testing
                     self.tcpServer = tcpServer
                     self.tcpServer?.delegate = self
                     self.tcpServer?.renderer = renderer
@@ -283,23 +286,20 @@ class ViewController: NSViewController{
         }
     }
     
-    // 共通の
-    
-    // 共通の onRightClick アクション
-    func commonOnRightClick(_ event: NSEvent, slider: NSSlider) {
+    func intensitySliderContextMenu(_ event: NSEvent, slider: NSSlider) {
         let menu = NSMenu()
         
-        let defaultItem = NSMenuItem(title: "Set to Default", action: #selector(menuActionSlider(_:)), keyEquivalent: "")
-        defaultItem.target = self
-        defaultItem.tag = 1
-        let zeroItem = NSMenuItem(title: "Set to 0", action: #selector(menuActionSlider(_:)), keyEquivalent: "")
-        zeroItem.target = self
-        zeroItem.tag = 0
-        // スライダーのidentifierをrepresentedObjectに設定
-        defaultItem.representedObject = slider.identifier?.rawValue
-        zeroItem.representedObject = slider.identifier?.rawValue
-        menu.addItem(defaultItem)
-        menu.addItem(zeroItem)
+        let defaultMenuitem = NSMenuItem(title: "Set to Default", action: #selector(menuActionSlider(_:)), keyEquivalent: "")
+        defaultMenuitem.target = self
+        defaultMenuitem.tag = 1
+        let zeroMenuitem = NSMenuItem(title: "Set to 0", action: #selector(menuActionSlider(_:)), keyEquivalent: "")
+        zeroMenuitem.target = self
+        zeroMenuitem.tag = 0
+        
+        defaultMenuitem.representedObject = slider.identifier?.rawValue
+        zeroMenuitem.representedObject = slider.identifier?.rawValue
+        menu.addItem(defaultMenuitem)
+        menu.addItem(zeroMenuitem)
         
         
         NSMenu.popUpContextMenu(menu, with: event, for: slider)
@@ -308,22 +308,20 @@ class ViewController: NSViewController{
     @objc func menuActionSlider(_ sender: NSMenuItem) {
         if let sliderIdentifier = sender.representedObject as? String {
             print("Action for \(sliderIdentifier), ", sender.tag)
-            // どのスライダーかに応じた処理をここで行う
             switch sliderIdentifier {
             case "intensity_ch0":
-                print("Set to Default for Slider 1")
                 intensityRatio_slider_1.floatValue = sender.tag.toFloat()
                 intensityRatioSliderChanged(intensityRatio_slider_1)
+                
             case "intensity_ch1":
-                print("Set to Default for Slider 1")
                 intensityRatio_slider_2.floatValue = sender.tag.toFloat()
                 intensityRatioSliderChanged(intensityRatio_slider_2)
+                
             case "intensity_ch2":
-                print("Set to Default for Slider 1")
                 intensityRatio_slider_3.floatValue = sender.tag.toFloat()
                 intensityRatioSliderChanged(intensityRatio_slider_3)
+                
             case "intensity_ch3":
-                print("Set to Default for Slider 1")
                 intensityRatio_slider_4.floatValue = sender.tag.toFloat()
                 intensityRatioSliderChanged(intensityRatio_slider_4)
                 
@@ -1471,9 +1469,7 @@ extension ViewController: ImageOptionViewProtocol, Segment3DProtocol{
                 segmentView.voxelSize = renderer.imageParams.scaleX
                 segmentView.voxelUnit = renderer.imageParams.unit
                 segmentView.originalResolutionZ = renderer.imageParams.scaleZ
-
-                
-                
+ 
             }
             
         }else{
@@ -1535,5 +1531,14 @@ extension ViewController: TCPServerDelegate{
     func startDataTransfer(sender: TCPServer, connectionID: Int) {
         print("TCP responsed from Connection \(connectionID)")
         sender.sendVersionInfoToStartTransferSession(connectionID: connectionID)
+    }
+    
+    func portInUse(sender: TCPServer, port: UInt16) {
+        Logger.logPrintAndWrite(message: "Port(\(port)) already in use. Failed in creating TCP listener.")
+        self.tcpServer = nil
+    }
+    
+    func listenerInReady(sender: TCPServer, port: UInt16) {
+        Logger.logPrintAndWrite(message: "Acto3D is accepting data input (Port: \(port))")
     }
 }

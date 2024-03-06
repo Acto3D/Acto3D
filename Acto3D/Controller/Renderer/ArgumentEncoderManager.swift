@@ -16,8 +16,8 @@ class ArgumentEncoderManager {
     private var argumentEncoder: MTLArgumentEncoder!
     public var argumentBuffer: MTLBuffer!
 
-    // A dictionary to store buffers by argument index
     private var buffers = [Int: MTLBuffer]()
+    
     // A dictionary to track if a value is updated
     private var needsUpdate = [Int: Bool]()
     

@@ -15,7 +15,6 @@ extension ViewController{
         sender.processor?.interruptProcess()
     }
     
-    // スイッチのアクションを処理するメソッド
     @objc func thresholdSliderAction(_ sender: NSSlider) {
         
     }

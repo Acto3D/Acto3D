@@ -31,13 +31,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         debug_menu.delegate = self
         netConnection.delegate = self
         
-        // Obtein command line arguments
-        let arguments = CommandLine.arguments
-        for argument in arguments {
-        }
-
-        if arguments.contains("--input") {
-        }
+//        let arguments = CommandLine.arguments
+//        for argument in arguments {
+//        }
+//
+//        if arguments.contains("--input") {
+//        }
         
 
     }
