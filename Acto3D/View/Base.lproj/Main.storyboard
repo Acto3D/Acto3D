@@ -4340,13 +4340,6 @@ Gw
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CJx-4M-De6">
-                                <rect key="frame" x="1076" y="13" width="149" height="32"/>
-                                <buttonCell key="cell" type="push" title="Save as ImageJ tiff" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Agj-fD-F8n">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mG9-k5-Luc">
                                 <rect key="frame" x="702" y="20" width="92" height="16"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Load channels" id="K5n-PT-F9O">
@@ -4451,8 +4444,6 @@ will be loaded. If you have sufficient memory,
                             <constraint firstItem="lQ8-jB-Bm5" firstAttribute="leading" secondItem="RTg-Mt-V7D" secondAttribute="trailing" constant="20" id="ady-6x-r6G"/>
                             <constraint firstItem="KOq-dg-WKG" firstAttribute="bottom" secondItem="ezk-As-2y1" secondAttribute="bottom" id="ba9-XY-RUw"/>
                             <constraint firstItem="zsc-sm-MF1" firstAttribute="leading" secondItem="PDw-pQ-H1M" secondAttribute="trailing" constant="12" symbolic="YES" id="d0k-gs-p0m"/>
-                            <constraint firstAttribute="bottom" secondItem="CJx-4M-De6" secondAttribute="bottom" constant="20" symbolic="YES" id="eT8-IP-Xmw"/>
-                            <constraint firstItem="PDw-pQ-H1M" firstAttribute="leading" secondItem="CJx-4M-De6" secondAttribute="trailing" constant="25" id="epf-MM-9Cv"/>
                             <constraint firstItem="D1j-9W-dIh" firstAttribute="leading" secondItem="6cy-Wl-Kfj" secondAttribute="trailing" constant="8" symbolic="YES" id="gSd-fA-R6S"/>
                             <constraint firstAttribute="bottom" secondItem="DFC-1J-xLo" secondAttribute="bottom" constant="20" symbolic="YES" id="gxr-3B-dGz"/>
                             <constraint firstItem="KOq-dg-WKG" firstAttribute="bottom" secondItem="yh4-SG-iKh" secondAttribute="bottom" id="haq-PO-awC"/>

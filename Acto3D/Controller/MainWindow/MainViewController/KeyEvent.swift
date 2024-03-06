@@ -9,13 +9,15 @@ import Foundation
 import Cocoa
 import simd
 
+// keyboard management in the main view
+
 extension ViewController{
     
     private struct keyCodeDic {
         static var keyboard = ["":false]
     }
     
-    
+    /// A dictionary for key hold / release detection
     var keyboard: [String : Bool] {
         get {
             guard let key = objc_getAssociatedObject(self, &keyCodeDic.keyboard) as? [String : Bool] else {
@@ -68,7 +70,6 @@ extension ViewController{
                 
                 // set temporaly view size
                 let viewSizeHQ:UInt16 = AppConfig.HQ_SIZE
-                
                 
                 var tmpImg_wo_scalebar:NSImage?
                 var tmpImg_only_scalebar:NSImage?

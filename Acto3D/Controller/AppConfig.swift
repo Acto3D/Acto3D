@@ -61,7 +61,7 @@ class AppConfig {
     @CachedUserDefault(key: "ACCEPT_TCP_CONNECTION", defaultValue: false) static var ACCEPT_TCP_CONNECTION: Bool
     
     /// This constant represents TCP port.
-    @CachedUserDefault(key: "TCP_PORT", defaultValue: 54847) static var TCP_PORT: UInt16
+    @CachedUserDefault(key: "TCP_PORT", defaultValue: 41233) static var TCP_PORT: UInt16
 
     private init() {
     }

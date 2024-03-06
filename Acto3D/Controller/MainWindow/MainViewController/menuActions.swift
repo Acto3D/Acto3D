@@ -202,6 +202,59 @@ extension ViewController{
         case "accept_tcp":
             AppConfig.ACCEPT_TCP_CONNECTION = !AppConfig.ACCEPT_TCP_CONNECTION
             
+        case "change_port":
+            //MARK: change port
+            // Show dialog to change TCP port setting.
+            let alert = NSAlert()
+            alert.messageText = "Enter a new port number:"
+            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: "Cancel")
+            alert.addButton(withTitle: "Reset to Default")
+            
+            let textField = ValidatingTextField(frame: NSRect(x: 0, y: 0, width: 90, height: 24))
+            let defaultValue = AppConfig.TCP_PORT
+            textField.integerValue = defaultValue.toInt()
+            textField.inputValueType = .UInt16
+            textField.alignment = .center
+            
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .none
+            formatter.usesGroupingSeparator = false
+            textField.formatter = formatter
+
+            let accessory = FlippedView(frame: NSRect(x: 0, y: 0, width: textField.frame.maxX, height: 50))
+            accessory.addSubview(textField)
+            
+            accessory.adjustHeightOfView()
+            
+            alert.accessoryView = accessory
+            
+            let modalResult = alert.runModal()
+            let firstButtonNo = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
+            
+            
+            switch modalResult.rawValue {
+            case firstButtonNo:
+                if let _ = UInt16(textField.stringValue){
+                    AppConfig.TCP_PORT = UInt16(textField.integerValue)
+                }else{
+                    Dialog.showDialog(message: "The port number is invalid.\nPlease enter a value between 0 and 65535.")
+                }
+                
+            case firstButtonNo + 1:
+                break
+                
+            case firstButtonNo + 2:
+                AppConfig.TCP_PORT = 41233
+                
+            default:
+                break
+                
+            }
+            
+            
+            
+            
         case "windowsize_adjust":
             if let window = self.view.window{
                 let currentFrame = window.frame

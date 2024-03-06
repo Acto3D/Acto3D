@@ -499,7 +499,3 @@ extension ViewController{
         }
     }
 }
-
-class FlippedAccesoryView: NSView{
-    
-}

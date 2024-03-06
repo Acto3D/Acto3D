@@ -7,9 +7,9 @@
 
 import Cocoa
 
-class FocusCircle: NSView {
+// Show mouse cursor indicator in main view
 
-    
+class FocusCircle: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
     }
@@ -40,13 +40,13 @@ class FocusCircle: NSView {
         return false
     }
     
-    
     override var acceptsFirstResponder: Bool{
         get {
             return false
             
         }
     }
+    
     override func becomeFirstResponder() -> Bool {
         return false
     }

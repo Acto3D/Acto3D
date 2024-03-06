@@ -389,7 +389,7 @@ kernel void copySliceImageToTexture(texture3d<float, access::sample>        texI
     float4x4 transferMat = float4x4(1, 0, 0, 0,
                                     0, 1, 0, 0,
                                     0, 0, 1.0, 0,
-                                    modelParameter.translationX, modelParameter.translationY, 0, 1.0);
+                                    0, 0, 0, 1.0);
     
     float4 directionVector = float4(0,0,1,0);
     float4 directionVector_rotate = float4(quatMul(quaternions, directionVector.xyz), 0);

@@ -8,23 +8,15 @@
 import Cocoa
 import Metal
 import MetalKit
-
 import IOKit
 
-
-
-
 class ViewController: NSViewController{
-    
-
-    
     @IBOutlet weak var focusCircle: FocusCircle!
     
     var currentCoordinate:float4 = float4(0, 0, 0, 0)
     
     @IBOutlet weak var mprmodeIndicator: NSTextField!
     
-    // MENUs
     @IBOutlet var openMenu: NSMenu!
     
     @IBOutlet weak var pathField: NSTextField!
@@ -1482,18 +1474,16 @@ extension ViewController: ImageOptionViewProtocol, Segment3DProtocol{
 
 extension ViewController: ValidatingTextFieldDelegate {
     func textFieldDidEndEditing(sender: ValidatingTextField, oldValue: Any, newValue: Any) {
-        print(sender.inputValueType.rawValue)
-        switch sender.inputValueType{
-        case .String:
-            break
-        case .Int:
-            break
-        case .Float:
-//            updateSliceAndScale(currentSliceToMax: false)
-            break
-        default:
-            break
-        }
+//        switch sender.inputValueType{
+//        case .String:
+//            break
+//        case .Int:
+//            break
+//        case .Float:
+//            break
+//        default:
+//            break
+//        }
         
         switch sender.identifier?.rawValue{
         case "scale":

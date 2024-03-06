@@ -1409,7 +1409,6 @@ class Segment3DController: NSViewController {
                 guard let providerRef = CGDataProvider(data: Data (bytes: &imageBytes,
                                                                    count: MemoryLayout<UInt8>.stride * bytesPerImage) as CFData)
                 else{
-                    print("ref")
                     return
                     
                 }

@@ -12,6 +12,7 @@ import Cocoa
     case Float  // 1
     case Int    // 2
     case UInt   // 3
+    case UInt16   // 4
 }
 
 
@@ -22,7 +23,7 @@ protocol ValidatingTextFieldDelegate: AnyObject {
 class ValidatingTextField: NSTextField {
     weak var validationDelegate:ValidatingTextFieldDelegate?
     
-    // Input Type - Specify the type of input: "string", "int", or "float"
+    // Input Type - Specify the type (see ValueType)
     @IBInspectable var valueType: Int = 0 {
         didSet {
             inputValueType = ValueType(rawValue: valueType) ?? .String
@@ -61,6 +62,9 @@ class ValidatingTextField: NSTextField {
         case .UInt:
             storedValue = UInt(self.integerValue)
             
+        case .UInt16:
+            storedValue = UInt16(self.integerValue)
+            
         default:
             break
         }
@@ -70,7 +74,6 @@ class ValidatingTextField: NSTextField {
     
     
     override func textShouldEndEditing(_ textObject: NSText) -> Bool {
-        print("textShouldEndEditing", textObject)
         switch self.inputValueType {
         case .String:
             self.newValue = self.stringValue
@@ -96,6 +99,13 @@ class ValidatingTextField: NSTextField {
                 self.integerValue = Int(storedValue as! UInt)
             }
             
+        case .UInt16:
+            if let newValue = UInt16(self.stringValue){
+                self.newValue = newValue
+            }else{
+                self.integerValue = Int(storedValue as! UInt16)
+            }
+            
         default:
             break
         }
@@ -106,7 +116,7 @@ class ValidatingTextField: NSTextField {
     override func textDidEndEditing(_ notification: Notification) {
         guard let storedValue = self.storedValue,
               let newValue = self.newValue else {
-            print("error")
+            
             return}
         
         self.validationDelegate?.textFieldDidEndEditing(sender:self, oldValue: storedValue, newValue: newValue)

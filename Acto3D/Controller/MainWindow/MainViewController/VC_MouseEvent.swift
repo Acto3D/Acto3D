@@ -13,8 +13,6 @@ import simd
 
 extension ViewController: ModelViewProtocol{
     
-    
-    
     func modelViewMouseMoved(with event: NSEvent, point: NSPoint){
         if(renderer.mainTexture == nil){
             return
@@ -27,10 +25,9 @@ extension ViewController: ModelViewProtocol{
         let viewScaleH = outputView.frame.height / CGFloat (viewSize.toFloat())
         let viewScale = Float(min(viewScaleW, viewScaleH))
         
-        focusCircle.frame.origin = CGPoint(x: point.x - 16, y: point.y - 16)
-        
-        self.focusCircle.isHidden = false
-        self.focusCircle.alphaValue = 1
+//        focusCircle.frame.origin = CGPoint(x: point.x - 16, y: point.y - 16)
+//        self.focusCircle.isHidden = false
+//        self.focusCircle.alphaValue = 1
         
         let viewCenterPosition = float2(x: Float(outputViewPoint.x - outputView.frame.width / 2.0) / viewScale + viewSize.toFloat() / 2.0,
                                         y: (-1.0) * (Float(outputViewPoint.y - outputView.frame.height / 2.0) / viewScale) + viewSize.toFloat() / 2.0)
