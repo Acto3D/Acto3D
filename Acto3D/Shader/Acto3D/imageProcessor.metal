@@ -325,3 +325,17 @@ kernel void computeHistogramSliceBySlice(texture3d<float, access::read> inputTex
         
     }
 }
+
+
+
+kernel void swapChannels(texture3d<float, access::read_write> inputTexture [[texture(0)]],
+                         constant uint8_t &channel1 [[buffer(0)]],
+                         constant uint8_t &channel2 [[buffer(1)]],
+                         uint3 gid [[thread_position_in_grid]])
+{
+    float4 originalValue = inputTexture.read(gid);
+    float tmpValue = originalValue[channel1];
+    originalValue[channel1] = originalValue[channel2];
+    originalValue[channel2] = tmpValue;
+    inputTexture.write(originalValue, gid);
+}

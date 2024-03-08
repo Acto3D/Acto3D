@@ -72,6 +72,16 @@ extension ViewController{
         case "otsu_binarization_slicebyslice":
             applyBinarization_Otsu_SliceBySlice()
             
+        case "swap_channels":
+            if let loadedChannels = renderer.imageParams.textureLoadChannel,
+               loadedChannels == 1{
+                Dialog.showDialog(message: "An image with at least two channels loaded is required.", level: .error)
+                
+            }else{
+                swapChannels()
+                renderer.calculateTextureHistogram()
+            }
+            
         case "export_to_tiff":
             let useChannel = sender.tag
             

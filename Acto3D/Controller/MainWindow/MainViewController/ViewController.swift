@@ -1166,6 +1166,7 @@ class ViewController: NSViewController{
         return rootMenuItems
     }
     
+    //MARK: Close session
     /// Close the current session
     public func closeCurrentSession() -> Bool{
         let alert = NSAlert()
@@ -1184,6 +1185,10 @@ class ViewController: NSViewController{
             fileListTable.reloadData()
             pathField.stringValue = ""
             outputView.image = nil
+            toneCh1.histogram = nil
+            toneCh2.histogram = nil
+            toneCh3.histogram = nil
+            toneCh4.histogram = nil
             Logger.logPrintAndWrite(message: "Close the current session.")
             
             

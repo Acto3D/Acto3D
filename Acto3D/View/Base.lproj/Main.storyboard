@@ -491,6 +491,13 @@ isotropic voxel size</string>
                                                 </items>
                                             </menu>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="WEh-9p-OTD"/>
+                                        <menuItem title="Swap Channels" identifier="swap_channels" id="9EV-UJ-2FB">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="Wpa-Fl-vG0"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>

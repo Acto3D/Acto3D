@@ -1043,8 +1043,6 @@ class VoluemeRenderer{
             commandBuffer.commit()
             
         }
-        
-        
     }
     
     

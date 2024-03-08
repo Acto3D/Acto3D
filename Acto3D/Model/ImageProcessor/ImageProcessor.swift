@@ -687,6 +687,59 @@ class ImageProcessor{
         return threshold
     }
     
+    public func swapChannels(inTexture:MTLTexture, channel1: UInt8, channel2: UInt8){
+        guard let computeFunction = lib.makeFunction(name: "swapChannels") else {
+            print("error make function")
+            return
+        }
+        
+        var pipeline:MTLComputePipelineState!
+        do{
+            let pipelineDescriptor = MTLComputePipelineDescriptor()
+            pipelineDescriptor.label = MTL_label.applyFilter_gaussian3D
+            pipelineDescriptor.computeFunction = computeFunction
+            pipeline = try device.makeComputePipelineState(descriptor: pipelineDescriptor, options: [], reflection: nil)
+            
+        }catch{
+            Dialog.showDialog(message: "Error in creating metal pipeline for gaussian3D")
+            return
+        }
+        
+        let cmdBuf = cmdQueue.makeCommandBuffer(label: "Swap Channels")!
+        let computeEncoder = cmdBuf.makeComputeCommandEncoder(label: "Swap Channels Encoder")!
+        computeEncoder.setComputePipelineState(pipeline)
+        
+        computeEncoder.setTexture(inTexture, index: 0)
+        
+        var channel1 = channel1
+        var channel2 = channel2
+        
+        computeEncoder.setBytes(&channel1, length: MemoryLayout<UInt8>.stride, index: 0)
+        computeEncoder.setBytes(&channel2, length: MemoryLayout<UInt8>.stride, index: 1)
+  
+        
+        // Compute optimization
+        let xCount = inTexture.width
+        let yCount = inTexture.height
+        let zCount = inTexture.depth
+        let maxTotalThreadsPerThreadgroup = pipeline.maxTotalThreadsPerThreadgroup
+        let threadExecutionWidth          = pipeline.threadExecutionWidth
+        let width  = threadExecutionWidth
+        let height = 8
+        let depth  = maxTotalThreadsPerThreadgroup / width / height
+        let threadsPerThreadgroup = MTLSize(width: width, height: height, depth: depth)
+        let threadgroupsPerGrid = MTLSize(width: (xCount + width - 1) / width,
+                                          height: (yCount + height - 1) / height,
+                                          depth: (zCount + depth - 1) / depth)
+        
+        // Metal Dispatch
+        computeEncoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threadsPerThreadgroup)
+        computeEncoder.endEncoding()
+        cmdBuf.commit()
+        
+        cmdBuf.waitUntilCompleted()
+    }
+    
     
     /*
     public func applyFilter_Median3D(inTexture:MTLTexture, k_size: UInt8, channel: Int, completion: @escaping (MTLTexture?) -> Void) {
