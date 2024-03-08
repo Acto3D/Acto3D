@@ -7,6 +7,9 @@
 
 import Cocoa
 
+/**
+String:0, Float:1, Int:2, UInt:3, UInt16:4
+*/
 @objc enum ValueType: Int {
     case String // 0
     case Float  // 1
@@ -20,10 +23,12 @@ protocol ValidatingTextFieldDelegate: AnyObject {
     func textFieldDidEndEditing(sender: ValidatingTextField, oldValue:Any, newValue:Any)
 }
 
+/**
+ This text box reverts to its original value if input other than a predefined type is entered.
+ */
 class ValidatingTextField: NSTextField {
     weak var validationDelegate:ValidatingTextFieldDelegate?
     
-    // Input Type - Specify the type (see ValueType)
     @IBInspectable var valueType: Int = 0 {
         didSet {
             inputValueType = ValueType(rawValue: valueType) ?? .String
@@ -36,7 +41,6 @@ class ValidatingTextField: NSTextField {
     
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-
         // Drawing code here.
     }
     
@@ -45,6 +49,15 @@ class ValidatingTextField: NSTextField {
         self.wantsLayer = true
         self.layer?.borderWidth = 1.5
         self.layer?.borderColor =  NSColor.clear.cgColor
+        
+        if(self.inputValueType == .Float){
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.usesGroupingSeparator = false
+            self.formatter = formatter
+        }
+        
+        
     }
     
     override func textShouldBeginEditing(_ textObject: NSText) -> Bool {
@@ -74,13 +87,22 @@ class ValidatingTextField: NSTextField {
     
     
     override func textShouldEndEditing(_ textObject: NSText) -> Bool {
+        textShouldEndEditingEvent()
+        
+        return true
+    }
+    
+    public func textShouldEndEditingEvent(){
         switch self.inputValueType {
         case .String:
             self.newValue = self.stringValue
+            self.storedValue = self.newValue
             
         case .Int:
             if let newValue = Int(self.stringValue){
                 self.newValue = newValue
+                self.storedValue = self.newValue
+                
             }else{
                 self.integerValue = storedValue as! Int
             }
@@ -88,6 +110,8 @@ class ValidatingTextField: NSTextField {
         case .Float:
             if let newValue = Float(self.stringValue){
                 self.newValue = newValue
+                self.storedValue = self.newValue
+                
             }else{
                 self.floatValue = storedValue as! Float
             }
@@ -95,6 +119,8 @@ class ValidatingTextField: NSTextField {
         case .UInt:
             if let newValue = UInt(self.stringValue){
                 self.newValue = newValue
+                self.storedValue = self.newValue
+                
             }else{
                 self.integerValue = Int(storedValue as! UInt)
             }
@@ -102,6 +128,8 @@ class ValidatingTextField: NSTextField {
         case .UInt16:
             if let newValue = UInt16(self.stringValue){
                 self.newValue = newValue
+                self.storedValue = self.newValue
+                
             }else{
                 self.integerValue = Int(storedValue as! UInt16)
             }
@@ -109,19 +137,21 @@ class ValidatingTextField: NSTextField {
         default:
             break
         }
-        
-        return true
     }
     
     override func textDidEndEditing(_ notification: Notification) {
+        textDidEndEditingEvent()
+        
+        super.textDidEndEditing(notification)
+    }
+    
+    public func textDidEndEditingEvent(){
         guard let storedValue = self.storedValue,
               let newValue = self.newValue else {
             
             return}
         
         self.validationDelegate?.textFieldDidEndEditing(sender:self, oldValue: storedValue, newValue: newValue)
-        
-        super.textDidEndEditing(notification)
     }
     
     override func mouseEntered(with event: NSEvent) {
@@ -161,4 +191,5 @@ class ValidatingTextField: NSTextField {
         let area = NSTrackingArea(rect: bounds, options: options, owner: self, userInfo: nil)
         addTrackingArea(area)
     }
+    
 }

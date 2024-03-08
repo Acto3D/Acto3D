@@ -155,8 +155,8 @@ class ToneCurveView: NSView {
 //    }
     
     
-    // calculate Kernel Density Estimation, KDE
-    // apply smoothing
+    /// calculate Kernel Density Estimation, KDE
+    /// apply smoothing for histogram drawing
     func gaussianKernelSmoothing(data: [Double], kernelBandwidth: Double) -> [Double] {
         var smoothedData = [Double](repeating: 0, count: data.count)
         let constant = 1 / sqrt(2 * .pi * kernelBandwidth * kernelBandwidth)
@@ -170,6 +170,7 @@ class ToneCurveView: NSView {
         
         return smoothedData
     }
+    
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         

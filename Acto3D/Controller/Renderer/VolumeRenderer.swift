@@ -1030,7 +1030,6 @@ class VoluemeRenderer{
                     histogramData.deallocate()
                 }
                 
-                // 出力
                 for (channel, histogram) in histogramPerChannel.enumerated() {
                     print("Histogram for channel \(channel): \(histogram)")
                 }

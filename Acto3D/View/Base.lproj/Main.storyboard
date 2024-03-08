@@ -4076,16 +4076,16 @@ DQ
                                         </textFieldCell>
                                     </textField>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GAO-cb-4Nj">
-                                        <rect key="frame" x="148" y="26" width="37" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="0sk-gr-9GM">
+                                        <rect key="frame" x="161" y="26" width="11" height="16"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" title="-" id="0sk-gr-9GM">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
                                     <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="g1b-kO-mRa">
-                                        <rect key="frame" x="83" y="-1" width="164" height="18"/>
-                                        <buttonCell key="cell" type="check" title="ignore saturated pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="UgG-JA-VpQ">
+                                        <rect key="frame" x="82" y="-1" width="166" height="18"/>
+                                        <buttonCell key="cell" type="check" title="Ignore Saturated Pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="UgG-JA-VpQ">
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
@@ -4093,9 +4093,41 @@ DQ
                                             <action selector="changeIgnoreSaturatePixelSwitchValue:" target="wut-uz-5Lf" id="m1u-cg-3ag"/>
                                         </connections>
                                     </button>
+                                    <textField identifier="range_min" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cJs-Sn-V3u" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="66" y="26" width="84" height="16"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="80" id="C7j-E6-wTt"/>
+                                        </constraints>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="U7q-EU-w8u">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
+                                    <textField identifier="range_max" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OTl-vF-LXk" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="183" y="26" width="84" height="16"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="CfD-lz-3Xi">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="OTl-vF-LXk" firstAttribute="width" secondItem="cJs-Sn-V3u" secondAttribute="width" id="2iI-Je-UKj"/>
                                     <constraint firstItem="6JQ-nh-yQa" firstAttribute="top" secondItem="KOq-dg-WKG" secondAttribute="top" id="8LD-o8-w0y"/>
+                                    <constraint firstItem="OTl-vF-LXk" firstAttribute="centerY" secondItem="cJs-Sn-V3u" secondAttribute="centerY" id="8s4-SE-uhb"/>
+                                    <constraint firstItem="OTl-vF-LXk" firstAttribute="leading" secondItem="GAO-cb-4Nj" secondAttribute="trailing" constant="15" id="CWe-gP-jXu"/>
                                     <constraint firstItem="gln-v7-Cgv" firstAttribute="top" secondItem="MnQ-4m-dTm" secondAttribute="bottom" constant="20" id="Feb-5B-iab"/>
                                     <constraint firstAttribute="bottom" secondItem="g1b-kO-mRa" secondAttribute="bottom" id="K3f-wk-c22"/>
                                     <constraint firstAttribute="trailing" secondItem="Ozo-Ne-3jo" secondAttribute="trailing" constant="5" id="OgZ-bQ-jA4"/>
@@ -4105,8 +4137,10 @@ DQ
                                     <constraint firstItem="6JQ-nh-yQa" firstAttribute="centerX" secondItem="KOq-dg-WKG" secondAttribute="centerX" id="aiG-Wv-CMP"/>
                                     <constraint firstItem="Ozo-Ne-3jo" firstAttribute="top" secondItem="6JQ-nh-yQa" secondAttribute="bottom" constant="8" symbolic="YES" id="cKM-P8-YMr"/>
                                     <constraint firstItem="MnQ-4m-dTm" firstAttribute="top" secondItem="Ozo-Ne-3jo" secondAttribute="bottom" constant="8" symbolic="YES" id="lWU-Nu-LSK"/>
+                                    <constraint firstItem="GAO-cb-4Nj" firstAttribute="leading" secondItem="cJs-Sn-V3u" secondAttribute="trailing" constant="15" id="ma0-Aw-ZnY"/>
                                     <constraint firstItem="Ozo-Ne-3jo" firstAttribute="leading" secondItem="KOq-dg-WKG" secondAttribute="leading" constant="5" id="mcF-yf-OYB"/>
                                     <constraint firstAttribute="trailing" secondItem="gln-v7-Cgv" secondAttribute="trailing" constant="20" symbolic="YES" id="qiK-L9-BjU"/>
+                                    <constraint firstItem="GAO-cb-4Nj" firstAttribute="centerY" secondItem="cJs-Sn-V3u" secondAttribute="centerY" id="sst-4w-ohX"/>
                                     <constraint firstItem="MnQ-4m-dTm" firstAttribute="leading" secondItem="KOq-dg-WKG" secondAttribute="leading" constant="20" symbolic="YES" id="tky-Yt-njr"/>
                                     <constraint firstItem="g1b-kO-mRa" firstAttribute="top" secondItem="GAO-cb-4Nj" secondAttribute="bottom" constant="10" id="uLs-Vi-mjd"/>
                                     <constraint firstItem="g1b-kO-mRa" firstAttribute="centerX" secondItem="KOq-dg-WKG" secondAttribute="centerX" id="v7Q-VZ-6C0"/>
@@ -4139,8 +4173,8 @@ DQ
                                         </connections>
                                     </slider>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1CZ-xP-5Jv">
-                                        <rect key="frame" x="148" y="26" width="37" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="WIs-1E-D19">
+                                        <rect key="frame" x="161" y="26" width="11" height="16"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" title="-" id="WIs-1E-D19">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -4150,8 +4184,8 @@ DQ
                                         <rect key="frame" x="20" y="50" width="292" height="110"/>
                                     </customView>
                                     <button hidden="YES" verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="OCP-xq-8fo">
-                                        <rect key="frame" x="83" y="-1" width="164" height="18"/>
-                                        <buttonCell key="cell" type="check" title="ignore saturated pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="e4s-J8-sPy">
+                                        <rect key="frame" x="82" y="-1" width="166" height="18"/>
+                                        <buttonCell key="cell" type="check" title="Ignore Saturated Pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="e4s-J8-sPy">
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
@@ -4159,11 +4193,44 @@ DQ
                                             <action selector="changeIgnoreSaturatePixelSwitchValue:" target="wut-uz-5Lf" id="SCW-nN-dzF"/>
                                         </connections>
                                     </button>
+                                    <textField identifier="range_min" verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="hS0-gW-U7M" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="66" y="26" width="84" height="16"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="80" id="qfA-2P-ei5"/>
+                                        </constraints>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="37h-0G-Sap">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
+                                    <textField identifier="range_max" verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="2K7-hq-QSw" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="183" y="26" width="84" height="16"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="6K7-ir-AXn">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="2K7-hq-QSw" firstAttribute="width" secondItem="hS0-gW-U7M" secondAttribute="width" id="0ke-4P-tr0"/>
                                     <constraint firstItem="C2h-io-GSy" firstAttribute="top" secondItem="yh4-SG-iKh" secondAttribute="top" id="2lS-BT-6cL"/>
                                     <constraint firstItem="1CZ-xP-5Jv" firstAttribute="top" secondItem="M3b-pb-ILQ" secondAttribute="bottom" constant="8" symbolic="YES" id="5aR-Qf-yKD"/>
+                                    <constraint firstItem="2K7-hq-QSw" firstAttribute="leading" secondItem="1CZ-xP-5Jv" secondAttribute="trailing" constant="15" id="5cV-6w-IHx"/>
+                                    <constraint firstItem="1CZ-xP-5Jv" firstAttribute="leading" secondItem="hS0-gW-U7M" secondAttribute="trailing" constant="15" id="7DA-yc-pWR"/>
                                     <constraint firstItem="KF4-lx-o6A" firstAttribute="leading" secondItem="yh4-SG-iKh" secondAttribute="leading" constant="20" symbolic="YES" id="7zc-Eu-Yqa"/>
+                                    <constraint firstItem="1CZ-xP-5Jv" firstAttribute="centerY" secondItem="hS0-gW-U7M" secondAttribute="centerY" id="9Vk-Vt-ZNV"/>
                                     <constraint firstItem="M3b-pb-ILQ" firstAttribute="leading" secondItem="yh4-SG-iKh" secondAttribute="leading" constant="20" symbolic="YES" id="CyA-eu-sIb"/>
                                     <constraint firstAttribute="bottom" secondItem="OCP-xq-8fo" secondAttribute="bottom" id="HPz-gg-DAz"/>
                                     <constraint firstAttribute="trailing" secondItem="BPx-V1-VHC" secondAttribute="trailing" constant="5" id="K7R-ws-S0W"/>
@@ -4177,6 +4244,7 @@ DQ
                                     <constraint firstItem="OCP-xq-8fo" firstAttribute="centerX" secondItem="yh4-SG-iKh" secondAttribute="centerX" id="eGh-JS-TeG"/>
                                     <constraint firstItem="BPx-V1-VHC" firstAttribute="leading" secondItem="yh4-SG-iKh" secondAttribute="leading" constant="5" id="kfP-qk-Uqu"/>
                                     <constraint firstAttribute="trailing" secondItem="M3b-pb-ILQ" secondAttribute="trailing" constant="20" symbolic="YES" id="ney-ga-P8o"/>
+                                    <constraint firstItem="2K7-hq-QSw" firstAttribute="centerY" secondItem="hS0-gW-U7M" secondAttribute="centerY" id="uNY-s0-fs4"/>
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="bne-Sc-fLv">
@@ -4205,8 +4273,8 @@ DQ
                                         </connections>
                                     </slider>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Gi-kn-RZZ">
-                                        <rect key="frame" x="148" y="26" width="37" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="Xb8-ng-Kao">
+                                        <rect key="frame" x="161" y="26" width="11" height="16"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" title="-" id="Xb8-ng-Kao">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -4216,8 +4284,8 @@ DQ
                                         <rect key="frame" x="20" y="50" width="292" height="110"/>
                                     </customView>
                                     <button hidden="YES" verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="WFp-xr-0ih">
-                                        <rect key="frame" x="83" y="-1" width="164" height="18"/>
-                                        <buttonCell key="cell" type="check" title="ignore saturated pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="TNm-dG-KcU">
+                                        <rect key="frame" x="82" y="-1" width="166" height="18"/>
+                                        <buttonCell key="cell" type="check" title="Ignore Saturated Pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="TNm-dG-KcU">
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
@@ -4225,9 +4293,40 @@ DQ
                                             <action selector="changeIgnoreSaturatePixelSwitchValue:" target="wut-uz-5Lf" id="0dN-2P-Xgt"/>
                                         </connections>
                                     </button>
+                                    <textField identifier="range_min" verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="u9H-kh-sYJ" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="66" y="26" width="84" height="16"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="80" id="NwW-ot-Ksn"/>
+                                        </constraints>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="MMV-e6-lA8">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
+                                    <textField identifier="range_max" verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="ngC-wu-Z5o" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="183" y="26" width="84" height="16"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="ADp-ru-DZH">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="ngC-wu-Z5o" firstAttribute="leading" secondItem="0Gi-kn-RZZ" secondAttribute="trailing" constant="15" id="4tt-1h-CcW"/>
                                     <constraint firstItem="O1P-eV-GmA" firstAttribute="leading" secondItem="bne-Sc-fLv" secondAttribute="leading" constant="5" id="6D9-fa-dgc"/>
+                                    <constraint firstItem="ngC-wu-Z5o" firstAttribute="width" secondItem="u9H-kh-sYJ" secondAttribute="width" id="6oA-ex-EMW"/>
                                     <constraint firstAttribute="trailing" secondItem="0Bm-M4-hpV" secondAttribute="trailing" constant="20" symbolic="YES" id="8ha-gM-8Ap"/>
                                     <constraint firstItem="WFp-xr-0ih" firstAttribute="top" secondItem="0Gi-kn-RZZ" secondAttribute="bottom" constant="10" id="AK0-9r-aWE"/>
                                     <constraint firstAttribute="bottom" secondItem="WFp-xr-0ih" secondAttribute="bottom" id="Aa1-Yf-qo7"/>
@@ -4235,10 +4334,13 @@ DQ
                                     <constraint firstItem="0Bm-M4-hpV" firstAttribute="top" secondItem="O1P-eV-GmA" secondAttribute="bottom" constant="8" symbolic="YES" id="IkD-d5-wH0"/>
                                     <constraint firstItem="0Bm-M4-hpV" firstAttribute="leading" secondItem="bne-Sc-fLv" secondAttribute="leading" constant="20" symbolic="YES" id="Ke1-WK-mt0"/>
                                     <constraint firstItem="0Gi-kn-RZZ" firstAttribute="centerX" secondItem="bne-Sc-fLv" secondAttribute="centerX" id="LeJ-dw-iEu"/>
+                                    <constraint firstItem="0Gi-kn-RZZ" firstAttribute="leading" secondItem="u9H-kh-sYJ" secondAttribute="trailing" constant="15" id="QOA-8x-r3C"/>
                                     <constraint firstItem="vzM-u5-0Z0" firstAttribute="top" secondItem="bne-Sc-fLv" secondAttribute="top" id="UK7-8L-6G4"/>
                                     <constraint firstItem="pMc-Jl-XrJ" firstAttribute="top" secondItem="0Bm-M4-hpV" secondAttribute="bottom" constant="20" id="WFZ-Pv-fqq"/>
+                                    <constraint firstItem="0Gi-kn-RZZ" firstAttribute="centerY" secondItem="ngC-wu-Z5o" secondAttribute="centerY" id="Yo2-6B-H4l"/>
                                     <constraint firstItem="pMc-Jl-XrJ" firstAttribute="leading" secondItem="bne-Sc-fLv" secondAttribute="leading" constant="20" symbolic="YES" id="cUo-yU-mNH"/>
                                     <constraint firstItem="O1P-eV-GmA" firstAttribute="top" secondItem="vzM-u5-0Z0" secondAttribute="bottom" constant="8" symbolic="YES" id="cuZ-E5-jAc"/>
+                                    <constraint firstItem="u9H-kh-sYJ" firstAttribute="centerY" secondItem="ngC-wu-Z5o" secondAttribute="centerY" id="dhM-3R-CgC"/>
                                     <constraint firstAttribute="trailing" secondItem="pMc-Jl-XrJ" secondAttribute="trailing" constant="20" symbolic="YES" id="gmb-wf-LoL"/>
                                     <constraint firstItem="0Gi-kn-RZZ" firstAttribute="top" secondItem="pMc-Jl-XrJ" secondAttribute="bottom" constant="8" symbolic="YES" id="mDo-Nq-RJ8"/>
                                     <constraint firstItem="vzM-u5-0Z0" firstAttribute="centerX" secondItem="bne-Sc-fLv" secondAttribute="centerX" id="pHL-u9-p8H"/>
@@ -4264,8 +4366,8 @@ DQ
                                         </textFieldCell>
                                     </textField>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YXV-Vj-bCb">
-                                        <rect key="frame" x="148" y="26" width="37" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="Tai-rq-5p0">
+                                        <rect key="frame" x="161" y="26" width="11" height="16"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" title="-" id="Tai-rq-5p0">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -4282,8 +4384,8 @@ DQ
                                         </connections>
                                     </slider>
                                     <button hidden="YES" verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="IdV-1r-Mkx">
-                                        <rect key="frame" x="83" y="-1" width="164" height="18"/>
-                                        <buttonCell key="cell" type="check" title="ignore saturated pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="CFd-RJ-s7j">
+                                        <rect key="frame" x="82" y="-1" width="166" height="18"/>
+                                        <buttonCell key="cell" type="check" title="Ignore Saturated Pixels" bezelStyle="regularSquare" imagePosition="left" inset="2" id="CFd-RJ-s7j">
                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
@@ -4291,24 +4393,59 @@ DQ
                                             <action selector="changeIgnoreSaturatePixelSwitchValue:" target="wut-uz-5Lf" id="VWH-yi-khu"/>
                                         </connections>
                                     </button>
+                                    <textField identifier="range_max" verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="aJQ-Pw-1RI" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="183" y="26" width="84" height="16"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="d5N-Ns-Ika">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
+                                    <textField identifier="range_min" verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="3bT-0Q-hZa" customClass="ValidatingTextField" customModule="Acto3D" customModuleProvider="target">
+                                        <rect key="frame" x="66" y="26" width="84" height="16"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="80" id="pKm-Sl-bNr"/>
+                                        </constraints>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" alignment="center" title="0" id="j9y-YA-fIp">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="valueType">
+                                                <integer key="value" value="1"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </textField>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="3bT-0Q-hZa" firstAttribute="centerY" secondItem="aJQ-Pw-1RI" secondAttribute="centerY" id="172-NI-luF"/>
                                     <constraint firstItem="KJn-Ph-6f2" firstAttribute="top" secondItem="ezk-As-2y1" secondAttribute="top" id="1IP-BZ-6vU"/>
                                     <constraint firstAttribute="trailing" secondItem="CHj-FC-0jT" secondAttribute="trailing" constant="20" symbolic="YES" id="2fY-S9-QDd"/>
                                     <constraint firstAttribute="trailing" secondItem="OK7-ys-Pxz" secondAttribute="trailing" constant="20" symbolic="YES" id="4zR-bj-msA"/>
                                     <constraint firstItem="KJn-Ph-6f2" firstAttribute="centerX" secondItem="ezk-As-2y1" secondAttribute="centerX" id="7gB-qa-Wlw"/>
+                                    <constraint firstItem="YXV-Vj-bCb" firstAttribute="centerY" secondItem="3bT-0Q-hZa" secondAttribute="centerY" id="DDg-ST-7LT"/>
                                     <constraint firstItem="IdV-1r-Mkx" firstAttribute="top" secondItem="YXV-Vj-bCb" secondAttribute="bottom" constant="10" id="DJ6-DR-toS"/>
+                                    <constraint firstItem="YXV-Vj-bCb" firstAttribute="leading" secondItem="3bT-0Q-hZa" secondAttribute="trailing" constant="15" id="Fvv-iI-2Bb"/>
                                     <constraint firstAttribute="bottom" secondItem="IdV-1r-Mkx" secondAttribute="bottom" id="GLe-Wt-xil"/>
                                     <constraint firstItem="B6h-Yf-4xS" firstAttribute="top" secondItem="KJn-Ph-6f2" secondAttribute="bottom" constant="8" symbolic="YES" id="P9W-7i-BEe"/>
                                     <constraint firstItem="CHj-FC-0jT" firstAttribute="top" secondItem="OK7-ys-Pxz" secondAttribute="bottom" constant="20" id="PDK-0R-vwg"/>
                                     <constraint firstItem="IdV-1r-Mkx" firstAttribute="centerX" secondItem="ezk-As-2y1" secondAttribute="centerX" id="Q1Y-PE-gh5"/>
+                                    <constraint firstItem="aJQ-Pw-1RI" firstAttribute="centerY" secondItem="3bT-0Q-hZa" secondAttribute="centerY" id="TCq-Wu-alI"/>
                                     <constraint firstItem="CHj-FC-0jT" firstAttribute="leading" secondItem="ezk-As-2y1" secondAttribute="leading" constant="20" symbolic="YES" id="Tom-5W-P6t"/>
                                     <constraint firstAttribute="trailing" secondItem="B6h-Yf-4xS" secondAttribute="trailing" constant="5" id="UD1-Z0-taG"/>
+                                    <constraint firstItem="aJQ-Pw-1RI" firstAttribute="leading" secondItem="YXV-Vj-bCb" secondAttribute="trailing" constant="15" id="UDW-hX-WqY"/>
                                     <constraint firstItem="OK7-ys-Pxz" firstAttribute="top" secondItem="B6h-Yf-4xS" secondAttribute="bottom" constant="8" symbolic="YES" id="dC5-Ic-gVA"/>
                                     <constraint firstItem="YXV-Vj-bCb" firstAttribute="top" secondItem="CHj-FC-0jT" secondAttribute="bottom" constant="8" symbolic="YES" id="eqj-Lm-768"/>
                                     <constraint firstItem="OK7-ys-Pxz" firstAttribute="leading" secondItem="ezk-As-2y1" secondAttribute="leading" constant="20" symbolic="YES" id="hud-gC-wIK"/>
                                     <constraint firstItem="B6h-Yf-4xS" firstAttribute="leading" secondItem="ezk-As-2y1" secondAttribute="leading" constant="5" id="obc-Io-3TY"/>
                                     <constraint firstItem="YXV-Vj-bCb" firstAttribute="centerX" secondItem="ezk-As-2y1" secondAttribute="centerX" id="v8k-nT-mta"/>
+                                    <constraint firstItem="aJQ-Pw-1RI" firstAttribute="width" secondItem="3bT-0Q-hZa" secondAttribute="width" id="vrs-ml-XNd"/>
                                 </constraints>
                             </customView>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PDw-pQ-H1M">
@@ -4479,6 +4616,14 @@ will be loaded. If you have sufficient memory,
                         <outlet property="label_range2" destination="1CZ-xP-5Jv" id="09C-1M-G5U"/>
                         <outlet property="label_range3" destination="0Gi-kn-RZZ" id="Usn-k8-HJ2"/>
                         <outlet property="label_range4" destination="YXV-Vj-bCb" id="JD1-hV-tLn"/>
+                        <outlet property="range_max_1" destination="OTl-vF-LXk" id="tce-a2-2EM"/>
+                        <outlet property="range_max_2" destination="2K7-hq-QSw" id="k0b-J5-cJ8"/>
+                        <outlet property="range_max_3" destination="ngC-wu-Z5o" id="2mZ-na-weZ"/>
+                        <outlet property="range_max_4" destination="aJQ-Pw-1RI" id="aoG-6I-73D"/>
+                        <outlet property="range_min_1" destination="cJs-Sn-V3u" id="FLe-Ty-Afd"/>
+                        <outlet property="range_min_2" destination="hS0-gW-U7M" id="OTQ-aI-KgL"/>
+                        <outlet property="range_min_3" destination="u9H-kh-sYJ" id="Bwk-yc-Xra"/>
+                        <outlet property="range_min_4" destination="3bT-0Q-hZa" id="Eiv-eA-Cb9"/>
                         <outlet property="slider_imgNo1" destination="MnQ-4m-dTm" id="fTW-wc-LtQ"/>
                         <outlet property="slider_imgNo2" destination="KF4-lx-o6A" id="UVo-bK-GP6"/>
                         <outlet property="slider_imgNo3" destination="0Bm-M4-hpV" id="eJt-f2-nwJ"/>

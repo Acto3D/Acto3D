@@ -68,6 +68,16 @@ class ImageOptionView: NSViewController {
     @IBOutlet weak var label_range3: NSTextField!
     @IBOutlet weak var label_range4: NSTextField!
     
+    @IBOutlet weak var range_min_1: ValidatingTextField!
+    @IBOutlet weak var range_max_1: ValidatingTextField!
+    @IBOutlet weak var range_min_2: ValidatingTextField!
+    @IBOutlet weak var range_max_2: ValidatingTextField!
+    @IBOutlet weak var range_min_3: ValidatingTextField!
+    @IBOutlet weak var range_max_3: ValidatingTextField!
+    @IBOutlet weak var range_min_4: ValidatingTextField!
+    @IBOutlet weak var range_max_4: ValidatingTextField!
+    
+    
     @IBOutlet weak var histo_1: HistogramView!
     @IBOutlet weak var histo_2: HistogramView!
     @IBOutlet weak var histo_3: HistogramView!
@@ -98,6 +108,8 @@ class ImageOptionView: NSViewController {
     var imageWell:[NSImageView] = []
     var slider_imgNo:[NSSlider] = []
     var label_range:[NSTextField] = []
+    var label_range_min:[ValidatingTextField] = []
+    var label_range_max:[ValidatingTextField] = []
     var histo:[HistogramView] = []
     var ignoreSaturate:[NSButton] = []
     
@@ -137,6 +149,8 @@ class ImageOptionView: NSViewController {
         label_range = [label_range1, label_range2, label_range3, label_range4]
         histo = [histo_1, histo_2, histo_3, histo_4]
         ignoreSaturate = [ignoreSaturateButton_1, ignoreSaturateButton_2, ignoreSaturateButton_3, ignoreSaturateButton_4]
+        label_range_min = [range_min_1,range_min_2,range_min_3,range_min_4]
+        label_range_max = [range_max_1,range_max_2,range_max_3,range_max_4]
         
         if let textureLoadChannel = imageParams.textureLoadChannel{
             switch textureLoadChannel{
@@ -189,11 +203,6 @@ class ImageOptionView: NSViewController {
             slider_imgNo3.integerValue = imageCountPerChannel / 2
             slider_imgNo4.integerValue = imageCountPerChannel / 2
             
-            label_range1.stringValue = ""
-            label_range2.stringValue = ""
-            label_range3.stringValue = ""
-            label_range4.stringValue = ""
-            
             voxelWidth.floatValue = imageParams.scaleX
             voxelHeight.floatValue = imageParams.scaleY
             voxelDepth.floatValue = imageParams.scaleZ
@@ -213,10 +222,12 @@ class ImageOptionView: NSViewController {
                 ignoreSaturate[c].isHidden = false
                 ignoreSaturate[c].state = self.imageParams.ignoreSaturatedPixels?[c] == 0 ? .off : .on
                 
-                
-                label_range[c].stringValue = "min: \(imageParams.displayRanges[c][0].round(point: 2)), max: \(imageParams.displayRanges[c][1].round(point: 2))"
-                label_range[c].sizeToFit()
-                
+                label_range_min[c].delegate = self
+                label_range_min[c].validationDelegate = self
+                label_range_max[c].delegate = self
+                label_range_max[c].validationDelegate = self
+                label_range_min[c].doubleValue = imageParams.displayRanges[c][0]
+                label_range_max[c].doubleValue = imageParams.displayRanges[c][1]
                 
                 imageWell[c].image = getAdjustedImage(c: c)
             }
@@ -308,9 +319,12 @@ class ImageOptionView: NSViewController {
                 ignoreSaturate[c].isHidden = false
                 ignoreSaturate[c].state = self.imageParams.ignoreSaturatedPixels?[c] == 0 ? .off : .on
                 
-                label_range[c].stringValue = "min: \(imageParams.displayRanges[c][0].round(point: 2)), max: \(imageParams.displayRanges[c][1].round(point: 2))"
-                label_range[c].sizeToFit()
-                
+                label_range_min[c].delegate = self
+                label_range_min[c].validationDelegate = self
+                label_range_max[c].delegate = self
+                label_range_max[c].validationDelegate = self
+                label_range_min[c].doubleValue = imageParams.displayRanges[c][0]
+                label_range_max[c].doubleValue = imageParams.displayRanges[c][1]
                 
                 imageWell[c].image = getAdjustedImage(c: c)
             }
@@ -659,15 +673,45 @@ class ImageOptionView: NSViewController {
     
 }
 
-extension ImageOptionView: HistogramViewProtocol{
+extension ImageOptionView: HistogramViewProtocol, ValidatingTextFieldDelegate, NSTextFieldDelegate{
+    func textFieldDidEndEditing(sender: ValidatingTextField, oldValue: Any, newValue: Any) {
+        if(sender.identifier?.rawValue == "range_min"){
+            imageParams.displayRanges[sender.tag][0] = sender.doubleValue
+        }
+        
+        if(sender.identifier?.rawValue == "range_max"){
+            imageParams.displayRanges[sender.tag][1] = sender.doubleValue
+        }
+        
+        histo[sender.tag].displayRanges = [imageParams.displayRanges[sender.tag][0], imageParams.displayRanges[sender.tag][1]]
+        histo[sender.tag].update()
+        histo[sender.tag].updateView()
+        
+        imageWell[sender.tag].image = getAdjustedImage(c: sender.tag)
+    }
+    
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            
+            if let validField = control as? ValidatingTextField{
+                validField.textShouldEndEditingEvent()
+                validField.textDidEndEditingEvent()
+                return true
+            }
+        }
+        return false
+    }
+    
     func adjustRanges(channel:Int, ranges: [Double]) {
         imageParams.displayRanges[channel][0] = ranges[0]
         imageParams.displayRanges[channel][1] = ranges[1]
         
-        label_range[channel].stringValue = "min: \(imageParams.displayRanges[channel][0].round(point: 2)), max: \(imageParams.displayRanges[channel][1].round(point: 2))"
-        label_range[channel].sizeToFit()
         
         imageWell[channel].image = getAdjustedImage(c: channel)
+        
+        label_range_min[channel].doubleValue = imageParams.displayRanges[channel][0].round(point: 2)
+        label_range_max[channel].doubleValue = imageParams.displayRanges[channel][1].round(point: 2)
+        
     }
     
     

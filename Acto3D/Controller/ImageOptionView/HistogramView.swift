@@ -149,7 +149,6 @@ class HistogramView: NSView {
     }
     
     override func updateTrackingAreas() {
-        //すでに指定済みのtrackingAreaを一旦解除しておく
         if !trackingAreas.isEmpty {
             for area in trackingAreas {
                 removeTrackingArea(area)
@@ -158,7 +157,6 @@ class HistogramView: NSView {
         
         if bounds.size.width == 0 || bounds.size.height == 0 { return }
         
-        //トラッキングオプションを指定(Enter / Exit と一緒に Moved も対象に)
         let options:NSTrackingArea.Options = [
             .mouseMoved,
             .cursorUpdate,
@@ -168,19 +166,14 @@ class HistogramView: NSView {
         
         let area = NSTrackingArea(rect: bounds, options: options, owner: self, userInfo: nil)
         addTrackingArea(area)
-        //        print("update track")
     }
     
     override func viewWillStartLiveResize() {
-//        update()
         updateView()
-        
         isResizing = true
     }
     override func viewDidEndLiveResize() {
-//        update()
         updateView()
-        
         isResizing = false
     }
 
@@ -205,7 +198,6 @@ class HistogramView: NSView {
             }
             addConstraints(newConstraints)
         }
-        
     }
     
     override init(frame: NSRect)
@@ -213,12 +205,9 @@ class HistogramView: NSView {
         super.init(frame: frame)
         
         loadNib()
-        
-        
     }
     
     public func update(){
-        
         if(bit == 8){
             bitClipTo10.isEnabled = false
             bitClipTo12.isEnabled = false
@@ -256,12 +245,12 @@ class HistogramView: NSView {
         }
         
         if(histogram == nil){
-            print("histogram is not set")
             bitButton_8.isHidden = true
             bitButton_10.isHidden = true
             bitButton_12.isHidden = true
             bitButton_14.isHidden = true
             bitButton_16.isHidden = true
+            
         }else{
             bitButton_8.isHidden = false
             bitButton_10.isHidden = false
@@ -269,10 +258,6 @@ class HistogramView: NSView {
             bitButton_14.isHidden = false
             bitButton_16.isHidden = false
         }
-        
-        
-//        print("max", maxIntensity)
-        
         
         let p1 = NSPoint(x:  CGFloat(displayRanges![0]) / CGFloat(maxIntensityForCurrentClipBit) * graphSize.width ,
                          y:  0)
@@ -294,147 +279,141 @@ class HistogramView: NSView {
             knobPoint2 = NSPoint(x: graphSize.width , y: (graphSize.width - p1.x) * (p2.y - p1.y) / (p2.x - p1.x))
             
         }
+        
         controlPoints[0] = NSPoint(x: knobSize + knobPoint1.x, y: knobSize + knobPoint1.y)
         controlPoints[1] = NSPoint(x: knobSize + knobPoint2.x, y: knobSize + knobPoint2.y)
     }
     
     public func histogram16to8(){
-        var his = [UInt32](repeating: 0, count: 256)
+        var temp_array = [UInt32](repeating: 0, count: 256)
         for i in 0..<256{
-            //            print(i * 256, 255 + 256 * i)
-            his[i] = histogram![(i * 256) ... (255 + 256 * i)].reduce(0, +)
+            temp_array[i] = histogram![(i * 256) ... (255 + 256 * i)].reduce(0, +)
         }
-        //        print(his)
-        self.histogram = his
+        self.histogram = temp_array
     }
     public func histogram14to8(){
-        var his = [UInt32](repeating: 0, count: 256)
+        var tmp_array = [UInt32](repeating: 0, count: 256)
         for i in 0..<256{
-            //            print(i * 64, 63 + 64 * i)
-            his[i] = histogram![(i * 64) ... (63 + 64 * i)].reduce(0, +)
+            tmp_array[i] = histogram![(i * 64) ... (63 + 64 * i)].reduce(0, +)
         }
-        //        print(his)
-        self.histogram = his
+        self.histogram = tmp_array
     }
     
     public func histogramClip8(bit:Int){
         let power = pow(2, bit)
         let mag = NSDecimalNumber(decimal: power / 256).intValue
-//        print(mag)
         guard let histogram = histogram else {
             return
         }
 
         clippedHistogram = [UInt32](repeating: 0, count: 256)
         for i in 0..<256{
-//            print(i, i * mag, mag - 1 + mag * i)
             clippedHistogram![i] = histogram[(i * mag) ... mag - 1 + mag * i].reduce(0, +)
         }
-//        print(clippedHistogram!)
     }
     
     //MARK: - draw
     
+    /// calculate Kernel Density Estimation, KDE
+    /// apply smoothing for histogram drawing
+    func gaussianKernelSmoothing(data: [Double], kernelBandwidth: Double) -> [Double] {
+        var smoothedData = [Double](repeating: 0, count: data.count)
+        let constant = 1 / sqrt(2 * .pi * kernelBandwidth * kernelBandwidth)
+
+        for i in 0..<data.count {
+            for j in 0..<data.count {
+                let diff = Double(i - j)
+                smoothedData[i] += data[j] * constant * exp(-0.5 * diff * diff / (kernelBandwidth * kernelBandwidth))
+            }
+        }
+        
+        return smoothedData
+    }
+    
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
+        
         if(isResizing){
             update()
         }
-        
         
         if(currentClipBit != previousClipBit){
             histogramClip8(bit: currentClipBit)
             previousClipBit = currentClipBit
         }
         
+        // set the clip area
+        let viewBoundary = NSBezierPath(roundedRect: NSRect(x: knobSize, y: knobSize, width: graphSize.width, height: graphSize.height), xRadius: knobSize, yRadius: knobSize)
         
-        guard let clippedHistogram = clippedHistogram else {
-            return
-        }
+        NSGraphicsContext.current?.saveGraphicsState()
+        viewBoundary.addClip()
         
-        let max = clippedHistogram.max()!
-        
-        let roundrRectangle = NSBezierPath(roundedRect: NSRect(x: knobSize-2, y: knobSize-2, width: self.frame.width-knobSize*2+4, height: self.frame.height-knobSize*2 - vMargin+4), xRadius: knobSize, yRadius: knobSize)
+        // Draw histogram
+        if let histogramData = self.clippedHistogram {
+            let sortedHistogramData = histogramData.sorted()
+            let lowerIndex = Int(Double(sortedHistogramData.count) * 0.02)
+            let upperIndex = Int(Double(sortedHistogramData.count) * 0.98)
+            let lowerBound = Double(sortedHistogramData[lowerIndex])
+            let upperBound = Double(sortedHistogramData[upperIndex])
+            let clippedHistogramData = histogramData.map { min(max(Double($0), lowerBound), upperBound) }
 
-        
-        let path = NSBezierPath()
-        
-        borderColor.setStroke()
-        borderColor.withAlphaComponent(0.2).setFill()
-        
-        path.lineWidth = 2.0
-        
-        let dataCount = clippedHistogram.count
-        
-        let interpolateDistance = graphSize.width / CGFloat(dataCount - 1)
-        
-        
-        for i in 0..<dataCount {
-            if i == 0{
-                let yp = Float(         clippedHistogram[i] * UInt32(graphSize.height - knobSize ) / max )
-                
-                let p:NSPoint = NSPoint(x: knobSize +  CGFloat(i) * interpolateDistance, y: knobSize +  CGFloat( yp))
-     
-                path.move(to: p)
-            }else if i == dataCount - 1{
-                
-                let yp = Float(         clippedHistogram[i] * UInt32(graphSize.height - knobSize ) / max )
-                
-                let p:NSPoint = NSPoint(x:  knobSize + CGFloat(i) * interpolateDistance, y:  knobSize + CGFloat( yp))
-                path.line(to:p)
-            }else{
-                let yp = Float(         clippedHistogram[i] * UInt32(graphSize.height - knobSize ) / max )
-                
-                let p:NSPoint = NSPoint(x:  knobSize + CGFloat(i) * interpolateDistance, y:  knobSize + CGFloat( yp))
-                path.line(to:p)
+            let barWidth = Double(graphSize.width) / Double(histogramData.count)
+            let smoothedHistogramData = gaussianKernelSmoothing(data: clippedHistogramData, kernelBandwidth: 3.0)
+
+            let maxValue = smoothedHistogramData.max() ?? 0
+            if (maxValue != 0){
+                let scaleFactor = Double(graphSize.height) / maxValue * 0.9
+
+                let histogramPath = NSBezierPath()
+                histogramPath.lineWidth = 1.0
+                NSColor.darkGray.setStroke()
+                NSColor.darkGray.setFill()
+                for (index, data) in smoothedHistogramData.enumerated() {
+                    let height = data * scaleFactor
+                    let rect = CGRect(x: knobSize + CGFloat(index) * CGFloat(barWidth), y: knobSize, width: CGFloat(barWidth), height: CGFloat(height))
+                    histogramPath.append(NSBezierPath(rect: rect))
+                }
+                histogramPath.fill()
             }
         }
         
+        // Draw graph border
+        NSGraphicsContext.current?.restoreGraphicsState()
+        viewBoundary.lineWidth = 2
+        borderColor.setStroke()
+        viewBoundary.stroke()
         
-        path.stroke()
-        
-        
+        // Draw range line
         let rangeLine = NSBezierPath()
         NSColor.selectedControlTextColor.setStroke()
         rangeLine.lineWidth = 2.0
-        
         rangeLine.move(to: controlPoints[0])
         rangeLine.line(to: controlPoints[1])
         rangeLine.stroke()
         
-        let roundrRectangle2 = NSBezierPath(roundedRect: NSRect(x: knobSize, y: knobSize, width: self.frame.width-knobSize*2, height: self.frame.height-knobSize*2 - vMargin), xRadius: knobSize, yRadius: knobSize)
-        roundrRectangle.lineWidth = 6
-        NSColor.controlBackgroundColor.setStroke()
-        roundrRectangle.stroke()
-        borderColor.setStroke()
-        roundrRectangle2.lineWidth = 1.5
-        roundrRectangle2.stroke()
-        
-        
+        // Draw knobs
         let grabKnob1 = NSBezierPath()
         if(mouseHoverPoint == .controlPoint1over){
             NSColor.red.setFill()
         }else{
-            NSColor.selectedControlTextColor.setFill()
+            NSColor.selectedControlTextColor.withAlphaComponent(1).setFill()
         }
         grabKnob1.appendArc(withCenter:controlPoints[0],
                            radius: knobSize,
                            startAngle: 0, endAngle: 360)
         grabKnob1.fill()
-        
-        
-        
+
         let grabKnob2 = NSBezierPath()
         if(mouseHoverPoint == .controlPoint2over){
             NSColor.red.setFill()
         }else{
-            NSColor.selectedControlTextColor.setFill()
+            NSColor.selectedControlTextColor.withAlphaComponent(1).setFill()
         }
         grabKnob2.appendArc(withCenter:controlPoints[1],
                            radius: knobSize,
                            startAngle: 0, endAngle: 360)
         grabKnob2.fill()
-        
+
     }
     
     
@@ -460,15 +439,20 @@ class HistogramView: NSView {
         if(point.x > controlPoints[0].x - knobSize &&
            point.x < controlPoints[0].x + knobSize &&
            point.y > controlPoints[0].y - knobSize &&
-           point.y < controlPoints[0].y + knobSize){
+           point.y < controlPoints[0].y + knobSize)
+        {
             mouseHoverPoint = .controlPoint1over
+            
         }else if(point.x > controlPoints[1].x - knobSize &&
                  point.x < controlPoints[1].x + knobSize &&
                  point.y > controlPoints[1].y - knobSize &&
-                 point.y < controlPoints[1].y + knobSize){
+                 point.y < controlPoints[1].y + knobSize)
+        {
             mouseHoverPoint = .controlPoint2over
+            
         }else{
             mouseHoverPoint = .none
+            
         }
         
         if(currentMouseState != mouseHoverPoint){
@@ -484,9 +468,9 @@ class HistogramView: NSView {
             return
         }
         
-        let max = pow(2, currentClipBit) - 1
-        
-        let currentMouseState = mouseHoverPoint
+//        let max = pow(2, currentClipBit) - 1
+//
+//        let currentMouseState = mouseHoverPoint
         
         if(point.x > controlPoints[0].x - knobSize &&
            point.x < controlPoints[0].x + knobSize &&
@@ -510,7 +494,7 @@ class HistogramView: NSView {
         }
         
         
-        let margin: CGFloat = 3.0
+        let margin: CGFloat = 0.5
         
         if(mouseHoverPoint == .controlPoint1grab){
             if(point.x <= knobSize){
@@ -520,46 +504,41 @@ class HistogramView: NSView {
                 point.y = knobSize
             }
             
-            if(point.x > point.y){
-                if(point.x < controlPoints[1].x - margin){
-                    let p = NSPoint(x: point.x , y: 0 + knobSize)
-                    
-                    controlPoints[0] = p
-                }
-            }else{
-                if(point.y < controlPoints[1].y - margin){
-                    let p = NSPoint(x: 0 + knobSize, y: point.y )
-                    controlPoints[0] = p
-                }
-                
+            if(point.x >= controlPoints[1].x - margin){
+                point.x = controlPoints[1].x - margin
             }
+            if(point.y >= controlPoints[1].y - margin){
+                point.y = controlPoints[1].y - margin
+            }
+            let p = NSPoint(x: point.x , y: point.y )
+            controlPoints[0] = p
+            
         }else if(mouseHoverPoint == .controlPoint2grab){
             if(point.x >= knobSize + graphSize.width){
                 point.x = knobSize + graphSize.width
+                
             }
             if(point.y >= knobSize + graphSize.height){
                 point.y = knobSize + graphSize.height
             }
             
-            if( (knobSize + graphSize.width) - point.x > (knobSize + graphSize.height) - point.y){
-                if(point.x > controlPoints[0].x + margin){
-                    
-                    let p = NSPoint(x: point.x , y: 0 + knobSize + graphSize.height)
-                    controlPoints[1] = p
-                }
-            }else{
-                if(point.y > controlPoints[0].y + margin){
-                    
-                    let p = NSPoint(x: graphSize.width + 0, y: point.y )
-                    controlPoints[1] = p
-                }
+            if(point.x <= controlPoints[0].x + margin){
+                point.x = controlPoints[0].x + margin
             }
+            if(point.y <= controlPoints[0].y + margin){
+                point.y = controlPoints[0].y + margin
+            }
+            
+            let p = NSPoint(x: point.x , y: point.y )
+            controlPoints[1] = p
+
         }
+        
         updateView()
         getDisplayRange()
     }
+    
     override func mouseUp(with event: NSEvent) {
-      
         mouseHoverPoint = .none
         updateView()
     }
