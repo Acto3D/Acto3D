@@ -263,19 +263,8 @@ class ViewController: NSViewController{
             self?.intensitySliderContextMenu(event, slider: self!.intensityRatio_slider_4)
         }
         
-        if AppConfig.ACCEPT_TCP_CONNECTION == true{
-            DispatchQueue.global(qos: .default).async {[self] in
-                if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){ // 6258 for testing
-                    self.tcpServer = tcpServer
-                    self.tcpServer?.delegate = self
-                    self.tcpServer?.renderer = renderer
-                    self.tcpServer?.vc = self
-                    self.tcpServer?.start()
-                }else{
-                    Logger.logPrintAndWrite(message: "Failed in creating TCP connection.", level: .error)
-                }
-            }
-        }
+        
+        startTcpServer()
     }
     
     func intensitySliderContextMenu(_ event: NSEvent, slider: NSSlider) {
@@ -1519,21 +1508,5 @@ extension ViewController: ValidatingTextFieldDelegate {
         default:
             break
         }
-    }
-}
-
-extension ViewController: TCPServerDelegate{
-    func startDataTransfer(sender: TCPServer, connectionID: Int) {
-        print("TCP responsed from Connection \(connectionID)")
-        sender.sendVersionInfoToStartTransferSession(connectionID: connectionID)
-    }
-    
-    func portInUse(sender: TCPServer, port: UInt16) {
-        Logger.logPrintAndWrite(message: "Port(\(port)) already in use. Failed in creating TCP listener.")
-        self.tcpServer = nil
-    }
-    
-    func listenerInReady(sender: TCPServer, port: UInt16) {
-        Logger.logPrintAndWrite(message: "Acto3D is accepting data input (Port: \(port))")
     }
 }

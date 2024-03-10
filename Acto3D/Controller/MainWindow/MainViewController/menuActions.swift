@@ -12,51 +12,8 @@ extension ViewController{
     @IBAction func menuAction(_ sender : NSMenuItem){
         
         switch sender.identifier?.rawValue {
-        case "performanceTest":
             
-            var startTime = Date()
-            startTime = Date()
-            
-         
-            
-            let n = 200
-            
-            
-            for _ in 0...(n-1) {
-                _ = renderer.rendering()
-            }
-            
-            let elapsed =  (Date().timeIntervalSince(startTime) * 1000 / Double(n))
-            let elapsedString = String(format: "%.3f", elapsed)
-            
-            Logger.log(message: "Performace Test x50 avg = \(elapsedString) ms", writeToLogfile: true)
-            
-            
-        case "showUserDefaults":
-            guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
-                fatalError("Couldn't find bundle identifier.")
-            }
-            let preferencesDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Preferences")
-            print(preferencesDirectoryURL)
-            let plistFileName = "\(bundleIdentifier).plist"
-            let plistFileURL = preferencesDirectoryURL.appendingPathComponent(plistFileName)
-
-            print(plistFileURL)
-            
-            var isDir:ObjCBool  = false
-            if FileManager.default.fileExists(atPath: plistFileURL.path, isDirectory: &isDir) {
-                NSWorkspace.shared.activateFileViewerSelecting([plistFileURL])
-            }
-            
-
-            
-        case "resetSecureScope":
-            UserDefaults.standard.removeObject(forKey: "PermanentFolderBookmarks")
-            
-        case "resetRecent":
-            UserDefaults.standard.removeObject(forKey: "Recent")
-            recentFiles = []
-            
+            //MARK: - Image Process
         case "gaussian":
             applyGaussian3D()
             
@@ -82,6 +39,7 @@ extension ViewController{
                 renderer.calculateTextureHistogram()
             }
             
+            //MARK: - File
         case "export_to_tiff":
             let useChannel = sender.tag
             
@@ -100,248 +58,6 @@ extension ViewController{
             
             renderer.exportToTiffForEachChannelWithCurrentAngleAndSize(useChannel: useChannel, filePackage: filePackage)
             
-        case "re-compile":
-            do{
-                try shaderReCompile()
-            }catch{
-                print("ERROR:", error)
-            }
-            
-        case "open_shader_dir":
-            guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader") else {
-                return
-            }
-            do {
-                try FileManager.default.createDirectory(at: customShadersURL, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-            }
-            
-//            let appURL = Bundle.main.bundleURL
-//            let shadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader")
-//
-//
-            var isDir:ObjCBool  = false
-
-            if FileManager.default.fileExists(atPath: customShadersURL.path, isDirectory: &isDir) {
-                NSWorkspace.shared.activateFileViewerSelecting([customShadersURL])
-            }
-            
-            
-        case "showLogs":
-            Logger.showLogDirectory()
-            
-        case "performance_test_item":
-            Logger.logPrintAndWrite(message: "Performance check")
-            
-            let max = 2<<(8-1) - 1
-            self.renderer.imageParams.displayRanges = [[Double]](repeating: [0, max.toDouble()], count: 4)
-            self.renderer.imageParams.scaleX = 1
-            self.renderer.imageParams.scaleY = 1
-            self.renderer.imageParams.scaleZ = 1
-            
-            self.renderer.renderParams.zScale = 1
-            
-            var volumeData = VolumeData()
-            
-
-            if(sender.tag == -1){
-                // perform test
-//                self.renderer.bench(repeatCount: 10)
-                DispatchQueue.global().async { [weak self] in
-                    self?.renderer.bench2(repeatCount: 1000, random_rotate: false) {(complete) in
-                        
-                        DispatchQueue.main.async {
-                            Logger.logPrintAndWrite(message: "Performance test finished.")
-                            self?.renderer.mainTexture = nil
-                        }
-                    }
-                }
-                
-                return
-            }
-            
-            /*
-             512 x 512 x 500  (0.49 GB)
-             960 x 960 x 500  (1.72 GB)
-             1024 x 1024 x 500  (1.95 GB)
-             1280 x 1280 x 500  (3.05 GB)
-             1536 x 1536 x 500  (4.39 GB)
-             1920 x 1920 x 500  (6.87 GB)
-             1920 x 1920 x 750  (10.3 GB)
-             1920 x 1920 x 1000  (13.73 GB)
-             */
-            let xy_size = [480, 720, 960, 1200, 1440, 1680, 1920]
-            let z_size = [900, 900, 900, 900, 900, 900, 900]
-            let ind = sender.tag
-            
-            volumeData.inputImageWidth = xy_size[ind].toUInt16()
-            volumeData.inputImageDepth = z_size[ind].toUInt16()
-            volumeData.inputImageHeight = volumeData.inputImageWidth
-            volumeData.numberOfComponent = 4
-            
-            Logger.logPrintAndWrite(message: "Performance test: size = \(xy_size[ind]) x \(xy_size[ind]) x \(z_size[ind]) pixels x 4 channel")
-            
-            self.renderer.volumeData = volumeData
-//            self.renderer.renderParams.viewSize = 512
-            self.renderer.renderParams.viewSize = 512
-            popUpViewSize.selectedItem!.title = String( 512)
-            self.scale_Slider.floatValue = 512.0 / volumeData.inputImageWidth.toFloat()
-//            self.scale_Slider.floatValue = 1.0
-            
-            
-            guard let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-                return
-            }
-            
-            filePackage = FilePackage(fileDir: docDir, fileType: .multiFileStacks, fileList: [String](repeating: "test", count: volumeData.inputImageDepth.toInt()))
-            guard let filePackage = filePackage else {
-                return
-            }
-            
-            benchmark_test_create3D(filePackage: filePackage)
-            
-        case "debug_mode":
-            AppConfig.IS_DEBUG_MODE = !AppConfig.IS_DEBUG_MODE
-            
-        case "preview_size":
-            AppConfig.PREVIEW_SIZE = sender.tag.toUInt16()
-            
-        case "high_quality_size":
-            AppConfig.HQ_SIZE = sender.tag.toUInt16()
-            
-        case "accept_tcp":
-            AppConfig.ACCEPT_TCP_CONNECTION = !AppConfig.ACCEPT_TCP_CONNECTION
-            
-        case "change_port":
-            //MARK: change port
-            // Show dialog to change TCP port setting.
-            let alert = NSAlert()
-            alert.messageText = "Enter a new port number:"
-            alert.addButton(withTitle: "OK")
-            alert.addButton(withTitle: "Cancel")
-            alert.addButton(withTitle: "Reset to Default")
-            
-            let textField = ValidatingTextField(frame: NSRect(x: 0, y: 0, width: 90, height: 24))
-            let defaultValue = AppConfig.TCP_PORT
-            textField.integerValue = defaultValue.toInt()
-            textField.inputValueType = .UInt16
-            textField.alignment = .center
-            
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .none
-            formatter.usesGroupingSeparator = false
-            textField.formatter = formatter
-
-            let accessory = FlippedView(frame: NSRect(x: 0, y: 0, width: textField.frame.maxX, height: 50))
-            accessory.addSubview(textField)
-            
-            accessory.adjustHeightOfView()
-            
-            alert.accessoryView = accessory
-            
-            let modalResult = alert.runModal()
-            let firstButtonNo = NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
-            
-            
-            switch modalResult.rawValue {
-            case firstButtonNo:
-                if let _ = UInt16(textField.stringValue){
-                    AppConfig.TCP_PORT = UInt16(textField.integerValue)
-                }else{
-                    Dialog.showDialog(message: "The port number is invalid.\nPlease enter a value between 0 and 65535.")
-                }
-                
-            case firstButtonNo + 1:
-                break
-                
-            case firstButtonNo + 2:
-                AppConfig.TCP_PORT = 41233
-                
-            default:
-                break
-                
-            }
-            
-            
-            
-            
-        case "windowsize_adjust":
-            if let window = self.view.window{
-                let currentFrame = window.frame
-                
-                let currentCenterX = currentFrame.origin.x + (currentFrame.width / 2)
-                let currentCenterY = currentFrame.origin.y + (currentFrame.height / 2)
-
-                let newSize = NSMakeSize(1440, 960)
-
-                let newCenterX = currentCenterX - (newSize.width / 2)
-                let newCenterY = currentCenterY - (newSize.height / 2)
-
-                let newFrame = NSRect(x: newCenterX, y: newCenterY, width: newSize.width, height: newSize.height)
-
-                window.setFrame(newFrame, display: true, animate: true)
-            }
-            
-        case "create_mp4":
-            let dialog = NSOpenPanel();
-            dialog.title                   = "Choose Images";
-            dialog.showsResizeIndicator    = true;
-            dialog.showsHiddenFiles        = false;
-            dialog.canChooseDirectories    = false;
-            dialog.canCreateDirectories    = true;
-            dialog.allowsMultipleSelection = true;
-//            dialog.allowedFileTypes        = ["tif", "tiff", "jpg", "jpeg", "png"];
-            dialog.allowedContentTypes     = [.tiff, .jpeg, .png]
-            
-            
-            let accessoryView = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 40))
-            let textField = NSTextField(string: "FPS")
-            textField.isBezeled = false
-            textField.drawsBackground = false
-            textField.isEditable = false
-            textField.isSelectable = false
-            textField.sizeToFit()
-            textField.setFrameOrigin(NSPoint(x: 0, y: (40 - textField.frame.height) / 2))
-            accessoryView.addSubview(textField)
-            
-            let fpspopup = NSPopUpButton()
-            fpspopup.addItem(withTitle: "30")
-            fpspopup.addItem(withTitle: "60")
-            fpspopup.setFrameSize(NSSize(width: 100, height: 30))
-            fpspopup.sizeToFit()
-            fpspopup.setFrameOrigin(NSPoint(x: textField.frame.maxX + 10, y: (40 - fpspopup.frame.height) / 2 ))
-            
-            accessoryView.addSubview(fpspopup)
-            
-            if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
-                let result = dialog.urls
-                
-                let savePanel = NSSavePanel()
-                savePanel.title = "Save the movie"
-//                savePanel.allowedFileTypes = [ "mp4"]
-                savePanel.allowedContentTypes = [.mpeg4Movie]
-                
-                savePanel.accessoryView = accessoryView
-                
-                
-                if savePanel.runModal() == NSApplication.ModalResponse.OK {
-                    if let saveURL = savePanel.url {
-                        guard let sampleImage = NSImage(contentsOf: result[0])?.toCGImage else{
-                            Dialog.showDialog(message: "Invalid format")
-                            return
-                        }
-                        let width = sampleImage.width, height = sampleImage.height
-                        
-                        let movCreator = MovieCreator(withFps: Int(fpspopup.titleOfSelectedItem!)!, size: NSSize(width: width.toCGFloat(), height: height.toCGFloat()))
-                        movCreator.createMovie(from: result, exportFileUrl: saveURL)
-                    
-                    }
-                }
-                
-            }else{
-                return
-            }
-            
             
         case "open_file_directory":
             guard let filePackage = filePackage else {return}
@@ -357,36 +73,14 @@ extension ViewController{
                     NSWorkspace.shared.activateFileViewerSelecting([filePackage.fileDir.appendingPathComponent(filePackage.fileList[0])])
                 }
             }
-        
+            
         case "open_working_directory":
             guard let workingDirUrl = filePackage?.workingDir else {return}
             NSWorkspace.shared.activateFileViewerSelecting([workingDirUrl])
             
-        case "copy_sample_shaders":
-            copySampleShadersToShaderDirectory()
+            //MARK: File, Demo model
             
-        case "copy_template_shaders":
-            copyTemplatesToShaderDirectory()
             
-        case "reset_tcp":
-            if let tcpServer = tcpServer{
-                tcpServer.stop()
-                Thread.sleep(forTimeInterval: 2)
-                tcpServer.start()
-            }else{
-                AppConfig.ACCEPT_TCP_CONNECTION = true
-                if let tcpServer = TCPServer(port: AppConfig.TCP_PORT){
-                    self.tcpServer = tcpServer
-                    self.tcpServer?.delegate = self
-                    self.tcpServer?.renderer = renderer
-                    self.tcpServer?.vc = self
-                    self.tcpServer?.start()
-                }else{
-                    Logger.logPrintAndWrite(message: "Failed in creating TCP connection.", level: .error)
-                }
-            }
-            
-                
         case "tori":
             // creation of tori model
             if let _ = renderer.mainTexture {
@@ -511,7 +205,7 @@ extension ViewController{
             let demoSp = DemoModel(device: renderer.device, lib: renderer.mtlLibrary, cmdQueue: renderer.cmdQueue)
             
             guard let texture = demoSp.createDemoModel_sphereincube(imgWidth: 768, imgHeight: 768, ball_size: 256, square_size: 350),
-                    let sp_texture = demoSp.gaussian2D(inTexture: texture, k_size: 7, inChannel: -1, outChannel: -1) else{
+                  let sp_texture = demoSp.gaussian2D(inTexture: texture, k_size: 7, inChannel: -1, outChannel: -1) else{
                 Logger.logPrintAndWrite(message: "Failed to create demo model.")
                 return
             }
@@ -653,14 +347,14 @@ extension ViewController{
                 processor.applyFilter_Gaussian3D(inTexture: texture, k_size: thinModelParams.kernelSize.toUInt8(), sigma: thinModelParams.sigma, channel: 0) { result in
                     
                     DispatchQueue.main.async {[self] in
-                    ImageProcessor.transferTextureToTexture(device: self.renderer.device,
-                                                            cmdQueue: self.renderer.cmdQueue,
-                                                            lib: self.renderer.mtlLibrary,
-                                                            texIn: result!,
-                                                            texOut: texture,
-                                                            channelIn: 0, channelOut: 1)
-                    
-                    
+                        ImageProcessor.transferTextureToTexture(device: self.renderer.device,
+                                                                cmdQueue: self.renderer.cmdQueue,
+                                                                lib: self.renderer.mtlLibrary,
+                                                                texIn: result!,
+                                                                texOut: texture,
+                                                                channelIn: 0, channelOut: 1)
+                        
+                        
                         
                         renderer.mainTexture = texture
                         
@@ -783,6 +477,271 @@ extension ViewController{
                 
                 
             }
+            
+            //MARK: - Shader
+        case "re-compile":
+            do{
+                try shaderReCompile()
+            }catch{
+                print("ERROR:", error)
+            }
+            
+        case "open_shader_dir":
+            guard let customShadersURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Shader") else {
+                return
+            }
+            do {
+                try FileManager.default.createDirectory(at: customShadersURL, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+            }
+            
+            //            let appURL = Bundle.main.bundleURL
+            //            let shadersURL = appURL.appendingPathComponent("Contents").appendingPathComponent("Resources").appendingPathComponent("Shader")
+            //
+            //
+            var isDir:ObjCBool  = false
+            
+            if FileManager.default.fileExists(atPath: customShadersURL.path, isDirectory: &isDir) {
+                NSWorkspace.shared.activateFileViewerSelecting([customShadersURL])
+            }
+            
+            
+            
+            
+        case "copy_sample_shaders":
+            copySampleShadersToShaderDirectory()
+            
+        case "copy_template_shaders":
+            copyTemplatesToShaderDirectory()
+            
+            
+            //MARK: - Debug
+            
+        case "showLogs":
+            Logger.showLogDirectory()
+            
+        case "performance_test_item":
+            Logger.logPrintAndWrite(message: "Performance check")
+            
+            let max = 2<<(8-1) - 1
+            self.renderer.imageParams.displayRanges = [[Double]](repeating: [0, max.toDouble()], count: 4)
+            self.renderer.imageParams.scaleX = 1
+            self.renderer.imageParams.scaleY = 1
+            self.renderer.imageParams.scaleZ = 1
+            
+            self.renderer.renderParams.zScale = 1
+            
+            var volumeData = VolumeData()
+            
+            
+            if(sender.tag == -1){
+                // perform test
+                //                self.renderer.bench(repeatCount: 10)
+                DispatchQueue.global().async { [weak self] in
+                    self?.renderer.bench2(repeatCount: 1000, random_rotate: false) {(complete) in
+                        
+                        DispatchQueue.main.async {
+                            Logger.logPrintAndWrite(message: "Performance test finished.")
+                            self?.renderer.mainTexture = nil
+                        }
+                    }
+                }
+                
+                return
+            }
+            
+            /*
+             512 x 512 x 500  (0.49 GB)
+             960 x 960 x 500  (1.72 GB)
+             1024 x 1024 x 500  (1.95 GB)
+             1280 x 1280 x 500  (3.05 GB)
+             1536 x 1536 x 500  (4.39 GB)
+             1920 x 1920 x 500  (6.87 GB)
+             1920 x 1920 x 750  (10.3 GB)
+             1920 x 1920 x 1000  (13.73 GB)
+             */
+            let xy_size = [480, 720, 960, 1200, 1440, 1680, 1920]
+            let z_size = [900, 900, 900, 900, 900, 900, 900]
+            let ind = sender.tag
+            
+            volumeData.inputImageWidth = xy_size[ind].toUInt16()
+            volumeData.inputImageDepth = z_size[ind].toUInt16()
+            volumeData.inputImageHeight = volumeData.inputImageWidth
+            volumeData.numberOfComponent = 4
+            
+            Logger.logPrintAndWrite(message: "Performance test: size = \(xy_size[ind]) x \(xy_size[ind]) x \(z_size[ind]) pixels x 4 channel")
+            
+            self.renderer.volumeData = volumeData
+            //            self.renderer.renderParams.viewSize = 512
+            self.renderer.renderParams.viewSize = 512
+            popUpViewSize.selectedItem!.title = String( 512)
+            self.scale_Slider.floatValue = 512.0 / volumeData.inputImageWidth.toFloat()
+            //            self.scale_Slider.floatValue = 1.0
+            
+            
+            guard let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                return
+            }
+            
+            filePackage = FilePackage(fileDir: docDir, fileType: .multiFileStacks, fileList: [String](repeating: "test", count: volumeData.inputImageDepth.toInt()))
+            guard let filePackage = filePackage else {
+                return
+            }
+            
+            benchmark_test_create3D(filePackage: filePackage)
+            
+        case "debug_mode":
+            AppConfig.IS_DEBUG_MODE = !AppConfig.IS_DEBUG_MODE
+            
+        case "preview_size":
+            AppConfig.PREVIEW_SIZE = sender.tag.toUInt16()
+            
+        case "high_quality_size":
+            AppConfig.HQ_SIZE = sender.tag.toUInt16()
+            
+        case "windowsize_adjust":
+            if let window = self.view.window{
+                let currentFrame = window.frame
+                
+                let currentCenterX = currentFrame.origin.x + (currentFrame.width / 2)
+                let currentCenterY = currentFrame.origin.y + (currentFrame.height / 2)
+                
+                let newSize = NSMakeSize(1440, 960)
+                
+                let newCenterX = currentCenterX - (newSize.width / 2)
+                let newCenterY = currentCenterY - (newSize.height / 2)
+                
+                let newFrame = NSRect(x: newCenterX, y: newCenterY, width: newSize.width, height: newSize.height)
+                
+                window.setFrame(newFrame, display: true, animate: true)
+            }
+            
+        case "performanceTest":
+            
+            var startTime = Date()
+            startTime = Date()
+            
+            
+            
+            let n = 200
+            
+            
+            for _ in 0...(n-1) {
+                _ = renderer.rendering()
+            }
+            
+            let elapsed =  (Date().timeIntervalSince(startTime) * 1000 / Double(n))
+            let elapsedString = String(format: "%.3f", elapsed)
+            
+            Logger.log(message: "Performace Test x50 avg = \(elapsedString) ms", writeToLogfile: true)
+            
+            
+        case "showUserDefaults":
+            guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
+                fatalError("Couldn't find bundle identifier.")
+            }
+            let preferencesDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("Preferences")
+            print(preferencesDirectoryURL)
+            let plistFileName = "\(bundleIdentifier).plist"
+            let plistFileURL = preferencesDirectoryURL.appendingPathComponent(plistFileName)
+            
+            print(plistFileURL)
+            
+            var isDir:ObjCBool  = false
+            if FileManager.default.fileExists(atPath: plistFileURL.path, isDirectory: &isDir) {
+                NSWorkspace.shared.activateFileViewerSelecting([plistFileURL])
+            }
+            
+            
+            
+        case "resetSecureScope":
+            UserDefaults.standard.removeObject(forKey: "PermanentFolderBookmarks")
+            
+        case "resetRecent":
+            UserDefaults.standard.removeObject(forKey: "Recent")
+            recentFiles = []
+            
+            //MARK: - Connection
+        case "accept_tcp":
+            AppConfig.ACCEPT_TCP_CONNECTION = !AppConfig.ACCEPT_TCP_CONNECTION
+            if(AppConfig.ACCEPT_TCP_CONNECTION == true){
+                startTcpServer()
+            }else{
+                self.tcpServer?.stop()
+                self.tcpServer = nil
+            }
+            
+        case "reset_tcp":
+            startTcpServer()
+            
+        case "change_port":
+            showChangePortDialog()
+            
+            
+            
+            //MARK: - Tool
+            
+        case "create_mp4":
+            let dialog = NSOpenPanel();
+            dialog.title                   = "Choose Images";
+            dialog.showsResizeIndicator    = true;
+            dialog.showsHiddenFiles        = false;
+            dialog.canChooseDirectories    = false;
+            dialog.canCreateDirectories    = true;
+            dialog.allowsMultipleSelection = true;
+            //            dialog.allowedFileTypes        = ["tif", "tiff", "jpg", "jpeg", "png"];
+            dialog.allowedContentTypes     = [.tiff, .jpeg, .png]
+            
+            
+            let accessoryView = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 40))
+            let textField = NSTextField(string: "FPS")
+            textField.isBezeled = false
+            textField.drawsBackground = false
+            textField.isEditable = false
+            textField.isSelectable = false
+            textField.sizeToFit()
+            textField.setFrameOrigin(NSPoint(x: 0, y: (40 - textField.frame.height) / 2))
+            accessoryView.addSubview(textField)
+            
+            let fpspopup = NSPopUpButton()
+            fpspopup.addItem(withTitle: "30")
+            fpspopup.addItem(withTitle: "60")
+            fpspopup.setFrameSize(NSSize(width: 100, height: 30))
+            fpspopup.sizeToFit()
+            fpspopup.setFrameOrigin(NSPoint(x: textField.frame.maxX + 10, y: (40 - fpspopup.frame.height) / 2 ))
+            
+            accessoryView.addSubview(fpspopup)
+            
+            if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+                let result = dialog.urls
+                
+                let savePanel = NSSavePanel()
+                savePanel.title = "Save the movie"
+                //                savePanel.allowedFileTypes = [ "mp4"]
+                savePanel.allowedContentTypes = [.mpeg4Movie]
+                
+                savePanel.accessoryView = accessoryView
+                
+                
+                if savePanel.runModal() == NSApplication.ModalResponse.OK {
+                    if let saveURL = savePanel.url {
+                        guard let sampleImage = NSImage(contentsOf: result[0])?.toCGImage else{
+                            Dialog.showDialog(message: "Invalid format")
+                            return
+                        }
+                        let width = sampleImage.width, height = sampleImage.height
+                        
+                        let movCreator = MovieCreator(withFps: Int(fpspopup.titleOfSelectedItem!)!, size: NSSize(width: width.toCGFloat(), height: height.toCGFloat()))
+                        movCreator.createMovie(from: result, exportFileUrl: saveURL)
+                        
+                    }
+                }
+                
+            }else{
+                return
+            }
+            
+            
             
         default:
             break

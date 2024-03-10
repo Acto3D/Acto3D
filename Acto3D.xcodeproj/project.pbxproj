@@ -73,6 +73,7 @@
 		B0CBE0772A4BA183007C6380 /* menuActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CBE0762A4BA183007C6380 /* menuActions.swift */; };
 		B0D36C84296A6C72008E9ECA /* KMeansController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D36C83296A6C72008E9ECA /* KMeansController.swift */; };
 		B0DA86D927CEE81E0000C788 /* NSColor+RGBAf.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DA86D827CEE81E0000C788 /* NSColor+RGBAf.swift */; };
+		B0DB39922B9E028900619E18 /* ViewController-TCP.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DB39912B9E028900619E18 /* ViewController-TCP.swift */; };
 		B0E819242A4DBB85009E9B82 /* CubicSplineInterpolator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E819232A4DBB85009E9B82 /* CubicSplineInterpolator.swift */; };
 		B0E9634028A5DF5600797449 /* VC_MouseEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E9633F28A5DF5600797449 /* VC_MouseEvent.swift */; };
 		B0EA41CA2B87833E00FAB19F /* NSTextFieldWithAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EA41C92B87833E00FAB19F /* NSTextFieldWithAction.swift */; };
@@ -192,6 +193,7 @@
 		B0CBE0762A4BA183007C6380 /* menuActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = menuActions.swift; sourceTree = "<group>"; };
 		B0D36C83296A6C72008E9ECA /* KMeansController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMeansController.swift; sourceTree = "<group>"; };
 		B0DA86D827CEE81E0000C788 /* NSColor+RGBAf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+RGBAf.swift"; sourceTree = "<group>"; };
+		B0DB39912B9E028900619E18 /* ViewController-TCP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController-TCP.swift"; sourceTree = "<group>"; };
 		B0E5D3F328A0AF1E009856BD /* struct.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = struct.metal; sourceTree = "<group>"; };
 		B0E5D3F528A0B08F009856BD /* quat.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = quat.metal; sourceTree = "<group>"; };
 		B0E819232A4DBB85009E9B82 /* CubicSplineInterpolator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CubicSplineInterpolator.swift; sourceTree = "<group>"; };
@@ -501,6 +503,7 @@
 			isa = PBXGroup;
 			children = (
 				B0B75E5D276D733400CCAF6B /* ViewController.swift */,
+				B0DB39912B9E028900619E18 /* ViewController-TCP.swift */,
 				B07507AD2A6CF12000B43C61 /* ViewController-renderer.swift */,
 				B09E5CA42A5170AC00B90CD4 /* ShaderCompiler.swift */,
 				B01F2F7729A9F86A005D5775 /* enum.swift */,
@@ -739,6 +742,7 @@
 				B09BB662279801A400326EA4 /* VC_make3D_texture.swift in Sources */,
 				B07B6D1B276E4F1900D31400 /* shader.metal in Sources */,
 				B0E9634028A5DF5600797449 /* VC_MouseEvent.swift in Sources */,
+				B0DB39922B9E028900619E18 /* ViewController-TCP.swift in Sources */,
 				B002C4042B806C8B004546F7 /* VC_ImageFilter.swift in Sources */,
 				B06A2B16299F8996002B1CC5 /* Permission.swift in Sources */,
 				B0F59D2027D6ECDF00E0644F /* MovieSequence.swift in Sources */,

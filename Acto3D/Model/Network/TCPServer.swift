@@ -42,7 +42,7 @@ class TCPServer {
     private var imageChannel: UInt32 = 0
     private var receivedSlices: UInt32 = 0
     
-    var renderer:VoluemeRenderer!
+    weak var renderer:VoluemeRenderer!
     
     var renderPipeline: MTLComputePipelineState!
     var parallelPipeline : MTLComputePipelineState?
@@ -64,22 +64,22 @@ class TCPServer {
             return
         }
         
-        listener.stateUpdateHandler = { state in
+        listener.stateUpdateHandler = {[weak self] state in
             print("Listener state: \(state)")
             
             switch state {
             case .ready:
-                self.delegate?.listenerInReady(sender: self, port: self.port.rawValue)
+                self?.delegate?.listenerInReady(sender: self!, port: self!.port.rawValue)
                 
             case .setup:
                 break
                 
             case .failed(let error):
                 print("Server failed with error: \(error)")
-                self.stop(byError: true)
+                self?.stop(byError: true)
                 
                 if error == NWError.posix(.EADDRINUSE){
-                    self.delegate?.portInUse(sender: self, port: self.port.rawValue)
+                    self?.delegate?.portInUse(sender: self!, port: self!.port.rawValue)
                 }
                 
             default:
@@ -87,8 +87,8 @@ class TCPServer {
             }
         }
         
-        listener.newConnectionHandler = {[self] newConnection in
-            self.accept(connection: newConnection)
+        listener.newConnectionHandler = {[weak self] newConnection in
+            self?.accept(connection: newConnection)
         }
         
         listener.start(queue: .main)
@@ -100,19 +100,19 @@ class TCPServer {
         
         connections[connectionID] = connection
         
-        connection.stateUpdateHandler = { [self] state in
+        connection.stateUpdateHandler = {[weak self] state in
             switch state {
             case .ready:
                 print("Connection \(connectionID) is ready.")
-                self.receiveMessage(connectionID: connectionID)
+                self?.receiveMessage(connectionID: connectionID)
                 
             case .failed(let error):
                 print("Connection \(connectionID) failed with error: \(error)")
-                self.connections.removeValue(forKey: connectionID)
+                self?.connections.removeValue(forKey: connectionID)
                 
             case .cancelled:
                 print("Connection \(connectionID) cancelled. Remove from collection.")
-                self.connections.removeValue(forKey: connectionID)
+                self?.connections.removeValue(forKey: connectionID)
                 
             default:
                 break
@@ -126,38 +126,38 @@ class TCPServer {
         guard let connection = connections[connectionID] else { return }
         
         // Wait for START signal
-        connection.receive(minimumIncompleteLength: 5, maximumLength: 5) { [self] (data, _, isComplete, error) in
+        connection.receive(minimumIncompleteLength: 5, maximumLength: 5) { [weak self] (data, _, isComplete, error) in
             if let data = data,
                let signal = String(data: data, encoding: .utf8)
             {
                 switch signal{
                 case "START":
                     // Initialize slice count for new data input.
-                    self.receivedSlices = 0
+                    self?.receivedSlices = 0
                     print("Received start signal, Connection \(connectionID)")
-                    self.delegate?.startDataTransfer(sender: self, connectionID: connectionID)
+                    self?.delegate?.startDataTransfer(sender: self!, connectionID: connectionID)
                     
                 case "ZDATA":
                     // After verifing version compatibility, send slice each by each (parallel).
                     // This is start signal
-                    self.waitForClientResponse(connectionID: connectionID)
+                    self?.waitForClientResponse(connectionID: connectionID)
                     
                 case "PEND_":
                     // When parallel slice transfer finished.
-                    vc?.zScale_Slider.floatValue = self.renderer.renderParams.zScale
-                    vc?.updateSliceAndScale(currentSliceToMax: true)
+                    self?.vc?.zScale_Slider.floatValue = self!.renderer.renderParams.zScale
+                    self?.vc?.updateSliceAndScale(currentSliceToMax: true)
                     
-                    vc?.xResolutionField.floatValue = renderer.imageParams.scaleX
-                    vc?.yResolutionField.floatValue = renderer.imageParams.scaleY
-                    vc?.zResolutionField.floatValue = renderer.imageParams.scaleZ
-                    vc?.scaleUnitField.stringValue = renderer.imageParams.unit
+                    self?.vc?.xResolutionField.floatValue = self!.renderer.imageParams.scaleX
+                    self?.vc?.yResolutionField.floatValue = self!.renderer.imageParams.scaleY
+                    self?.vc?.zResolutionField.floatValue = self!.renderer.imageParams.scaleZ
+                    self?.vc?.scaleUnitField.stringValue = self!.renderer.imageParams.unit
                     
-                    vc?.progressBar.isHidden = true
-                    vc?.progressBar.doubleValue = 0
-                    vc?.outputView.image = renderer.rendering()
+                    self?.vc?.progressBar.isHidden = true
+                    self?.vc?.progressBar.doubleValue = 0
+                    self?.vc?.outputView.image = self?.renderer.rendering()
                     
-                    self.parallelPipeline = nil
-                    self.stopConnectionByID(connectionID)
+                    self?.parallelPipeline = nil
+                    self?.stopConnectionByID(connectionID)
                     
                 default:
                     break
@@ -167,12 +167,12 @@ class TCPServer {
             if isComplete {
                 print("Connection complete")
                 connection.cancel()
-                self.connections.removeValue(forKey: connectionID)
+                self?.connections.removeValue(forKey: connectionID)
                 
             } else if let error = error {
                 print("Received error: \(error)")
                 connection.cancel()
-                self.connections.removeValue(forKey: connectionID)
+                self?.connections.removeValue(forKey: connectionID)
                 
             } else {
                 // Continue waiting for signals.
@@ -846,7 +846,8 @@ class TCPServer {
     
     deinit {
         listener?.cancel()
-        print("Server on port \(self.port) is stopped.")
+        print("Server on port \(self.port) is closed.")
+        Logger.logPrintAndWrite(message: "Shutdown TCP Server.")
     }
     
     
