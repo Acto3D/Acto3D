@@ -25,6 +25,7 @@ class TCPServer {
         case ZCYX
         case ZYX
         case LZYX
+        case TEXSZ
     }
     enum ParameterMode{
         case VOXEL
@@ -43,7 +44,8 @@ class TCPServer {
     
     var renderer:VoluemeRenderer!
     
-    var renderPipeline:MTLComputePipelineState!
+    var renderPipeline: MTLComputePipelineState!
+    var parallelPipeline : MTLComputePipelineState?
     
     init?(port: UInt16) {
         guard let serverPort = NWEndpoint.Port(rawValue: port) else { return nil }
@@ -95,9 +97,9 @@ class TCPServer {
     private func accept(connection: NWConnection) {
         let connectionID = nextConnectionID
         nextConnectionID += 1
-
+        
         connections[connectionID] = connection
-
+        
         connection.stateUpdateHandler = { [self] state in
             switch state {
             case .ready:
@@ -116,23 +118,50 @@ class TCPServer {
                 break
             }
         }
-
+        
         connection.start(queue: .main)
     }
-
+    
     private func receiveMessage(connectionID: Int) {
         guard let connection = connections[connectionID] else { return }
-
+        
         // Wait for START signal
         connection.receive(minimumIncompleteLength: 5, maximumLength: 5) { [self] (data, _, isComplete, error) in
             if let data = data,
-                let signal = String(data: data, encoding: .utf8),
-                signal == "START"
+               let signal = String(data: data, encoding: .utf8)
             {
-                // Initialize slice count for new data input.
-                self.receivedSlices = 0
-                print("Received start signal, Connection \(connectionID)")
-                self.delegate?.startDataTransfer(sender: self, connectionID: connectionID)
+                switch signal{
+                case "START":
+                    // Initialize slice count for new data input.
+                    self.receivedSlices = 0
+                    print("Received start signal, Connection \(connectionID)")
+                    self.delegate?.startDataTransfer(sender: self, connectionID: connectionID)
+                    
+                case "ZDATA":
+                    // After verifing version compatibility, send slice each by each (parallel).
+                    // This is start signal
+                    self.waitForClientResponse(connectionID: connectionID)
+                    
+                case "PEND_":
+                    // When parallel slice transfer finished.
+                    vc?.zScale_Slider.floatValue = self.renderer.renderParams.zScale
+                    vc?.updateSliceAndScale(currentSliceToMax: true)
+                    
+                    vc?.xResolutionField.floatValue = renderer.imageParams.scaleX
+                    vc?.yResolutionField.floatValue = renderer.imageParams.scaleY
+                    vc?.zResolutionField.floatValue = renderer.imageParams.scaleZ
+                    vc?.scaleUnitField.stringValue = renderer.imageParams.unit
+                    
+                    vc?.progressBar.isHidden = true
+                    vc?.progressBar.doubleValue = 0
+                    vc?.outputView.image = renderer.rendering()
+                    
+                    self.parallelPipeline = nil
+                    self.stopConnectionByID(connectionID)
+                    
+                default:
+                    break
+                }
             }
             
             if isComplete {
@@ -179,13 +208,13 @@ class TCPServer {
         
         connection.receive(minimumIncompleteLength: 5, maximumLength: 5) {[self] (data, _, _, error) in
             guard let data = data, error == nil,
-                    let response = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters)
+                  let response = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters)
             else {
                 print("Error receiving client response (ID: \(connectionID): \(error?.localizedDescription ?? "Unknown error")")
                 self.stopConnectionByID(connectionID)
                 return
             }
-
+            
             if (response == "ZCYX_"){
                 print("Data type would be ZCYX")
                 receiveImageInfo(mode: .ZCYX, connectionID: connectionID)
@@ -214,6 +243,29 @@ class TCPServer {
                 print("Send Current Image")
                 sendCurrentSliceData(connectionID: connectionID)
                 
+            }else if(response == "STOP_"){
+                print("STOP command")
+                stopConnectionByID(connectionID)
+                
+            }else if(response == "TEXSZ"){
+                print("Prepare 3D Texture (TEXSZ)")
+                print("Create pipeline")
+                
+                // To avoid simultanious creation of pipeline in parallel threads, create pipeline first.
+                guard let computeFunction = renderer.mtlLibrary.makeFunction(name: "createTextureFromCYX_8bit"),
+                      let pipeline = try? renderer.device.makeComputePipelineState(function: computeFunction)
+                else {
+                    print("Failed in creating pipeline for arranging parallel input iamges.")
+                    return
+                }
+                self.parallelPipeline = pipeline
+                
+                receiveImageInfo(mode: .TEXSZ, connectionID: connectionID)
+                
+            }else if(response == "SLICP"){
+                print("Accept parallel input (SLICP)")
+                receiveAndTransferImageToTexture(connectionID: connectionID)
+                
             }else{
                 print("Received error code or incompatible version from client.")
                 stopConnectionByID(connectionID)
@@ -229,7 +281,7 @@ class TCPServer {
         
         // Close current session
         if let _ = self.renderer.mainTexture,
-            let closeSession = self.vc?.closeCurrentSession(),
+           let closeSession = self.vc?.closeCurrentSession(),
            !closeSession{
             // Selected cancel for the dialog.
             print("Continue current session. Stop data interaction.")
@@ -238,7 +290,7 @@ class TCPServer {
         }
         
         switch mode{
-        case .ZCYX:
+        case .ZCYX, .TEXSZ:
             Logger.logPrintAndWrite(message: "Waiting for ZCYX images.")
             connection.receive(minimumIncompleteLength: 16, maximumLength: 16) {[self] (data, _, _, error) in
                 if let data = data {
@@ -258,7 +310,7 @@ class TCPServer {
                     
                     Logger.logPrintAndWrite(message: "Received image info - Z: \(self.imageDepth), C: \(self.imageChannel), Y: \(self.imageHeight), X: \(self.imageWidth)")
                     
-                    self.receiveSliceData(mode: .ZCYX, connectionID: connectionID)
+                    self.receiveSliceData(mode: mode, connectionID: connectionID)
                     
                 } else if let error = error {
                     print("Error receiving image info: \(error)")
@@ -362,8 +414,130 @@ class TCPServer {
             return
         }
         
-        self.waitingSliceData(mode: mode, connectionID: connectionID)
+        if(mode == .TEXSZ){
+            print("Prepared 3D texture for parallel input.")
+            self.stopConnectionByID(connectionID)
+            return
+            
+        }else{
+            self.waitingSliceData(mode: mode, connectionID: connectionID)
+        }
     }
+    
+    
+    /// transfer each slice for z
+    private func receiveAndTransferImageToTexture(connectionID: Int){
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
+        // actual data size for 1 slice image (= byte in 8 bits image)
+        let sliceSize = Int(imageWidth * imageHeight * imageChannel)
+        
+        connection.receive(minimumIncompleteLength: sliceSize + 4, maximumLength: sliceSize + 4) {[self] (data, _, isComplete, error) in
+            if let data = data {
+                let zInformation = data.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self) }
+                print("Received slice index (z): \(zInformation)")
+                
+                let imageData = data.subdata(in: 4..<data.count)
+                
+                // Allocate data memory region for 4 channels
+                let pxCountPerSlice = self.imageWidth.toInt() * self.imageHeight.toInt() * 4
+                
+                let bufferSizePerSlice = MemoryLayout<UInt8>.stride * pxCountPerSlice
+                let options: MTLResourceOptions = [.storageModeShared, .cpuCacheModeWriteCombined ]
+                
+                guard let cpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: options),
+                      let gpuBuffer = renderer.device.makeBuffer(length: bufferSizePerSlice, options: .storageModePrivate) else {
+                    Logger.logPrintAndWrite(message: "  Error in creating CPU or GPU buffers", level: .error)
+                    self.stopConnectionByID(connectionID)
+                    return
+                }
+                
+                let cpuPixels = cpuBuffer.contents().bindMemory(to: UInt8.self, capacity: pxCountPerSlice)
+                
+                // Copy image data to CPU buffer (CYX)
+                imageData.withUnsafeBytes { rawPtr in
+                    if let ptr = rawPtr.baseAddress?.assumingMemoryBound(to: UInt8.self){
+                        memmove(&cpuPixels[0], ptr, sliceSize)
+                    }
+                }
+                
+                guard let commandBuffer = renderer.cmdQueue.makeCommandBuffer(),
+                      let blitEncoder = commandBuffer.makeBlitCommandEncoder() else {
+                    self.stopConnectionByID(connectionID)
+                    return
+                }
+                
+                blitEncoder.label = "Pixel Data Transfer Encoder"
+                commandBuffer.label = "Pixel Data Transfer Command Buffer"
+                cpuBuffer.label = "CPU Pixel Data Buffer"
+                gpuBuffer.label = "GPU Pixel Data Buffer"
+                
+                // Copy data from CPU buffer to GPU buffer
+                blitEncoder.copy(from: cpuBuffer, sourceOffset: 0, to: gpuBuffer, destinationOffset: 0, size: bufferSizePerSlice)
+                blitEncoder.endEncoding()
+                commandBuffer.commit()
+                
+                // Kernel Funciton
+                guard let arrangeCommandBuffer = renderer.cmdQueue.makeCommandBuffer(),
+                      let computeEncoder = arrangeCommandBuffer.makeComputeCommandEncoder(),
+                      let computeFunction = renderer.mtlLibrary.makeFunction(name: "createTextureFromCYX_8bit")
+                else {
+                    print("Error in creating compute command buffer or function")
+                    return
+                }
+                arrangeCommandBuffer.label = "Arrange Pixel Buffer"
+                computeEncoder.label = "Arrangement Encoder"
+                computeFunction.label = "Arrange Function"
+                
+                guard let parallelPipeline = self.parallelPipeline else{
+                    print("Parallel render pipeline has not preapared yet.")
+                    self.stopConnectionByID(connectionID)
+                    return
+                }
+                
+                computeEncoder.setComputePipelineState(parallelPipeline)
+                
+                var zPosition = zInformation.toUInt16()
+                var originalNumberOfComponents: UInt8 = self.imageChannel.toUInt8()
+                
+                computeEncoder.setBuffer(gpuBuffer, offset: 0, index: 0)
+                computeEncoder.setBytes(&renderer.volumeData, length: MemoryLayout<VolumeData>.stride, index: 1)
+                computeEncoder.setBytes(&originalNumberOfComponents, length: MemoryLayout<UInt8>.stride, index: 2)
+                computeEncoder.setBytes(&zPosition, length: MemoryLayout<UInt16>.stride, index: 3)
+                computeEncoder.setTexture(renderer.mainTexture, index: 0)
+                
+                if(renderer.device.checkNonUniformThreadgroup() == true){
+                    let threadGroupSize = MTLSizeMake(parallelPipeline.threadExecutionWidth, parallelPipeline.maxTotalThreadsPerThreadgroup / parallelPipeline.threadExecutionWidth, 1)
+                    computeEncoder.dispatchThreads(MTLSize(width: self.imageWidth.toInt(), height: self.imageHeight.toInt(), depth: 1),
+                                                   threadsPerThreadgroup: threadGroupSize)
+                    
+                }else{
+                    let threadGroupSize = MTLSize(width: parallelPipeline.threadExecutionWidth,
+                                                  height: parallelPipeline.maxTotalThreadsPerThreadgroup / parallelPipeline.threadExecutionWidth,
+                                                  depth: 1)
+                    let threadGroups = MTLSize(width: (self.imageWidth.toInt() + threadGroupSize.width - 1) / threadGroupSize.width,
+                                               height: (self.imageHeight.toInt() + threadGroupSize.height - 1) / threadGroupSize.height,
+                                               depth: 1)
+                    computeEncoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadGroupSize)
+                    
+                }
+                
+                computeEncoder.endEncoding()
+                arrangeCommandBuffer.commit()
+                
+                // Update progress bar
+                DispatchQueue.main.async {[self] in
+                    self.vc?.progressBar.increment(by: 1)
+                }
+                
+                self.stopConnectionByID(connectionID)
+            }
+        }
+    }
+    
     
     private func waitingSliceData(mode: ShapeMode, connectionID: Int){
         guard let connection = connections[connectionID] else {
@@ -403,7 +577,7 @@ class TCPServer {
             }
             
             if(self.receivedSlices % 10 == 0){
-//                Logger.logPrintAndWrite(message: " Data transfer... (\(self.receivedSlices+1) / \(self.imageDepth))", level: .info)
+                //                Logger.logPrintAndWrite(message: " Data transfer... (\(self.receivedSlices+1) / \(self.imageDepth))", level: .info)
             }
             
             // Allocate data memory region for 4 channels
@@ -463,7 +637,7 @@ class TCPServer {
                     }catch{
                         Logger.logOnlyToFile(message: "  Error in creating pipeline for pixel arrangement function")
                     }
-                        
+                    
                 }
                 computeEncoder.setComputePipelineState(renderPipeline)
                 
@@ -493,7 +667,7 @@ class TCPServer {
                     computeEncoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadGroupSize)
                     
                 }
-
+                
                 computeEncoder.endEncoding()
                 arrangeCommandBuffer.commit()
                 
@@ -505,7 +679,7 @@ class TCPServer {
             }
             
             self.receivedSlices += 1
-
+            
             // wait for next slice
             if !isComplete {
                 self.waitingSliceData(mode: mode, connectionID: connectionID)
@@ -522,9 +696,9 @@ class TCPServer {
         connection.receive(minimumIncompleteLength: 3, maximumLength: 3) {[self] (data, _, isComplete, error) in
             if let data = data, let signal = String(data: data, encoding: .utf8), signal == "END" {
                 print("Received end signal. Data transmission completed successfully.")
-    
-//                Logger.logPrintAndWrite(message: "Data transfer succeeded.", level: .info)
- 
+                
+                //                Logger.logPrintAndWrite(message: "Data transfer succeeded.", level: .info)
+                
                 self.stopConnectionByID(connectionID)
                 
             } else if let error = error {
@@ -533,33 +707,7 @@ class TCPServer {
             }
         }
     }
-
-//
-//
-//    private func handleConnection() {
-//        connection?.start(queue: .main)
-//
-//        receiveStartSignal()
-//    }
-//
-//    private func receiveStartSignal() {
-//        receivedSlices = 0
-//
-//        connection?.receive(minimumIncompleteLength: 1, maximumLength: 5) { (data, _, _, error) in
-//            if let data = data, let signal = String(data: data, encoding: .utf8), signal == "START" {
-//                print("Received start signal")
-//
-//                self.delegate?.startDataTransfer(sender: self, connectionID: 0)
-//
-//            } else if let error = error {
-//                print("Error receiving start signal: \(error)")
-//                self.stop(byError: true)
-//
-//            }
-//        }
-//    }
-//
-//
+    
     
     private func stopConnectionByID(_ connectionID: Int) {
         if let connection = connections[connectionID] {
@@ -586,7 +734,7 @@ class TCPServer {
         var height = UInt32(imageSize)
         var imageSizeData = Data(bytes: &width, count: 4)
         imageSizeData.append(Data(bytes: &height, count: 4))
-
+        
         connection.send(content: imageSizeData, completion: .contentProcessed({[self] error in
             if let error = error {
                 print("Failed to send size data:", error)
@@ -707,7 +855,7 @@ class TCPServer {
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifaddr) == 0 else { return nil }
         guard let firstAddr = ifaddr else { return nil }
-
+        
         for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
             let interface = ifptr.pointee
             let addrFamily = interface.ifa_addr.pointee.sa_family
