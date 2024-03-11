@@ -6,7 +6,7 @@ This repository contains the complete source code and compiled binaries of the p
 Please [cite the paper](#how-to-cite) if you are using this software or code in your research.  
 
 ## Overview
-Acto3D is a software that enables researchers to easily display and observe multi-channel images taken with a fluorescent microscope in 3D with very simple operations. You can adjust the color tone and opacity in detail for each channel, enabling advanced 3D displays. It is also possible to create sections from any angle and set animations. *Furthermore, for expert users, it is possible to apply any transfer function by changing the transfer function in the [template shader files](https://github.com/Acto3D/Acto3D/tree/main/ShaderTemplates)*.
+Acto3D is a software that enables researchers to easily display and observe multi-channel images taken with a fluorescent microscope in 3D with very simple operations. You can adjust the color tone and opacity in detail for each channel, enabling advanced 3D displays. It is also possible to create sections from any angle and set animations. *Furthermore, for expert users, it is possible to apply any transfer function by changing the transfer function in the [template shader files](https://github.com/Acto3D/Acto3D/tree/main/Acto3D/Shader/Templates) or [sample shader files](https://github.com/Acto3D/Acto3D/tree/main/Acto3D/Shader/SampleShaders)*.
 <center>
 <img src="./img/Overview.png" width=500>
 </center>
