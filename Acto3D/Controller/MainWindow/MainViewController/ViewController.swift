@@ -263,8 +263,9 @@ class ViewController: NSViewController{
             self?.intensitySliderContextMenu(event, slider: self!.intensityRatio_slider_4)
         }
         
-        
-        startTcpServer()
+        if(AppConfig.ACCEPT_TCP_CONNECTION == true){
+            startTcpServer()
+        }
     }
     
     func intensitySliderContextMenu(_ event: NSEvent, slider: NSSlider) {
