@@ -775,8 +775,8 @@ class TCPServer {
                     (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32,  Bool) in
                     let sliceNo = pointer.load(fromByteOffset: 0, as: UInt32.self)
                     let targetViewSize = pointer.load(fromByteOffset: 4, as: UInt32.self)
-                    let refleshView = pointer.load(fromByteOffset: 8, as: Bool.self)
-                    return (sliceNo, targetViewSize, refleshView)
+                    let refreshView = pointer.load(fromByteOffset: 8, as: Bool.self)
+                    return (sliceNo, targetViewSize, refreshView)
                 }
                 
                 self?.renderer.renderParams.sliceNo = args.0.toUInt16()
@@ -791,7 +791,7 @@ class TCPServer {
                 }
                 
                 if(args.2 == true){
-                    // reflesh view
+                    // refresh view
                     self?.vc?.outputView.image = image
                 }
 
