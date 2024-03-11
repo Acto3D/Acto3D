@@ -24,6 +24,9 @@ extension UInt16{
     func toInt() -> Int{
         return Int(self)
     }
+    func toUInt32() -> UInt32{
+        return UInt32(self)
+    }
     func toFloat() -> Float{
         return Float(self)
     }

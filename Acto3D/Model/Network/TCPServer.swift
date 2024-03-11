@@ -227,17 +227,13 @@ class TCPServer {
                 print("Data type would be LZYX")
                 receiveImageInfo(mode: .LZYX, connectionID: connectionID)
                 
-            }else if(response == "VOXEL"){
-                print("Set Voxel size")
-                setParameters(mode: .VOXEL, connectionID: connectionID)
+            }else if(response == "GPARA"){
+                print("Send parameters from Acto3D")
+                sendParameters(connectionID: connectionID)
                 
-            }else if(response == "SLICE"){
-                print("Set Slice")
-                setParameters(mode: .SLICE, connectionID: connectionID)
-                
-            }else if(response == "SCALE"){
-                print("Set Scale")
-                setParameters(mode: .SCALE, connectionID: connectionID)
+            }else if(response == "SPARA"){
+                print("Set parameters from external software")
+                getParametersAndSet(connectionID: connectionID)
                 
             }else if(response == "CURIM"){
                 print("Send Current Image")
@@ -717,6 +713,121 @@ class TCPServer {
         }
     }
     
+    
+    public func sendParameters(connectionID: Int){
+        guard let connection = connections[connectionID] else {
+            print("Connection \(connectionID) not found.")
+            return
+        }
+        
+        connection.receive(minimumIncompleteLength: 4, maximumLength: 4) {[weak self] (lengthData, _, _, error) in
+            if let strLength = lengthData?.withUnsafeBytes({$0.load(as: UInt32.self)}){
+                connection.receive(minimumIncompleteLength: Int(strLength), maximumLength: Int(strLength)) {[weak self] (data, _, _, error) in
+                    guard let data = data,
+                    let cmd = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters) else {
+                        print("Error receiving message: \(error?.localizedDescription ?? "Unknown error")")
+                        self?.stopConnectionByID(connectionID)
+                        return
+                    }
+                    
+                    switch cmd {
+                    case "getCurrentSliceNo":
+                        if let params = self?.renderer.renderParams.sliceNo.toUInt32(){
+                            self?.sendValue(connection: connection, connectionID: connectionID, value: params, completion: { result in
+                                self?.stopConnectionByID(connectionID)
+                            })
+                        }
+                        
+                    case "getCurrentScale":
+                        if let params = self?.renderer.renderParams.scale{
+                            self?.sendValue(connection: connection, connectionID: connectionID, value: params, completion: { result in
+                                self?.stopConnectionByID(connectionID)
+                            })
+                        }
+                        
+                    case "getCurrentZScale":
+                        if let params = self?.renderer.renderParams.zScale{
+                            self?.sendValue(connection: connection, connectionID: connectionID, value: params, completion: { result in
+                                self?.stopConnectionByID(connectionID)
+                            })
+                        }
+                        
+                    case "getSliceImage":
+                        self?.sendSliceImage(connection: connection, connectionID: connectionID, completion: { result in
+                            self?.stopConnectionByID(connectionID)
+                        })
+                                                
+                        
+                    default:
+                        print("Invalid connection commands.")
+                        self?.stopConnectionByID(connectionID)
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    private func sendSliceImage(connection: NWConnection, connectionID: Int, completion: @escaping (Bool) -> Void){
+        connection.receive(minimumIncompleteLength: 9, maximumLength: 9) {[weak self] (data, _, _, error) in
+            if let data = data{
+                let args = data.withUnsafeBytes {
+                    (pointer: UnsafeRawBufferPointer) -> (UInt32, UInt32,  Bool) in
+                    let sliceNo = pointer.load(fromByteOffset: 0, as: UInt32.self)
+                    let targetViewSize = pointer.load(fromByteOffset: 4, as: UInt32.self)
+                    let refleshView = pointer.load(fromByteOffset: 8, as: Bool.self)
+                    return (sliceNo, targetViewSize, refleshView)
+                }
+                
+                self?.renderer.renderParams.sliceNo = args.0.toUInt16()
+                
+                guard let image = self?.renderer.rendering(targetViewSize: args.1.toUInt16()) ,
+                      let currentData = self?.renderer.getCurrentImageData(),
+                      let imageData = currentData.data
+                else{
+                    print("Failed in creating image for slice with view size:\(args.1)")
+                    completion(false)
+                    return
+                }
+                
+                if(args.2 == true){
+                    // reflesh view
+                    self?.vc?.outputView.image = image
+                }
+
+                
+                connection.send(content: imageData, completion: .contentProcessed({[weak self] error in
+                    if let error = error {
+                        print("Error sending image data: \(error)")
+                        self?.stopConnectionByID(connectionID)
+                        completion(false)
+                        return
+                    }
+                    
+                    completion(true)
+                    
+                }))
+                
+            }
+        }
+    }
+    
+    private func sendValue<T>(connection:NWConnection, connectionID: Int, value: T, completion: @escaping (Bool) -> Void){
+        var value = value
+        let valueData = Data(bytes: &value, count: MemoryLayout<T>.size)
+        
+        connection.send(content: valueData, completion: .contentProcessed({[weak self] error in
+            if let error = error {
+                print("Error sending parameters: \(error)")
+                self?.stopConnectionByID(connectionID)
+                completion(false)
+                return
+            }
+            
+            completion(true)
+        }))
+    }
+    
     public func sendCurrentSliceData(connectionID: Int){
         guard let connection = connections[connectionID] else {
             print("Connection \(connectionID) not found.")
@@ -754,89 +865,132 @@ class TCPServer {
         }))
     }
     
-    private func setParameters(mode: ParameterMode, connectionID: Int) {
+    /// Set parameters from external apps.
+    public func getParametersAndSet(connectionID: Int){
         guard let connection = connections[connectionID] else {
             print("Connection \(connectionID) not found.")
             return
         }
         
-        switch mode{
-        case .VOXEL:
-            connection.receive(minimumIncompleteLength: 32, maximumLength: 32) {[self] (data, _, _, error) in
-                if let data = data {
-                    let imageInfo = data.withUnsafeBytes {
-                        (pointer: UnsafeRawBufferPointer) -> (Float, Float, Float, String) in
-                        let resX = pointer.load(fromByteOffset: 0, as: Float.self)
-                        let resY = pointer.load(fromByteOffset: 4, as: Float.self)
-                        let resZ = pointer.load(fromByteOffset: 8, as: Float.self)
-                        let unitStr = String(data: data[12...31], encoding: .utf8)?.trimmingCharacters(in: .init(charactersIn: "\0")) ?? ""
-                        return (resX, resY, resZ, unitStr)
+        connection.receive(minimumIncompleteLength: 4, maximumLength: 4) {[weak self] (lengthData, _, _, error) in
+            if let strLength = lengthData?.withUnsafeBytes({$0.load(as: UInt32.self)}){
+                connection.receive(minimumIncompleteLength: Int(strLength), maximumLength: Int(strLength)) {[weak self] (data, _, _, error) in
+                    guard let data = data,
+                          let cmd = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters) else {
+                        print("Error receiving message: \(error?.localizedDescription ?? "Unknown error")")
+                        self?.stopConnectionByID(connectionID)
+                        return
                     }
                     
-                    self.renderer.imageParams.scaleX = imageInfo.0
-                    self.renderer.imageParams.scaleY = imageInfo.1
-                    self.renderer.imageParams.scaleZ = imageInfo.2
-                    self.renderer.imageParams.unit = imageInfo.3
-                    
-                    self.vc?.xResolutionField.floatValue = imageInfo.0
-                    self.vc?.yResolutionField.floatValue = imageInfo.1
-                    self.vc?.zResolutionField.floatValue = imageInfo.2
-                    self.vc?.scaleUnitField.stringValue = imageInfo.3
-                    
-                    self.vc?.showIsortopicView(self)
-                    
-                    // Waiting for end signal
-                    self.receiveEndSignal(connectionID: connectionID)
-                    
-                } else if let error = error {
-                    print("Error receiving image info: \(error)")
-                    self.stopConnectionByID(connectionID)
-                }
-            }
-            
-        case .SCALE:
-            connection.receive(minimumIncompleteLength: 4, maximumLength: 4) {[self] (data, _, _, error) in
-                if let data = data {
-                    let scale = data.withUnsafeBytes {
-                        $0.load(as: Float.self)
+                    switch cmd {
+                    case "setScale":
+                        self?.getValue(connection: connection, type: Float.self, completion: {[weak self] result in
+                            switch result {
+                            case .success(let value):
+                                print("Set scale value to :\(value)")
+                                self?.renderer.renderParams.scale = value
+                                self?.vc?.scale_Slider.floatValue = value
+                                self?.vc?.scale_Label.floatValue = value
+                                self?.vc?.outputView.image = self?.renderer.rendering()
+                                
+                            case .failure(let error):
+                                print(error)
+                                
+                            }
+                            self?.stopConnectionByID(connectionID)
+                        })
+                        
+                    case "setZScale":
+                        self?.getValue(connection: connection, type: Float.self, completion: {[weak self] result in
+                            switch result {
+                            case .success(let value):
+                                print("Set scale value to :\(value)")
+                                self?.renderer.renderParams.zScale = value
+                                self?.vc?.zScale_Slider.floatValue = value
+                                self?.vc?.zScale_Label.floatValue = value
+                                self?.vc?.outputView.image = self?.renderer.rendering()
+                                
+                            case .failure(let error):
+                                print(error)
+                                
+                            }
+                            self?.stopConnectionByID(connectionID)
+                        })
+                        
+                    case "setSlice":
+                        self?.getValue(connection: connection, type: UInt32.self, completion: {[weak self] result in
+                            switch result {
+                            case .success(let value):
+                                print("Set slice value to :\(value)")
+                                self?.renderer.renderParams.sliceNo = value.toUInt16()
+                                self?.vc?.slice_Slider.integerValue = value.toInt()
+                                self?.vc?.slice_Label_current.integerValue = value.toInt()
+                                self?.vc?.outputView.image = self?.renderer.rendering()
+                                
+                            case .failure(let error):
+                                print(error)
+                                
+                            }
+                            self?.stopConnectionByID(connectionID)
+                        })
+                        
+                        
+                    case "setVoxelSize":
+                        connection.receive(minimumIncompleteLength: 32, maximumLength: 32) {[weak self] (data, _, _, error) in
+                            if let data = data {
+                                let imageInfo = data.withUnsafeBytes {
+                                    (pointer: UnsafeRawBufferPointer) -> (Float, Float, Float, String) in
+                                    let resX = pointer.load(fromByteOffset: 0, as: Float.self)
+                                    let resY = pointer.load(fromByteOffset: 4, as: Float.self)
+                                    let resZ = pointer.load(fromByteOffset: 8, as: Float.self)
+                                    let unitStr = String(data: data[12...31], encoding: .utf8)?.trimmingCharacters(in: .init(charactersIn: "\0")) ?? ""
+                                    return (resX, resY, resZ, unitStr)
+                                }
+                                print("Set voxel value to :\(imageInfo)")
+                                
+                                self?.renderer.imageParams.scaleX = imageInfo.0
+                                self?.renderer.imageParams.scaleY = imageInfo.1
+                                self?.renderer.imageParams.scaleZ = imageInfo.2
+                                self?.renderer.imageParams.unit = imageInfo.3
+                                
+                                self?.vc?.xResolutionField.floatValue = imageInfo.0
+                                self?.vc?.yResolutionField.floatValue = imageInfo.1
+                                self?.vc?.zResolutionField.floatValue = imageInfo.2
+                                self?.vc?.scaleUnitField.stringValue = imageInfo.3
+                                
+                                self?.vc?.showIsortopicView(imageInfo)
+                            }
+                            self?.stopConnectionByID(connectionID)
+                        }
+                        
+                    default:
+                        print("Invalid connection commands.")
+                        self?.stopConnectionByID(connectionID)
                     }
-                    
-                    self.renderer.renderParams.scale = scale
-                    self.vc?.scale_Slider.floatValue = scale
-                    self.vc?.scale_Label.floatValue = scale
-                    self.vc?.outputView.image = self.renderer.rendering()
-                    
-                    // Waiting for end signal
-                    self.receiveEndSignal(connectionID: connectionID)
-                    
-                } else if let error = error {
-                    print("Error receiving image info: \(error)")
-                    self.stopConnectionByID(connectionID)
-                }
-            }
-            
-        case .SLICE:
-            connection.receive(minimumIncompleteLength: 4, maximumLength: 4) {[self] (data, _, _, error) in
-                if let data = data {
-                    let sliceNo = data.withUnsafeBytes {
-                        $0.load(as: UInt32.self)
-                    }
-                    
-                    self.renderer.renderParams.sliceNo = sliceNo.toUInt16()
-                    self.vc?.slice_Slider.integerValue = sliceNo.toInt()
-                    self.vc?.slice_Label_current.integerValue = sliceNo.toInt()
-                    self.vc?.outputView.image = self.renderer.rendering()
-                    
-                    // Waiting for end signal
-                    self.receiveEndSignal(connectionID: connectionID)
-                    
-                } else if let error = error {
-                    print("Error receiving image info: \(error)")
-                    self.stopConnectionByID(connectionID)
                 }
             }
         }
     }
+    
+    private func getValue<T>(connection:NWConnection, type: T.Type, completion: @escaping (Result<T, Error>) -> Void)  {//where T: FixedWidthInteger
+        connection.receive(minimumIncompleteLength: MemoryLayout<T>.size, maximumLength: MemoryLayout<T>.size) { (data, _, _, error) in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data, data.count == MemoryLayout<T>.size else {
+                completion(.failure(NWError.posix(POSIXErrorCode.EBADMSG)))
+                return
+            }
+            
+            let value = data.withUnsafeBytes {
+                $0.load(as: T.self)
+            }
+            completion(.success(value))
+        }
+    }
+    
     
     func stop(byError:Bool=false) {
         listener?.cancel()
