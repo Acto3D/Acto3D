@@ -231,7 +231,6 @@ extension ViewController{
         switch event.keyCode {
         case 6: // z
             if(keyboard["Z"] == true){
-                print("Z up")
                 keyboard["Z"] = false
                 renderer.renderOption.changeValue(option: .MPR, value: 0)
                 renderer.argumentManager?.markAsNeedsUpdate(argumentIndex: .optionValue)
@@ -241,7 +240,6 @@ extension ViewController{
             
         case 0: // a
             if(keyboard["A"] == true){
-                print("A up")
                 keyboard["A"] = false
                 renderer.renderOption.changeValue(option: .POINT, value: 0)
                 renderer.argumentManager?.markAsNeedsUpdate(argumentIndex: .optionValue)
@@ -250,12 +248,10 @@ extension ViewController{
             
         case 1: // s
             if(keyboard["S"] == true){
-                print("S up")
                 keyboard["S"] = false
             }
         case 8: // c
             if(keyboard["C"] == true){
-                print("C up")
                 keyboard["C"] = false
             }
         case 49: // Space
