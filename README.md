@@ -133,21 +133,24 @@ Please note that the instructions might vary based on your Xcode version.
 
 
 ## How to cite
-[BibTeX](https://www.biorxiv.org/highwire/citation/3319461/bibtext),
-[RIS](https://www.biorxiv.org/highwire/citation/3319461/ris),
-[EndNote](https://www.biorxiv.org/highwire/citation/3319461/endnote-tagged)
+[BibTeX](https://journals.biologists.com/Citation/Download?resourceId=346998&resourceType=3&citationFormat=2),
+[RIS](https://journals.biologists.com/Citation/Download?resourceId=346998&resourceType=3&citationFormat=0),
+[EndNote](https://journals.biologists.com/Citation/Download?resourceId=346998&resourceType=3&citationFormat=1)
 
 ```BibTeX
-@article {Takeshita2023.08.18.553473,
+@article{10.1242/dev.202550,
     author = {Naoki Takeshita and Shinichiro Sakaki and Rie Saba and Satoshi Inoue and Kosuke Nishikawa and Atsuko Ueyama and Kazuhiko Matsuo and Masaki Shigeta and Yoshiro Nakajima and Daisuke Kobayashi and Hideya Yamazaki and Kei Yamada and Tomoko Iehara and Kenta Yashiro},
-    title = {Acto3D: user- and budget-friendly software for multichannel high-resolution three-dimensional imaging},
-    elocation-id = {2023.08.18.553473},
-    year = {2023},
-    doi = {10.1101/2023.08.18.553473},
-    publisher = {Cold Spring Harbor Laboratory},
-    abstract = {Advances in fluorescence microscopy and tissue-clearing technology have revolutionized three-dimensional (3D) imaging of fluorescently labeled tissues, organs, and embryos. However, the complexity and high cost of existing software and computer solutions for such imaging limit its widespread adoption by researchers with limited resources. We here introduce Acto3D as a user- and budget-friendly, open-source computer software application designed to streamline the generation and observation of high-resolution 3D images of targets labeled with multiple fluorescent probes. Acto3D features an intuitive interface that simplifies the importation, visualization, and analysis of data sets, has an associated tool for annotation of vascular lumens, and incorporates multiple fluorescence channels for comprehensive imaging. Underpinned by an integrated graphics processing unit, Acto3D allows accurate image reconstruction and efficient data processing without the need for expensive high-performance computers. We validated the software by imaging mouse embryonic structures. Acto3D thus constitutes a cost-effective and efficient platform to support biological research.Competing Interest StatementThe authors have declared no competing interest.},
-    URL = {https://www.biorxiv.org/content/early/2023/08/20/2023.08.18.553473},
-    eprint = {https://www.biorxiv.org/content/early/2023/08/20/2023.08.18.553473.full.pdf},
-    journal = {bioRxiv}
+    title = "{Acto3D: an open-source user-friendly volume rendering software for high-resolution 3D fluorescence imaging in biology}",
+    journal = {Development},
+    volume = {151},
+    number = {8},
+    pages = {dev202550},
+    year = {2024},
+    month = {04},
+    abstract = "{Advances in fluorescence microscopy and tissue-clearing have revolutionised 3D imaging of fluorescently labelled tissues, organs and embryos. However, the complexity and high cost of existing software and computing solutions limit their widespread adoption, especially by researchers with limited resources. Here, we present Acto3D, an open-source software, designed to streamline the generation and analysis of high-resolution 3D images of targets labelled with multiple fluorescent probes. Acto3D provides an intuitive interface for easy 3D data import and visualisation. Although Acto3D offers straightforward 3D viewing, it performs all computations explicitly, giving users detailed control over the displayed images. Leveraging an integrated graphics processing unit, Acto3D deploys all pixel data to system memory, reducing visualisation latency. This approach facilitates accurate image reconstruction and efficient data processing in 3D, eliminating the need for expensive high-performance computers and dedicated graphics processing units. We have also introduced a method for efficiently extracting lumen structures in 3D. We have validated Acto3D by imaging mouse embryonic structures and by performing 3D reconstruction of pharyngeal arch arteries while preserving fluorescence information. Acto3D is a cost-effective and efficient platform for biological research.}",
+    issn = {0950-1991},
+    doi = {10.1242/dev.202550},
+    url = {https://doi.org/10.1242/dev.202550},
+    eprint = {https://journals.biologists.com/dev/article-pdf/151/8/dev202550/3421182/dev202550.pdf},
 }
 ```

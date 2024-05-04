@@ -268,7 +268,7 @@ class DemoModel{
         
         computeEncoder.setTexture(inTexture, index: 0)
         
-        var outTex = (inChannel != outChannel) ? inTexture : inTexture.createNewTextureWithSameSize(pixelFormat: inTexture.pixelFormat)
+        let outTex = (inChannel != outChannel) ? inTexture : inTexture.createNewTextureWithSameSize(pixelFormat: inTexture.pixelFormat)
         computeEncoder.setTexture(outTex, index: 1)
         
         

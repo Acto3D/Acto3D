@@ -577,7 +577,7 @@ class TCPServer {
             }
             
             // Allocate data memory region for 4 channels
-            var pxCountPerSlice = self.imageWidth.toInt() * self.imageHeight.toInt() * 4
+            let pxCountPerSlice = self.imageWidth.toInt() * self.imageHeight.toInt() * 4
             
             autoreleasepool{
                 let dataArray = [UInt8](data)
