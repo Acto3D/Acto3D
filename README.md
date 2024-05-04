@@ -1,7 +1,8 @@
 # *Acto3D* - 3D viewer for multichannel fluorocence images
 This repository contains the complete source code and compiled binaries of the paper:
-- Naoki Takeshita, Kenta Yashiro et al.  
-[***Acto3D: a novel user- and budget-friendly software for multichannel three-dimensional imaging with high-resolution***](https://biorxiv.org/cgi/content/short/2023.08.18.553473v1)  
+- Naoki Takeshita, Kenta Yashiro, et al.  
+[***Acto3D: an open-source user-friendly volume rendering software for high-resolution 3D fluorescence imaging in biology***](https://doi.org/10.1242/dev.202550)  
+DOI: [10.1242/dev.202550](https://doi.org/10.1242/dev.202550)
 
 Please [cite the paper](#how-to-cite) if you are using this software or code in your research.  
 
