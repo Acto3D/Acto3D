@@ -24,7 +24,7 @@ extension ViewController{
         if (filePackage.fileType == .singleFileMultiPage){
             make3Dtexture_from_ImageJ_tiff(filePackage: filePackage){success in
                 if(success == true){
-                    self.updateViewAfterTextureLoad()
+                    self.updateViewAfterTextureLoad(currentSliceToMax: true)
                 }
                 DispatchQueue.main.async {
                     self.progressBar.isHidden = true
@@ -35,7 +35,7 @@ extension ViewController{
         }else if (filePackage.fileType == .multiFileStacks){
             make3Dtexture_from_ImageStacks(filePackage: filePackage){success in
                 if(success == true){
-                    self.updateViewAfterTextureLoad()
+                    self.updateViewAfterTextureLoad(currentSliceToMax: true)
                 }
                 DispatchQueue.main.async {
                     self.progressBar.isHidden = true
@@ -47,13 +47,46 @@ extension ViewController{
         }
     }
     
-    func updateViewAfterTextureLoad() {
+    func make3DwithParams() {
+        guard let filePackage = filePackage else {
+            return
+        }
+        
+        removeAllPointSet(self) // re-initialize point set
+        
+        if (filePackage.fileType == .singleFileMultiPage){
+            make3Dtexture_from_ImageJ_tiff(filePackage: filePackage){success in
+                if(success == true){
+                    self.updateViewAfterTextureLoad(currentSliceToMax: false)
+                }
+                DispatchQueue.main.async {
+                    self.progressBar.isHidden = true
+                    self.progressBar.doubleValue = 0
+                }
+            }
+            
+        }else if (filePackage.fileType == .multiFileStacks){
+            make3Dtexture_from_ImageStacks(filePackage: filePackage){success in
+                if(success == true){
+                    self.updateViewAfterTextureLoad(currentSliceToMax: false)
+                }
+                DispatchQueue.main.async {
+                    self.progressBar.isHidden = true
+                    self.progressBar.doubleValue = 0
+                }
+            }
+            
+        }else{
+        }
+    }
+    
+    func updateViewAfterTextureLoad(currentSliceToMax: Bool) {
         self.renderer.createMtlFunctionForRendering()
         self.renderer.createMtlPipelineForRendering()
         
         DispatchQueue.main.sync {[self] in
             self.zScale_Slider.floatValue = self.renderer.renderParams.zScale
-            self.updateSliceAndScale(currentSliceToMax: true)
+            self.updateSliceAndScale(currentSliceToMax: currentSliceToMax)
                 
 
             self.xResolutionField.floatValue = self.renderer.imageParams.scaleX

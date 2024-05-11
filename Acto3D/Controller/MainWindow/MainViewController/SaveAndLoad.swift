@@ -473,7 +473,7 @@ extension ViewController{
             let response = alert.runModal()
             if(response == .alertFirstButtonReturn){
                 renderer.imageParams.displayRanges = params.imageParams!.displayRanges
-                make3D(self)
+                make3DwithParams()
             }
         }
         
