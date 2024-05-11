@@ -182,10 +182,11 @@ class ToneCurveView: NSView {
         let graphSize = getGraphSize()
         
         // set the clip area
-        let roundrRectangle = NSBezierPath(roundedRect: NSRect(x: knobSize, y: knobSize, width: self.frame.width-knobSize*2, height: self.frame.height-knobSize*2), xRadius: knobSize, yRadius: knobSize)
+        let roundRectangle = NSBezierPath(roundedRect: NSRect(x: knobSize, y: knobSize, width: self.frame.width-knobSize*2, height: self.frame.height-knobSize*2), xRadius: knobSize, yRadius: knobSize)
         
         NSGraphicsContext.current?.saveGraphicsState()
-        roundrRectangle.addClip()
+        roundRectangle.addClip()
+
         
         if let histogramData = histogram {
             let sortedHistogramData = histogramData.sorted()
@@ -214,23 +215,25 @@ class ToneCurveView: NSView {
             }
         }
         
-        // draw graph border
+        // Draw graph border
         NSGraphicsContext.current?.restoreGraphicsState()
-        roundrRectangle.lineWidth = borderLineWith
+        roundRectangle.lineWidth = borderLineWith
         borderColor.setStroke()
-        roundrRectangle.stroke()
-        roundrRectangle.addClip()
+        roundRectangle.stroke()
         
         
-        // draw curves
-        // get Y values (0.0 - 1.0)
+        // Draw curves
+        NSGraphicsContext.current?.saveGraphicsState()
+        roundRectangle.addClip()
+        
+        // Get Y values (0.0 - 1.0)
         var interpolateY = (0...255).map{
             spline.interpolate(Float($0))
         }
         vDSP.clip(interpolateY, to: 0 ... 1, result: &interpolateY)
         
         
-        // draw alpha curve
+        // Draw alpha curve
         let pathSp = NSBezierPath()
         pathSp.lineWidth = lineWith
         
@@ -252,29 +255,25 @@ class ToneCurveView: NSView {
         pathSp.stroke()
         pathSp.fill()
         
-        
-        // draw knobs
+
+        // Prepare to draw knobs
         NSGraphicsContext.current?.restoreGraphicsState()
-        
-        for i in 0..<self.spline!.xValues().count{
+
+        // Draw knobs without clipping
+        for i in 0..<self.spline!.xValues().count {
             let grabKnob = NSBezierPath()
-            grabKnob.appendArc(withCenter:
-                                NSMakePoint(
-                                    knobSize + CGFloat(self.spline!.xValues()[i]) * graphSize.width / 255,
-                                    knobSize + CGFloat(self.spline!.yValues()[i]) * graphSize.height),
-                               radius: knobSize,
-                               startAngle: 0, endAngle: 360)
-            
-            if (mouseOverIndex != nil && mouseOverIndex == i){
+            grabKnob.appendArc(withCenter: NSPoint(x: knobSize + CGFloat(self.spline!.xValues()[i]) * graphSize.width / 255, y: knobSize + CGFloat(self.spline!.yValues()[i]) * graphSize.height), radius: knobSize, startAngle: 0, endAngle: 360)
+
+            if (mouseOverIndex != nil && mouseOverIndex == i) {
                 highlightColor.setFill()
-                
-            }else{
+            } else {
                 lineColor.setFill()
-                
             }
             
             grabKnob.fill()
         }
+
+
     }
     
     

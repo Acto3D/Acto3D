@@ -1596,7 +1596,7 @@ isotropic voxel size</string>
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="Bli-RS-uBX">
-                                    <rect key="frame" x="1" y="322" width="354" height="16"/>
+                                    <rect key="frame" x="1" y="320" width="354" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="mOo-06-r4Q">

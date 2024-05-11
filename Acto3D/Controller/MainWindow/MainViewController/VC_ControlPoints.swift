@@ -55,8 +55,55 @@ extension ViewController{
         controlPoints.append(("Transparent-2 (Cut low intensity)", [[0, 0], [20, 0], [33, 0.15], [50, 0.215], [255, 0.35]], 0))
         controlPoints.append(("Transparent-3 (Consider low intensity, Spline)", [[0, 0], [10, 0.1], [25, 0.15], [255, 0.4]], 1))
     
-        for (title, _, _)  in controlPoints{
-            let menuItem = NSMenuItem(title: title, action: #selector(controlPointsMenuItemSelected), keyEquivalent: "")
+//        for (title, _, _)  in controlPoints{
+//            let menuItem = NSMenuItem(title: title, action: #selector(controlPointsMenuItemSelected), keyEquivalent: "")
+//            menuItem.identifier = NSUserInterfaceItemIdentifier(title)
+//            
+//            
+//            let deleteButton = NSButton(image: NSImage(named: NSImage.stopProgressFreestandingTemplateName)!, target: self, action:nil)
+//            deleteButton.frame = NSRect(x: 180, y: 0, width: 20, height: 20)
+//            deleteButton.bezelStyle = .roundRect
+//            
+//            menuItem.view?.addSubview(deleteButton)
+//            controlPointsMenu.addItem(menuItem)
+//        }
+        
+        for (title, _, _) in controlPoints {
+            // Create label
+            let labelButton = NSButton(title: title, target: self, action: #selector(changeControlPointsWith))
+            labelButton.alignment = .left
+            labelButton.showsBorderOnlyWhileMouseInside = true
+            labelButton.bezelStyle = .recessed
+            labelButton.focusRingType = .none
+            labelButton.frame = NSRect(x: 5, y: 0, width: 300, height: 25)
+            
+            // Create edit button
+            let editLabelButton = NSButton(image: NSImage(systemSymbolName: "square.and.pencil", accessibilityDescription: nil)!, target: self, action:#selector(controlPointsMenuItemSelected))
+            editLabelButton.imagePosition = .imageOnly
+            editLabelButton.imageScaling = .scaleProportionallyUpOrDown
+            editLabelButton.bezelStyle = .circular
+            editLabelButton.showsBorderOnlyWhileMouseInside = true
+            editLabelButton.focusRingType = .none
+            editLabelButton.frame = NSRect(x: 305, y: 0, width: 25, height: 25)
+            
+            // Create delete button
+            let deleteButton = NSButton(image: NSImage(named: NSImage.stopProgressFreestandingTemplateName)!, target: self, action:#selector(controlPointsMenuItemSelected))
+            deleteButton.imagePosition = .imageOnly
+            deleteButton.bezelStyle = .circular
+            deleteButton.showsBorderOnlyWhileMouseInside = true
+            deleteButton.focusRingType = .none
+            deleteButton.frame = NSRect(x: 325, y: 0, width: 25, height: 25)
+            
+            labelButton.identifier = NSUserInterfaceItemIdentifier(title)
+            
+            
+            let itemView = NSView(frame: NSRect(x: 0, y: 0, width: 350, height: 25))
+            itemView.addSubview(labelButton)
+            itemView.addSubview(deleteButton)
+            itemView.addSubview(editLabelButton)
+            
+            let menuItem = NSMenuItem()
+            menuItem.view = itemView
             menuItem.identifier = NSUserInterfaceItemIdentifier(title)
             controlPointsMenu.addItem(menuItem)
         }
@@ -66,6 +113,35 @@ extension ViewController{
     @IBAction func toneControlOptionButton(_ sender: NSButton) {
         let menuPosition = sender.superview!.convert(NSPoint(x: sender.frame.minX, y: sender.frame.minY), to: self.view)
         controlPointsMenu.popUp(positioning: nil, at: NSPoint(x: menuPosition.x, y: menuPosition.y), in: self.view)
+    }
+    
+    @objc func changeControlPointsWith(_ sender: NSButton) {
+        if let identifier = sender.identifier?.rawValue {
+            
+            if let controlPointsItem = controlPoints.first(where: { $0.0 == identifier }){
+                
+                toneCh1.setControlPoint(array: controlPointsItem.1)
+                toneCh2.setControlPoint(array: controlPointsItem.1)
+                toneCh3.setControlPoint(array: controlPointsItem.1)
+                toneCh4.setControlPoint(array: controlPointsItem.1)
+                
+                toneCh1.spline?.interpolateMode =  CubicSplineInterpolator.InterpolateMode(rawValue: controlPointsItem.2)!
+                toneCh2.spline?.interpolateMode =  CubicSplineInterpolator.InterpolateMode(rawValue: controlPointsItem.2)!
+                toneCh3.spline?.interpolateMode =  CubicSplineInterpolator.InterpolateMode(rawValue: controlPointsItem.2)!
+                toneCh4.spline?.interpolateMode =  CubicSplineInterpolator.InterpolateMode(rawValue: controlPointsItem.2)!
+                
+                
+                transferTone(sender: toneCh1, targetGPUbuffer: &renderer.toneBuffer_ch1, index: 0)
+                transferTone(sender: toneCh2, targetGPUbuffer: &renderer.toneBuffer_ch2, index: 1)
+                transferTone(sender: toneCh3, targetGPUbuffer: &renderer.toneBuffer_ch3, index: 2)
+                transferTone(sender: toneCh4, targetGPUbuffer: &renderer.toneBuffer_ch4, index: 3)
+                
+                outputView.image = renderer.rendering()
+                
+            }
+        }
+        
+        controlPointsMenu.cancelTracking()
     }
     
     @objc func controlPointsMenuItemSelected(_ sender: NSMenuItem) {
@@ -93,6 +169,7 @@ extension ViewController{
                 
             }
         }
+        
     }
     
     
