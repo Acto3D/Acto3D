@@ -57,7 +57,8 @@ class ViewController: NSViewController{
     @IBOutlet weak var toneCh4: ToneCurveView!
     
     // name, control points, linear or spline
-    var controlPoints:[(String, [[Float]], Int)] = []
+    var controlPoints:[ControlPoint] = []
+//    var controlPoints:[(String, [[Float]], Int)] = []
     let controlPointsMenu: NSMenu = NSMenu()
     
     

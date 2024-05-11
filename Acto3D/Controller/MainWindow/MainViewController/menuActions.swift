@@ -657,6 +657,17 @@ extension ViewController{
         case "resetSecureScope":
             UserDefaults.standard.removeObject(forKey: "PermanentFolderBookmarks")
             
+        case "resetControlPoints":
+            // Check preset control points file
+            let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("controlPoints.json")
+            if(FileManager.default.fileExists(atPath: fileURL.path)){
+                try? FileManager.default.removeItem(at: fileURL)
+                
+            }
+            
+            self.controlPoints = getDefaultControlPoints()
+            writeControlPointsData()
+            
         case "resetRecent":
             UserDefaults.standard.removeObject(forKey: "Recent")
             recentFiles = []

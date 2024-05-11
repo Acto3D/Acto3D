@@ -52,6 +52,7 @@ class ToneCurveView: NSView {
             spline?.interpolateMode = interpolateMode
             updateView()
         }
+        
     }
     
     

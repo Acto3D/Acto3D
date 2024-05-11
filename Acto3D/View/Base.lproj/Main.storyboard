@@ -589,10 +589,16 @@ isotropic voxel size</string>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="PVR-QD-Sru"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Reset Secure-Scope" identifier="resetSecureScope" id="kYP-8U-sug">
+                                        <menuItem title="Reset Control Points" identifier="resetControlPoints" id="kYP-8U-sug">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="menuAction:" target="Voe-Tx-rLC" id="459-F4-at5"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Reset Secure-Scope" identifier="resetSecureScope" id="Cyf-sX-Za3">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="menuAction:" target="Voe-Tx-rLC" id="oSK-nz-76n"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Reset Recent" identifier="resetRecent" id="aO4-rH-BTn">
@@ -3439,14 +3445,6 @@ DQ
                                             <action selector="colorWellChanged:" target="XfG-lQ-9wD" id="tQe-Ka-uCG"/>
                                         </connections>
                                     </colorWell>
-                                    <colorWell identifier="color_bg" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="w0m-a5-it9">
-                                        <rect key="frame" x="33" y="195" width="53" height="17"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                        <connections>
-                                            <action selector="colorWellChanged:" target="XfG-lQ-9wD" id="s3Z-bu-6Kw"/>
-                                        </connections>
-                                    </colorWell>
                                     <button identifier="Anterior" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pzi-0y-Z0E">
                                         <rect key="frame" x="30" y="110" width="36" height="37"/>
                                         <buttonCell key="cell" type="bevel" title="A" bezelStyle="regularSquare" alignment="center" borderStyle="border" inset="2" id="5a1-5s-YLA">
@@ -3682,7 +3680,7 @@ DQ
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="w6z-4l-eTv">
-                                        <rect key="frame" x="15" y="223" width="94" height="32"/>
+                                        <rect key="frame" x="-7" y="223" width="110" height="32"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         <buttonCell key="cell" type="push" title="Preset" bezelStyle="rounded" image="NSPathTemplate" imagePosition="right" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XGr-an-Qnt">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -3738,6 +3736,14 @@ DQ
                                             <action selector="intensityRatioSliderChanged:" target="XfG-lQ-9wD" id="woa-ty-DLg"/>
                                         </connections>
                                     </slider>
+                                    <colorWell identifier="color_bg" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="w0m-a5-it9">
+                                        <rect key="frame" x="22" y="200" width="53" height="20"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                        <connections>
+                                            <action selector="colorWellChanged:" target="XfG-lQ-9wD" id="s3Z-bu-6Kw"/>
+                                        </connections>
+                                    </colorWell>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="2iR-BM-pT3" secondAttribute="bottom" constant="16" id="5wa-xP-ciM"/>

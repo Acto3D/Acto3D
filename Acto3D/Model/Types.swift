@@ -192,3 +192,27 @@ struct PointClouds: Codable{
     var selectedIndex:UInt16 = 0
 }
 
+struct ControlPoint: Codable {
+    var title: String
+    var values0: [[Float]]
+    var type0: Int
+    var values1: [[Float]]
+    var type1: Int
+    var values2: [[Float]]
+    var type2: Int
+    var values3: [[Float]]
+    var type3: Int
+    
+    
+    enum CodingKeys: String, CodingKey {
+        case title
+        case values0
+        case type0
+        case values1
+        case type1
+        case values2
+        case type2
+        case values3
+        case type3
+    }
+}
