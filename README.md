@@ -6,7 +6,8 @@ DOI: [10.1242/dev.202550](https://doi.org/10.1242/dev.202550)
 
 Please [cite the paper](#how-to-cite) if you are using this software or code in your research.
 
-#### Download
+
+### Download
 You can download Acto3D from the following sources:
 - **[App Store](https://apps.apple.com/us/app/acto3d/id1599768775)**
 - **[GitHub Releases](https://github.com/Acto3D/Acto3D/releases)**
@@ -29,12 +30,6 @@ According to the original paper, Acto3D is designed to expand entire images into
 - Acto3D is currently an application for Mac, and we recommend using a Mac equipped with Apple silicon.
 - The dimensions in X, Y, Z must be less than or equal to 2048 pixels.
 - The maximum number of fluorescent channels is limited to 4.
-
-### Download
-Please refer **[this instruction manual](./instruction.pdf)** for instructions.   
-
-Please download the binary file from [here](https://github.com/Acto3D/Acto3D/releases).<br>
-For the sample data, please refer [here](#sample-data).
 
 ## Instruction
 Acto3D recommends the use of multi-page TIFF files created by Fiji. While it's possible to create 3D from sequential image files with common image formats, following the procedure below ensures that the XYZ resolution is set correctly. Therefore, create multi-page TIFF files from original format in accordance with the following steps.
