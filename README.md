@@ -4,7 +4,15 @@ This repository contains the complete source code and compiled binaries of the p
 [***Acto3D: an open-source user-friendly volume rendering software for high-resolution 3D fluorescence imaging in biology***](https://doi.org/10.1242/dev.202550)  
 DOI: [10.1242/dev.202550](https://doi.org/10.1242/dev.202550)
 
-Please [cite the paper](#how-to-cite) if you are using this software or code in your research.  
+Please [cite the paper](#how-to-cite) if you are using this software or code in your research.
+
+#### Download
+You can download Acto3D from the following sources:
+- **[App Store](https://apps.apple.com/us/app/acto3d/id1599768775)**
+- **[GitHub Releases](https://github.com/Acto3D/Acto3D/releases)**
+
+Please refer to **[this instruction manual](./instruction.pdf)** for instructions.  
+For sample data, please refer to **[here](#sample-data)**.
 
 ## Overview
 Acto3D is a software that enables researchers to easily display and observe multi-channel images taken with a fluorescent microscope in 3D with very simple operations. You can adjust the color tone and opacity in detail for each channel, enabling advanced 3D displays. It is also possible to create sections from any angle and set animations. *Furthermore, for expert users, it is possible to apply any transfer function by changing the transfer function in the [template shader files](https://github.com/Acto3D/Acto3D/tree/main/Acto3D/Shader/Templates) or [sample shader files](https://github.com/Acto3D/Acto3D/tree/main/Acto3D/Shader/SampleShaders)*.
